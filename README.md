@@ -123,7 +123,7 @@ You can specify a custom data fetcher for a field with `@GraphQLDataFetcher`
 
 ## Type Inference
 
-By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum, List) will be inferred from Java types. Also, it will respect `@javax.validation.constraints.NotNull` annotation with respect to value's nullability.
+By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum, List) will be inferred from Java types. Also, it will respect `@javax.validation.constraints.NotNull` annotation with respect to value's nullability, as well as `@GraphQLNonNull`
 
 If you want to register an additional type (for example, UUID), you have to implement `TypeFunction` for it and register it with `DefaultTypeFunction`:
 

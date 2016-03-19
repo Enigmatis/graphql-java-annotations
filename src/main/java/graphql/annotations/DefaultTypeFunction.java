@@ -15,8 +15,7 @@
 package graphql.annotations;
 
 import graphql.Scalars;
-import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLList;
+import graphql.schema.*;
 import graphql.schema.GraphQLType;
 import lombok.SneakyThrows;
 
@@ -188,6 +187,13 @@ public class DefaultTypeFunction implements TypeFunction {
             }
         }
 
-        return registry.get(t.getName()).apply(klass, annotatedType);
+        GraphQLType result = registry.get(t.getName()).apply(klass, annotatedType);
+
+        if (klass.getAnnotation(GraphQLNonNull.class) != null ||
+            (annotatedType != null && annotatedType.getAnnotation(GraphQLNonNull.class) != null)) {
+            result = new graphql.schema.GraphQLNonNull(result);
+        }
+
+        return result;
     }
 }

@@ -82,14 +82,16 @@ public class DefaultTypeFunctionTest {
 
 
     @SuppressWarnings("unused")
-    public List<List<String>> listMethod() { return null;};
+    public List<List<@GraphQLNonNull String>> listMethod() { return null;};
 
     @Test
     public void list() throws NoSuchMethodException {
         graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("listMethod").getReturnType(), (AnnotatedParameterizedType) getClass().getMethod("listMethod").getAnnotatedReturnType());
         assertTrue(type instanceof GraphQLList);
         GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
-        assertEquals(subtype.getWrappedType(), GraphQLString);
+        assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
+        graphql.schema.GraphQLNonNull wrappedType = (graphql.schema.GraphQLNonNull) subtype.getWrappedType();
+        assertEquals(wrappedType.getWrappedType(), GraphQLString);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

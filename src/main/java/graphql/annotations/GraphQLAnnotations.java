@@ -147,7 +147,7 @@ public class GraphQLAnnotations {
         }
         TypeFunction typeFunction = annotation.value().newInstance();
         GraphQLOutputType type = (GraphQLOutputType) typeFunction.apply(field.getType(), field.getAnnotatedType());
-        builder.type(field.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type));
+        builder.type(field.getAnnotation(NotNull.class) == null ? type : new graphql.schema.GraphQLNonNull(type));
 
         GraphQLDescription description = field.getAnnotation(GraphQLDescription.class);
         if (description != null) {
@@ -183,7 +183,7 @@ public class GraphQLAnnotations {
         TypeFunction typeFunction = annotation.value().newInstance();
         AnnotatedType annotatedReturnType = method.getAnnotatedReturnType();
         GraphQLOutputType type = (GraphQLOutputType) typeFunction.apply(method.getReturnType(), annotatedReturnType);
-        builder.type(method.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type));
+        builder.type(method.getAnnotation(NotNull.class) == null ? type : new graphql.schema.GraphQLNonNull(type));
 
         for (Parameter parameter : method.getParameters()) {
             if (!DataFetchingEnvironment.class.isAssignableFrom(parameter.getType())) {
@@ -213,7 +213,7 @@ public class GraphQLAnnotations {
     protected static GraphQLArgument argument(Parameter parameter, graphql.schema.GraphQLType t) throws IllegalAccessException, InstantiationException {
         GraphQLArgument.Builder builder = newArgument();
         builder.name(parameter.getName());
-        builder.type(parameter.getAnnotation(NotNull.class) == null ? (GraphQLInputType) t : new GraphQLNonNull(t));
+        builder.type(parameter.getAnnotation(NotNull.class) == null ? (GraphQLInputType) t : new graphql.schema.GraphQLNonNull(t));
         GraphQLDescription description = parameter.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());

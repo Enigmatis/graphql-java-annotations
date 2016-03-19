@@ -25,7 +25,6 @@ import org.testng.annotations.Test;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.AnnotatedType;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -101,15 +100,15 @@ public class GraphQLObjectTest {
 
         assertEquals(fields.get(2).getName(), "field0");
         assertEquals(fields.get(2).getDescription(), "field");
-        assertTrue(fields.get(2).getType() instanceof GraphQLNonNull);
-        assertEquals(((GraphQLNonNull) fields.get(2).getType()).getWrappedType(), GraphQLString);
+        assertTrue(fields.get(2).getType() instanceof graphql.schema.GraphQLNonNull);
+        assertEquals(((graphql.schema.GraphQLNonNull) fields.get(2).getType()).getWrappedType(), GraphQLString);
 
         assertEquals(fields.get(3).getName(), "fieldWithArgs");
         List<GraphQLArgument> args = fields.get(3).getArguments();
         assertEquals(args.size(), 2);
         assertEquals(args.get(0).getName(), "a");
-        assertTrue(args.get(0).getType() instanceof GraphQLNonNull);
-        assertEquals(((GraphQLNonNull) args.get(0).getType()).getWrappedType(), GraphQLString);
+        assertTrue(args.get(0).getType() instanceof graphql.schema.GraphQLNonNull);
+        assertEquals(((graphql.schema.GraphQLNonNull) args.get(0).getType()).getWrappedType(), GraphQLString);
         assertEquals(args.get(1).getName(), "b");
         assertEquals(args.get(1).getType(), GraphQLString);
         assertEquals(args.get(1).getDescription(), "b");
