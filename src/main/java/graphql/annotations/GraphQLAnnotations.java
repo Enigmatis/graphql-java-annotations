@@ -163,7 +163,7 @@ public class GraphQLAnnotations {
         }
 
         GraphQLDataFetcher dataFetcher = field.getAnnotation(GraphQLDataFetcher.class);
-        builder.dataFetcher(dataFetcher == null? new FieldDataFetcher(field.getName()) : dataFetcher.value().newInstance());
+        builder.dataFetcher(dataFetcher == null ? new FieldDataFetcher(field.getName()) : dataFetcher.value().newInstance());
 
         return builder.build();
     }

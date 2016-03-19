@@ -171,9 +171,9 @@ public class GraphQLObjectTest {
         assertNull(object.getDescription());
     }
 
-    private static class TestField {
+    public static class TestField {
         @GraphQLField @GraphQLName("field1")
-        public String field;
+        public String field = "test";
     }
 
     @Test @SneakyThrows
@@ -246,6 +246,16 @@ public class GraphQLObjectTest {
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>)result.getData()).get("fieldWithArgsAndEnvironment"), "test");
 
+    }
+
+    @Test @SneakyThrows
+    public void queryField() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestField.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = new GraphQL(schema).execute("{field1}", new TestField());
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, String>)result.getData()).get("field1"), "test");
     }
 
     @Test @SneakyThrows
