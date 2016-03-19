@@ -1,0 +1,81 @@
+plugins {
+    id "com.github.hierynomus.license" version "0.12.1"
+    id "com.jfrog.bintray" version "1.6"
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+version = "0.1.0"
+
+idea {
+    project {
+        languageLevel = '1.8'
+        vcs = 'Git'
+        ipr.withXml { xmlFile ->
+            // enable 'Annotation Processors'
+            xmlFile.asNode().component.find {
+                println(it)
+                return it.@name == 'CompilerConfiguration'
+            }['annotationProcessing'][0].replaceNode {
+                annotationProcessing {
+                    profile(default: true, name: 'Default', useClasspath: 'true', enabled: true)
+                }
+            }
+        }
+        // TODO: add -parameters to IDEA's javac
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId project.name
+            artifactId project.name
+            version project.version
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    publications = ['MyPublication']
+    pkg {
+        repo = 'maven'
+        name = project.name
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/yrashk/graphql-java-annotations'
+        version {
+            name = project.version
+        }
+    }
+}
+
+
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-parameters"
+    }
+}
+
+dependencies {
+    compile 'javax.validation:validation-api:1.1.0.Final'
+    compile 'com.graphql-java:graphql-java:2.0.0'
+
+    // Remove some boilerplate
+    compile 'org.projectlombok:lombok:1.16.6'
+
+    testCompile 'org.testng:testng:6.9.10'
+}
+
+test.useTestNG()
