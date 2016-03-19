@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-  compile 'graphql-java-annotations:graphql-java-annotations:0.1.0'
+  compile 'graphql-java-annotations:graphql-java-annotations:0.2.0'
 }
 ```
 
