@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/yrashk/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/yrashk/graphql-java-annotations)
-[![Bintray](https://img.shields.io/bintray/v/yrashk/maven/graphql-java-annotations.svg)](https://bintray.com/yrashk/graphql-java-annotations)
+[![Bintray](https://img.shields.io/bintray/v/yrashk/maven/graphql-java-annotations.svg)](https://bintray.com/yrashk/maven/graphql-java-annotations)
 
 # GraphQL Annotations for Java
 
