@@ -158,9 +158,10 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestAccessors.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 2);
+        fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
 
-        assertEquals(fields.get(0).getName(), "value");
-        assertEquals(fields.get(1).getName(), "anotherValue");
+        assertEquals(fields.get(1).getName(), "value");
+        assertEquals(fields.get(0).getName(), "anotherValue");
     }
 
 
