@@ -15,9 +15,7 @@ You can get packages from Bintray:
 
 ```groovy
 repositories {
-    maven {
-        url  "http://dl.bintray.com/yrashk/maven"
-    }
+    jcenter()
 }
 
 dependencies {
