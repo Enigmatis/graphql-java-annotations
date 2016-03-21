@@ -6,11 +6,12 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'idea'
 
+apply plugin: 'osgi'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
-version = "0.2.1"
+version = "0.2.2"
 
 idea {
     project {
@@ -28,6 +29,12 @@ idea {
             }
         }
         // TODO: add -parameters to IDEA's javac
+    }
+}
+
+jar {
+    manifest {
+        instruction 'Import-Package', 'javax.validation.constraints', '*'
     }
 }
 
