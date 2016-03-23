@@ -295,7 +295,27 @@ public class GraphQLObjectTest {
         assertEquals(object.getFieldDefinition("id").getType(), GraphQLString);
     }
 
+    private static class TestObjectInput {
+        @GraphQLField
+        public TestObject test(TestObject testObject) {
+            return testObject;
+        }
+    }
 
+    @Test @SneakyThrows
+    public void inputObjectArgument() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
+        GraphQLArgument argument = object.getFieldDefinition("test").getArgument("testObject");
+        assertTrue(argument.getType() instanceof GraphQLInputObjectType);
+        assertEquals(argument.getName(), "testObject");
+    }
+
+    @Test @SneakyThrows
+    public void inputObject() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
+        GraphQLInputObjectType inputObjectType = GraphQLAnnotations.inputObject(object);
+        assertEquals(inputObjectType.getFields().size(), object.getFieldDefinitions().size());
+    }
     private static class UUIDTypeFunction implements TypeFunction {
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {

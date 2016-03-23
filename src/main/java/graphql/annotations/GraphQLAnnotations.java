@@ -186,8 +186,14 @@ public class GraphQLAnnotations {
         builder.type(method.getAnnotation(NotNull.class) == null ? type : new graphql.schema.GraphQLNonNull(type));
 
         for (Parameter parameter : method.getParameters()) {
-            if (!DataFetchingEnvironment.class.isAssignableFrom(parameter.getType())) {
-                builder.argument(argument(parameter, typeFunction.apply(parameter.getType(), annotatedReturnType)));
+            Class<?> t = parameter.getType();
+            if (!DataFetchingEnvironment.class.isAssignableFrom(t)) {
+                graphql.schema.GraphQLType graphQLType = typeFunction.apply(t, annotatedReturnType);
+                if (graphQLType instanceof GraphQLObjectType) {
+                    GraphQLInputObjectType inputObject = inputObject((GraphQLObjectType) graphQLType);
+                    graphQLType = inputObject;
+                }
+                builder.argument(argument(parameter, graphQLType));
             }
         }
 
@@ -208,6 +214,24 @@ public class GraphQLAnnotations {
         builder.dataFetcher(dataFetcher == null? new MethodDataFetcher(method) : dataFetcher.value().newInstance());
 
         return builder.build();
+    }
+
+    public static GraphQLInputObjectType inputObject(GraphQLObjectType graphQLType) {
+        GraphQLObjectType object = graphQLType;
+        return new GraphQLInputObjectType(object.getName(), object.getDescription(),
+                object.getFieldDefinitions().stream().
+                        map(field -> {
+                            GraphQLOutputType type = field.getType();
+                            GraphQLInputType inputType;
+                            if (type instanceof GraphQLObjectType) {
+                                inputType = inputObject((GraphQLObjectType) type);
+                            } else {
+                                inputType = (GraphQLInputType) type;
+                            }
+
+                            return new GraphQLInputObjectField(field.getName(), field.getDescription(), inputType, null);
+                        }).
+                        collect(Collectors.toList()));
     }
 
     protected static GraphQLArgument argument(Parameter parameter, graphql.schema.GraphQLType t) throws IllegalAccessException, InstantiationException {
