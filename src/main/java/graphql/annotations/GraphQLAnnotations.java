@@ -44,6 +44,11 @@ public class GraphQLAnnotations {
      * @throws IllegalArgumentException if <code>iface</code> is not an interface or doesn't have <code>@GraphTypeResolver</code> annotation
      */
     public static GraphQLInterfaceType iface(Class<?> iface) throws IllegalAccessException, InstantiationException {
+        GraphQLInterfaceType.Builder builder = ifaceBuilder(iface);
+        return builder.build();
+    }
+
+    public static GraphQLInterfaceType.Builder ifaceBuilder(Class<?> iface) throws InstantiationException, IllegalAccessException {
         if (!iface.isInterface()) {
             throw new IllegalArgumentException(iface + " is not an interface");
         }
@@ -67,7 +72,7 @@ public class GraphQLAnnotations {
             throw new IllegalArgumentException(iface + " should have @GraphQLTypeResolver annotation defined");
         }
         builder.typeResolver(typeResolver.value().newInstance());
-        return builder.build();
+        return builder;
     }
 
     private static Class<?> getDeclaringClass(Method method) {
@@ -101,6 +106,12 @@ public class GraphQLAnnotations {
      * @throws NoSuchMethodException
      */
     public static GraphQLObjectType object(Class<?> object) throws IllegalAccessException, InstantiationException, NoSuchMethodException {
+        GraphQLObjectType.Builder builder = objectBuilder(object);
+
+        return builder.build();
+    }
+
+    public static GraphQLObjectType.Builder objectBuilder(Class<?> object) throws NoSuchMethodException, InstantiationException, IllegalAccessException {
         GraphQLObjectType.Builder builder = newObject();
         GraphQLName name = object.getAnnotation(GraphQLName.class);
         builder.name(name == null ? object.getSimpleName() : name.value());
@@ -132,8 +143,7 @@ public class GraphQLAnnotations {
                 builder.withInterface(iface(iface));
             }
         }
-
-        return builder.build();
+        return builder;
     }
 
 
