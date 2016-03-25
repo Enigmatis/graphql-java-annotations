@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.AnnotatedType;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -129,7 +130,7 @@ public class GraphQLObjectTest {
     private static class TestObjectInherited extends TestObject {
         @Override // Test overriding field
         public String field() {
-            return super.field();
+            return "inherited";
         }
     }
 
@@ -138,6 +139,13 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
         GraphQLObjectType objectInherited = GraphQLAnnotations.object(TestObjectInherited.class);
         assertEquals(object.getFieldDefinitions().size(), objectInherited.getFieldDefinitions().size());
+
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = new GraphQL(schema).execute("{field0}", new TestObject());
+        assertEquals(((Map<String, Object>)result.getData()).get("field0"), "test");
+        result = new GraphQL(schema).execute("{field0}", new TestObjectInherited());
+        assertEquals(((Map<String, Object>)result.getData()).get("field0"), "inherited");
     }
 
     private static class TestAccessors {
