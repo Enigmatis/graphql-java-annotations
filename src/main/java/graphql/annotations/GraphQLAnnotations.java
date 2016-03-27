@@ -19,9 +19,6 @@ import graphql.schema.*;
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static graphql.schema.GraphQLArgument.newArgument;
@@ -272,30 +269,4 @@ public class GraphQLAnnotations {
         }
     }
 
-    private static class MethodDataFetcher implements DataFetcher {
-        private final Method method;
-        private final int envIndex;
-
-        public MethodDataFetcher(Method method) {
-            this.method = method;
-            List<Class<?>> parameterTypes = Arrays.asList(method.getParameters()).stream().
-                    map(Parameter::getType).
-                    collect(Collectors.toList());
-            envIndex = parameterTypes.indexOf(DataFetchingEnvironment.class);
-        }
-
-        @Override
-        public Object get(DataFetchingEnvironment environment) {
-            if (environment.getSource() == null) return null;
-            try {
-                ArrayList args = new ArrayList<>(environment.getArguments().values());
-                if (envIndex >= 0) {
-                    args.add(envIndex, environment);
-                }
-                return method.invoke(environment.getSource(), args.toArray());
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                return null;
-            }
-        }
-    }
 }
