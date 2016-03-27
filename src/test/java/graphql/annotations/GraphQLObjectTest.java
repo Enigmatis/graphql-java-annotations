@@ -16,22 +16,20 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.Scalars;
 import graphql.schema.*;
 import graphql.schema.GraphQLType;
-import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.testng.annotations.Test;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.AnnotatedType;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static graphql.Scalars.GraphQLString;
+import static graphql.schema.GraphQLFieldDefinition.*;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.*;
 
@@ -329,5 +327,46 @@ public class GraphQLObjectTest {
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             return GraphQLString;
         }
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class OptionalTest {
+        @GraphQLField
+        public Optional<String> empty = Optional.empty();
+        @GraphQLField
+        public Optional<String> nonempty = Optional.of("test");
+
+    }
+
+    @Test @SneakyThrows
+    public void queryOptional() {
+        GraphQLObjectType object = GraphQLAnnotations.object(OptionalTest.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = new GraphQL(schema, new EnhancedExecutionStrategy()).execute("{empty, nonempty}", new OptionalTest());
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> v = (Map<String, Object>) result.getData();
+        assertNull(v.get("empty"));
+        assertEquals(v.get("nonempty"), "test");
+    }
+
+    @Test @SneakyThrows
+    public void optionalInput() {
+        GraphQLObjectType object = GraphQLAnnotations.object(OptionalTest.class);
+        GraphQLInputObjectType inputObject = GraphQLAnnotations.inputObject(object);
+        GraphQLObjectType mutation = GraphQLObjectType.newObject().name("mut").field(newFieldDefinition().name("test").type(object).
+                argument(GraphQLArgument.newArgument().type(inputObject).name("input").build()).dataFetcher(environment -> {
+                    Map<String, String> input = environment.getArgument("input");
+                    return new OptionalTest(Optional.ofNullable(input.get("empty")), Optional.ofNullable(input.get("nonempty")));
+                }).build()).build();
+        GraphQLSchema schema = newSchema().query(object).mutation(mutation).build();
+
+        ExecutionResult result = new GraphQL(schema, new EnhancedExecutionStrategy()).execute("mutation {test(input: {empty: \"test\"}) { empty nonempty } }", new OptionalTest());
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> v = (Map<String, Object>) ((Map<String, Object>) result.getData()).get("test");
+        assertEquals(v.get("empty"), "test");
+        assertNull(v.get("nonempty"));
     }
 }

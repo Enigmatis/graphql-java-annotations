@@ -14,9 +14,7 @@
  */
 package graphql.annotations;
 
-import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLEnumValueDefinition;
-import graphql.schema.GraphQLList;
+import graphql.schema.*;
 import graphql.schema.GraphQLType;
 import org.testng.annotations.Test;
 
@@ -24,6 +22,7 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static graphql.Scalars.*;
@@ -97,6 +96,26 @@ public class DefaultTypeFunctionTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void unparametrizedList() {
         List v = new LinkedList();
+        instance.apply(v.getClass(), null);
+    }
+
+    @SuppressWarnings("unused")
+    public Optional<List<@GraphQLNonNull String>> optionalMethod() { return Optional.empty();};
+
+    @Test
+    public void optional() throws NoSuchMethodException {
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("optionalMethod").getReturnType(), (AnnotatedParameterizedType) getClass().getMethod("listMethod").getAnnotatedReturnType());
+        assertTrue(type instanceof GraphQLList);
+        GraphQLType subtype = ((GraphQLList) type).getWrappedType();
+        assertTrue(subtype instanceof graphql.schema.GraphQLNonNull);
+        GraphQLType wrappedType = (((graphql.schema.GraphQLNonNull) subtype).getWrappedType());
+        assertEquals(wrappedType, GraphQLString);
+    }
+
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void unparametrizedOptional() {
+        Optional v = Optional.empty();
         instance.apply(v.getClass(), null);
     }
 

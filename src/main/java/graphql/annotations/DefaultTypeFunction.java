@@ -15,7 +15,8 @@
 package graphql.annotations;
 
 import graphql.Scalars;
-import graphql.schema.*;
+import graphql.schema.GraphQLEnumType;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
 import lombok.SneakyThrows;
 
@@ -93,6 +94,26 @@ public class DefaultTypeFunction implements TypeFunction {
         }
     }
 
+    private static class OptionalFunction implements TypeFunction {
+
+        @Override
+        @SneakyThrows
+        public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
+            if (!(annotatedType instanceof AnnotatedParameterizedType)) {
+                throw new IllegalArgumentException("Optional type parameter should be specified");
+            }
+            AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
+            AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
+            Class<?> klass;
+            if (arg.getType() instanceof ParameterizedType) {
+                klass = (Class<?>)((ParameterizedType)(arg.getType())).getRawType();
+            } else {
+                klass = (Class<?>) arg.getType();
+            }
+            return DefaultTypeFunction.instance.apply(klass, arg);
+        }
+    }
+
     private static class EnumFunction implements TypeFunction {
 
         @Override
@@ -160,6 +181,8 @@ public class DefaultTypeFunction implements TypeFunction {
         register(List.class, new ListFunction());
 
         register(Enum.class, new EnumFunction());
+
+        register(Optional.class, new OptionalFunction());
 
         register(Object.class, new ObjectFunction());
     }
