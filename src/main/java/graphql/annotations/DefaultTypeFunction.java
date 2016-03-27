@@ -22,10 +22,8 @@ import lombok.SneakyThrows;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
-import java.util.AbstractList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
@@ -85,14 +83,13 @@ public class DefaultTypeFunction implements TypeFunction {
             }
             AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
             AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
-            // This is a fairly ugly hack, but I couldn't find anything better yet
-            String classname = arg.getType().getTypeName().split("<")[0];
-            try {
-                Class<?> klass = Class.forName(classname);
-                return new GraphQLList(DefaultTypeFunction.instance.apply(klass, arg));
-            } catch (ClassNotFoundException e) {
-                return null;
+            Class<?> klass;
+            if (arg.getType() instanceof ParameterizedType) {
+                klass = (Class<?>)((ParameterizedType)(arg.getType())).getRawType();
+            } else {
+                klass = (Class<?>) arg.getType();
             }
+            return new GraphQLList(DefaultTypeFunction.instance.apply(klass, arg));
         }
     }
 
