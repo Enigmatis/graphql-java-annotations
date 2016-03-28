@@ -146,6 +146,23 @@ public class GraphQLObjectTest {
         assertEquals(((Map<String, Object>)result.getData()).get("field0"), "inherited");
     }
 
+    public interface Iface {
+        @GraphQLField
+        default String field() {
+            return "field";
+        }
+    }
+
+    public static class IfaceImpl implements Iface {}
+
+    @Test @SneakyThrows
+    public void interfaceInheritance() {
+        GraphQLObjectType object = GraphQLAnnotations.object(IfaceImpl.class);
+        assertEquals(object.getFieldDefinitions().size(), 1);
+        assertEquals(object.getFieldDefinition("field").getType(), GraphQLString);
+
+    }
+
     private static class TestAccessors {
         @GraphQLField
         public String getValue() {
