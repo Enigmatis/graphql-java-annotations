@@ -1,6 +1,7 @@
 plugins {
     id "com.github.hierynomus.license" version "0.12.1"
     id "com.jfrog.bintray" version "1.6"
+    id 'net.researchgate.release' version '2.3.4'
 }
 
 apply plugin: 'java'
@@ -10,8 +11,6 @@ apply plugin: 'osgi'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
-
-version = "0.5.0"
 
 idea {
     project {
@@ -30,6 +29,11 @@ idea {
         }
         // TODO: add -parameters to IDEA's javac
     }
+}
+
+release {
+    tagTemplate = 'v${version}'
+    failOnPublishNeeded = false
 }
 
 jar {
