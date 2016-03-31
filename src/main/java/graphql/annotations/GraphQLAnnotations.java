@@ -253,6 +253,10 @@ public class GraphQLAnnotations {
         if (defaultValue != null) {
             builder.defaultValue(defaultValue.value().newInstance().get());
         }
+        GraphQLName name = parameter.getAnnotation(GraphQLName.class);
+        if ( name != null ) {
+            builder.name(name.value());
+        }
         return builder.build();
     }
 
