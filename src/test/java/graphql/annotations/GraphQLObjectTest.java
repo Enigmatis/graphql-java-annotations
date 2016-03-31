@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static graphql.Scalars.GraphQLString;
+import static graphql.annotations.DefaultTypeFunction.instance;
 import static graphql.schema.GraphQLFieldDefinition.*;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.*;
@@ -309,6 +310,50 @@ public class GraphQLObjectTest {
         ExecutionResult result = new GraphQL(schema).execute("{fieldWithArgs(a: \"test\")}", new TestObject());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>)result.getData()).get("fieldWithArgs"), "default");
+    }
+
+
+
+    public static class Class1 {
+        @GraphQLField
+        public Class2 class2;
+        @GraphQLField
+        public String value;
+    }
+
+    public static class Class2 {
+        @GraphQLField
+        public Class1 class1;
+        @GraphQLField
+        public String value;
+    }
+
+    @Test @SneakyThrows
+    public void recursiveTypes() {
+        GraphQLObjectType object = GraphQLAnnotations.object(Class1.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        Class1 class1 = new Class1();
+        Class2 class2 = new Class2();
+        class1.class2 = class2;
+        class2.class1 = class1;
+        class2.value = "hello";
+        class1.value = "bye";
+
+        ExecutionResult result = new GraphQL(schema).execute("{ class2 { value } }", class1);
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> data = (Map<String, Object>) result.getData();
+        assertEquals(((Map<String, Object>) data.get("class2")).get("value"), "hello");
+
+        result = new GraphQL(schema).execute("{ class2 { class1 { value } } }", class1);
+        assertTrue(result.getErrors().isEmpty());
+        data = (Map<String, Object>) result.getData();
+        Map<String, Object> k1 = (Map<String, Object>)((Map<String, Object>) data.get("class2")).get("class1");
+        assertEquals(k1.get("value"), "bye");
+
+//        TODO: pending resolution of https://github.com/andimarek/graphql-java/issues/118
+//        result = new GraphQL(schema).execute("{ class2 { class1 { class2 { value } } } }", class1);
+//        assertTrue(result.getErrors().isEmpty());
     }
 
     private static class TestCustomType {

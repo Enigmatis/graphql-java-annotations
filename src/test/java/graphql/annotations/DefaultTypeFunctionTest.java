@@ -16,6 +16,7 @@ package graphql.annotations;
 
 import graphql.schema.*;
 import graphql.schema.GraphQLType;
+import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.AnnotatedParameterizedType;
@@ -27,8 +28,7 @@ import java.util.stream.Collectors;
 
 import static graphql.Scalars.*;
 import static graphql.annotations.DefaultTypeFunction.instance;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class DefaultTypeFunctionTest {
 
@@ -117,6 +117,27 @@ public class DefaultTypeFunctionTest {
     public void unparametrizedOptional() {
         Optional v = Optional.empty();
         instance.apply(v.getClass(), null);
+    }
+
+    public static class Class1 {
+        @GraphQLField
+        public Class2 class2;
+    }
+
+    public static class Class2 {
+        @GraphQLField
+        public Class1 class1;
+        @GraphQLField
+        public Class2 class2;
+    }
+
+    @Test @SneakyThrows
+    public void recursiveTypes() {
+        GraphQLType type = instance.apply(Class1.class, Class2.class.getField("class1").getAnnotatedType());
+        GraphQLFieldDefinition class1class2 = ((GraphQLObjectType) type).getFieldDefinition("class2");
+        assertNotNull(class1class2);
+        assertTrue(((GraphQLObjectType)class1class2.getType()).getFieldDefinition("class1").getType() instanceof GraphQLTypeReference);
+        assertTrue(((GraphQLObjectType)class1class2.getType()).getFieldDefinition("class2").getType() instanceof GraphQLTypeReference);
     }
 
 }

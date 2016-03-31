@@ -18,6 +18,7 @@ import graphql.Scalars;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
+import graphql.schema.GraphQLTypeReference;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.AnnotatedParameterizedType;
@@ -25,6 +26,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
@@ -149,13 +151,27 @@ public class DefaultTypeFunction implements TypeFunction {
 
     private static class ObjectFunction implements TypeFunction {
 
+        private final Map<String, GraphQLTypeReference> processing = new ConcurrentHashMap<>();
+        private final Map<String, GraphQLType> types = new ConcurrentHashMap<>();
+
         @Override
         @SneakyThrows
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
-            if (aClass.isInterface()) {
-                return GraphQLAnnotations.iface(aClass);
+            GraphQLName name = aClass.getAnnotation(GraphQLName.class);
+            String typeName = name == null ? aClass.getSimpleName() : name.value();
+            if (processing.containsKey(typeName)) {
+                return processing.get(typeName);
             } else {
-                return GraphQLAnnotations.object(aClass);
+                processing.put(typeName, new GraphQLTypeReference(typeName));
+                GraphQLType type;
+                if (aClass.isInterface()) {
+                    type = GraphQLAnnotations.iface(aClass);
+                } else {
+                    type = GraphQLAnnotations.object(aClass);
+                }
+                processing.remove(typeName);
+                types.put(typeName, type);
+                return type;
             }
         }
     }
