@@ -42,8 +42,6 @@ jar {
     }
 }
 
-project.version = projectVersion
-
 repositories {
     jcenter()
 }
