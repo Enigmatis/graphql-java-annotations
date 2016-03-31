@@ -82,6 +82,26 @@ public class GraphQLObjectTest {
     private static class TestDefaults {
     }
 
+    private static class TestObjectNamedArgs {
+        @GraphQLField
+        public String fieldWithNamedArgs(@GraphQLName("namedArg") String firstArgument) {
+            return firstArgument;
+        }
+    }
+
+    @Test @SneakyThrows
+    public void namedFields() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObjectNamedArgs.class);
+        List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
+        assertEquals(fields.size(), 1);
+
+        List<GraphQLArgument> args = fields.get(0).getArguments();
+        assertEquals(args.size(), 1);
+
+        GraphQLArgument arg = args.get(0);
+        assertEquals(arg.getName(), "namedArg");
+    }
+
     @Test @SneakyThrows
     public void metainformation() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
