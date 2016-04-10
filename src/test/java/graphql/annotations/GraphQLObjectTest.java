@@ -352,7 +352,7 @@ public class GraphQLObjectTest {
         assertEquals(k1.get("value"), "bye");
 
 //        TODO: pending resolution of https://github.com/andimarek/graphql-java/issues/118
-//        result = new GraphQL(schema).execute("{ class2 { class1 { class2 { value } } } }", class1);
+//        result = new GraphQL(schema).execute("{ class2 { class1 { class2 { name } } } }", class1);
 //        assertTrue(result.getErrors().isEmpty());
     }
 

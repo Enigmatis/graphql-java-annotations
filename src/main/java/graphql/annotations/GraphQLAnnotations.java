@@ -14,11 +14,15 @@
  */
 package graphql.annotations;
 
+import graphql.relay.Relay;
 import graphql.schema.*;
+import graphql.schema.GraphQLNonNull;
+import lombok.SneakyThrows;
 
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static graphql.schema.GraphQLArgument.newArgument;
@@ -152,9 +156,16 @@ public class GraphQLAnnotations {
         if (annotation == null) {
             annotation = new defaultGraphQLType();
         }
+
         TypeFunction typeFunction = annotation.value().newInstance();
         GraphQLOutputType type = (GraphQLOutputType) typeFunction.apply(field.getType(), field.getAnnotatedType());
-        builder.type(field.getAnnotation(NotNull.class) == null ? type : new graphql.schema.GraphQLNonNull(type));
+
+        GraphQLOutputType outputType = field.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
+
+        boolean isCursor = isCursor(field, field.getType(), type);
+        outputType = getGraphQLConnection(isCursor, field, type, outputType, builder);
+
+        builder.type(outputType);
 
         GraphQLDescription description = field.getAnnotation(GraphQLDescription.class);
         if (description != null) {
@@ -170,9 +181,41 @@ public class GraphQLAnnotations {
         }
 
         GraphQLDataFetcher dataFetcher = field.getAnnotation(GraphQLDataFetcher.class);
-        builder.dataFetcher(dataFetcher == null ? new FieldDataFetcher(field.getName()) : dataFetcher.value().newInstance());
+        DataFetcher actualDataFetcher = dataFetcher == null ? new FieldDataFetcher(field.getName()) : dataFetcher.value().newInstance();
+
+
+        if (isCursor) {
+            if (List.class.isAssignableFrom(field.getType())) {
+                actualDataFetcher = new ConnectionDataFetcher(field.getAnnotation(GraphQLCursor.class).connection(), actualDataFetcher);
+            }
+        }
+
+        builder.dataFetcher(actualDataFetcher);
 
         return builder.build();
+    }
+
+    private static GraphQLOutputType getGraphQLConnection(boolean isCursor, AccessibleObject field, GraphQLOutputType type, GraphQLOutputType outputType, GraphQLFieldDefinition.Builder builder) {
+        if (isCursor) {
+            if (type instanceof GraphQLList) {
+                graphql.schema.GraphQLType wrappedType = ((GraphQLList) type).getWrappedType();
+                assert wrappedType instanceof GraphQLObjectType;
+                String annValue = field.getAnnotation(GraphQLCursor.class).name();
+                String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
+                Relay relay = new Relay();
+                GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, ((GraphQLObjectType) wrappedType).getFieldDefinitions());
+                outputType = relay.connectionType(connectionName, edgeType, Collections.emptyList());
+                builder.argument(relay.getConnectionFieldArguments());
+            }
+        }
+        return outputType;
+    }
+
+    private static boolean isCursor(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
+        return obj.isAnnotationPresent(GraphQLCursor.class) &&
+                               type instanceof GraphQLList &&
+                               ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType &&
+                               List.class.isAssignableFrom(klass);
     }
 
     protected static GraphQLFieldDefinition field(Method method) throws InstantiationException, IllegalAccessException {
@@ -189,8 +232,15 @@ public class GraphQLAnnotations {
         }
         TypeFunction typeFunction = annotation.value().newInstance();
         AnnotatedType annotatedReturnType = method.getAnnotatedReturnType();
+
         GraphQLOutputType type = (GraphQLOutputType) typeFunction.apply(method.getReturnType(), annotatedReturnType);
-        builder.type(method.getAnnotation(NotNull.class) == null ? type : new graphql.schema.GraphQLNonNull(type));
+
+        GraphQLOutputType outputType = method.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
+
+        boolean isCursor = isCursor(method, method.getReturnType(), type);
+        outputType = getGraphQLConnection(isCursor, method, type, outputType, builder);
+
+        builder.type(outputType);
 
         for (Parameter parameter : method.getParameters()) {
             Class<?> t = parameter.getType();
@@ -218,7 +268,15 @@ public class GraphQLAnnotations {
         }
 
         GraphQLDataFetcher dataFetcher = method.getAnnotation(GraphQLDataFetcher.class);
-        builder.dataFetcher(dataFetcher == null? new MethodDataFetcher(method) : dataFetcher.value().newInstance());
+        DataFetcher actualDataFetcher = dataFetcher == null ? new MethodDataFetcher(method) : dataFetcher.value().newInstance();
+
+        if (isCursor) {
+            if (List.class.isAssignableFrom(method.getReturnType())) {
+                actualDataFetcher = new ConnectionDataFetcher(method.getAnnotation(GraphQLCursor.class).connection(), actualDataFetcher);
+            }
+        }
+
+        builder.dataFetcher(actualDataFetcher);
 
         return builder.build();
     }
@@ -273,4 +331,33 @@ public class GraphQLAnnotations {
         }
     }
 
+    private static class ConnectionDataFetcher implements DataFetcher {
+        private final Class<? extends Connection> connection;
+        private final DataFetcher actualDataFetcher;
+        private final Constructor<Connection> constructor;
+
+        public ConnectionDataFetcher(Class<? extends Connection> connection, DataFetcher actualDataFetcher) {
+            this.connection = connection;
+            Optional<Constructor<Connection>> constructor =
+                    Arrays.asList(connection.getConstructors()).stream().
+                            filter(c -> c.getParameterCount() == 1).
+                            map(c -> (Constructor<Connection>) c).
+                            findFirst();
+            if (constructor.isPresent()) {
+                this.constructor = constructor.get();
+            } else {
+                throw new IllegalArgumentException(connection + " doesn't have a single argument constructor");
+            }
+            this.actualDataFetcher = actualDataFetcher;
+        }
+
+        @Override @SneakyThrows
+        public Object get(DataFetchingEnvironment environment) {
+            // Exclude arguments
+            DataFetchingEnvironment env = new DataFetchingEnvironment(environment.getSource(), new HashMap<>(), environment.getContext(),
+                    environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema());
+            Connection conn = constructor.newInstance(actualDataFetcher.get(env));
+            return conn.get(environment);
+        }
+    }
 }
