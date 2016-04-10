@@ -86,6 +86,8 @@ bintray {
     }
 }
 
+afterReleaseBuild.dependsOn bintrayUpload
+
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
