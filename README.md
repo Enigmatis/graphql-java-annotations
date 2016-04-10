@@ -119,6 +119,10 @@ field.
 
 You can specify a custom data fetcher for a field with `@GraphQLDataFetcher`
 
+## Relay Connection
+
+You can use `@GraphQLCursor` annotation to make a field iterable in adherence to Relay Connection specification.
+
 ## Type Inference
 
 By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum, List) will be inferred from Java types. Also, it will respect `@javax.validation.constraints.NotNull` annotation with respect to value's nullability, as well as `@GraphQLNonNull`
