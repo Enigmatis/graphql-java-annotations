@@ -47,7 +47,7 @@ class MethodDataFetcher implements DataFetcher {
             }
             return method.invoke(environment.getSource(), args.toArray());
         } catch (IllegalAccessException | InvocationTargetException e) {
-            return null;
+            throw new RuntimeException(e);
         }
     }
 }
