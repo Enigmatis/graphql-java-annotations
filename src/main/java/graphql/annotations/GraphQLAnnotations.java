@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static graphql.schema.GraphQLArgument.newArgument;
@@ -242,16 +243,39 @@ public class GraphQLAnnotations {
 
         builder.type(outputType);
 
-        for (Parameter parameter : method.getParameters()) {
-            Class<?> t = parameter.getType();
-            if (!DataFetchingEnvironment.class.isAssignableFrom(t)) {
-                graphql.schema.GraphQLType graphQLType = typeFunction.apply(t, annotatedReturnType);
-                if (graphQLType instanceof GraphQLObjectType) {
-                    GraphQLInputObjectType inputObject = inputObject((GraphQLObjectType) graphQLType);
-                    graphQLType = inputObject;
-                }
-                builder.argument(argument(parameter, graphQLType));
+
+        List<GraphQLArgument> args = Arrays.asList(method.getParameters()).stream().
+                filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
+                map(new Function<Parameter, GraphQLArgument>() {
+                    @Override @SneakyThrows
+                    public GraphQLArgument apply(Parameter parameter) {
+                        Class<?> t = parameter.getType();
+                        graphql.schema.GraphQLType graphQLType = typeFunction.apply(t, annotatedReturnType);
+                        if (graphQLType instanceof GraphQLObjectType) {
+                            GraphQLInputObjectType inputObject = inputObject((GraphQLObjectType) graphQLType);
+                            graphQLType = inputObject;
+                        }
+                        return argument(parameter, graphQLType);
+                    }
+                }).collect(Collectors.toList());
+
+        GraphQLFieldDefinition relay = null;
+        if (method.isAnnotationPresent(GraphQLRelayMutation.class)) {
+            if (!(outputType instanceof GraphQLObjectType)) {
+                throw new RuntimeException("outputType should be an object");
             }
+            StringBuffer titleBuffer = new StringBuffer(method.getName());
+            titleBuffer.setCharAt(0, Character.toUpperCase(titleBuffer.charAt(0)));
+            String title = titleBuffer.toString();
+            relay = new Relay().mutationWithClientMutationId(title, method.getName(),
+                     args.stream().
+                             map(t -> new GraphQLInputObjectField(t.getName(), t.getType())).
+                            collect(Collectors.toList()),
+                    ((GraphQLObjectType) outputType).getFieldDefinitions(), null);
+            builder.argument(relay.getArguments());
+            builder.type(relay.getType());
+        } else {
+            builder.argument(args);
         }
 
         GraphQLDescription description = method.getAnnotation(GraphQLDescription.class);
@@ -269,6 +293,10 @@ public class GraphQLAnnotations {
 
         GraphQLDataFetcher dataFetcher = method.getAnnotation(GraphQLDataFetcher.class);
         DataFetcher actualDataFetcher = dataFetcher == null ? new MethodDataFetcher(method) : dataFetcher.value().newInstance();
+
+        if (method.isAnnotationPresent(GraphQLRelayMutation.class) && relay != null) {
+            actualDataFetcher = new RelayMutationMethodDataFetcher(method, args, relay.getArgument("input").getType(), relay.getType());
+        }
 
         if (isCursor) {
             if (List.class.isAssignableFrom(method.getReturnType())) {

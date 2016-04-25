@@ -14,16 +14,43 @@
  */
 package graphql.annotations;
 
+import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.execution.ExecutionContext;
 import graphql.execution.SimpleExecutionStrategy;
-import graphql.language.Field;
+import graphql.language.*;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
+
+    private static final Logger log = LoggerFactory.getLogger(EnhancedExecutionStrategy.class);
+
+    @Override
+    protected ExecutionResult resolveField(ExecutionContext executionContext, GraphQLObjectType parentType, Object source, List<Field> fields) {
+        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, fields.get(0));
+        if (fieldDef == null) return null;
+
+        if (fieldDef.getName().contentEquals("clientMutationId")) {
+            Field field = (Field) executionContext.getOperationDefinition().getSelectionSet().getSelections().get(0);
+            ObjectValue value = (ObjectValue) field.getArguments().get(0).getValue();
+            StringValue clientMutationIdVal = (StringValue) value.getObjectFields().stream().filter(f -> f.getName().contentEquals("clientMutationId")).findFirst().get().getValue();
+
+            String clientMutationId = clientMutationIdVal.getValue();
+
+            return completeValue(executionContext, fieldDef.getType(), fields, clientMutationId);
+        } else {
+            return super.resolveField(executionContext, parentType, source, fields);
+        }
+    }
 
     @Override
     protected ExecutionResult completeValue(ExecutionContext executionContext, GraphQLType fieldType, List<Field> fields, Object result) {
