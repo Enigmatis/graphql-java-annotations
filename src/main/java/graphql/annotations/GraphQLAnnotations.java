@@ -186,9 +186,7 @@ public class GraphQLAnnotations {
 
 
         if (isConnection) {
-            if (List.class.isAssignableFrom(field.getType())) {
-                actualDataFetcher = new ConnectionDataFetcher(field.getAnnotation(GraphQLConnection.class).connection(), actualDataFetcher);
-            }
+            actualDataFetcher = new ConnectionDataFetcher(field.getAnnotation(GraphQLConnection.class).connection(), actualDataFetcher);
         }
 
         builder.dataFetcher(actualDataFetcher);
@@ -215,8 +213,7 @@ public class GraphQLAnnotations {
     private static boolean isConnection(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
         return obj.isAnnotationPresent(GraphQLConnection.class) &&
                                type instanceof GraphQLList &&
-                               ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType &&
-                               List.class.isAssignableFrom(klass);
+                               ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType;
     }
 
     protected static GraphQLFieldDefinition field(Method method) throws InstantiationException, IllegalAccessException {
@@ -299,9 +296,7 @@ public class GraphQLAnnotations {
         }
 
         if (isConnection) {
-            if (List.class.isAssignableFrom(method.getReturnType())) {
-                actualDataFetcher = new ConnectionDataFetcher(method.getAnnotation(GraphQLConnection.class).connection(), actualDataFetcher);
-            }
+            actualDataFetcher = new ConnectionDataFetcher(method.getAnnotation(GraphQLConnection.class).connection(), actualDataFetcher);
         }
 
         builder.dataFetcher(actualDataFetcher);

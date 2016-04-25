@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static graphql.Scalars.*;
 import static graphql.annotations.DefaultTypeFunction.instance;
@@ -83,6 +84,9 @@ public class DefaultTypeFunctionTest {
     @SuppressWarnings("unused")
     public List<List<@GraphQLNonNull String>> listMethod() { return null;};
 
+    @SuppressWarnings("unused")
+    public Stream<List<@GraphQLNonNull String>> streamMethod() { return null;};
+
     @Test
     public void list() throws NoSuchMethodException {
         graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("listMethod").getReturnType(), (AnnotatedParameterizedType) getClass().getMethod("listMethod").getAnnotatedReturnType());
@@ -97,6 +101,16 @@ public class DefaultTypeFunctionTest {
     public void unparametrizedList() {
         List v = new LinkedList();
         instance.apply(v.getClass(), null);
+    }
+
+    @Test
+    public void stream() throws NoSuchMethodException {
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("streamMethod").getReturnType(), (AnnotatedParameterizedType) getClass().getMethod("listMethod").getAnnotatedReturnType());
+        assertTrue(type instanceof GraphQLList);
+        GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
+        assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
+        graphql.schema.GraphQLNonNull wrappedType = (graphql.schema.GraphQLNonNull) subtype.getWrappedType();
+        assertEquals(wrappedType.getWrappedType(), GraphQLString);
     }
 
     @SuppressWarnings("unused")

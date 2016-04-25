@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import static graphql.schema.GraphQLEnumType.newEnum;
 
@@ -83,6 +84,25 @@ public class DefaultTypeFunction implements TypeFunction {
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             if (!(annotatedType instanceof AnnotatedParameterizedType)) {
                 throw new IllegalArgumentException("List type parameter should be specified");
+            }
+            AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
+            AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
+            Class<?> klass;
+            if (arg.getType() instanceof ParameterizedType) {
+                klass = (Class<?>)((ParameterizedType)(arg.getType())).getRawType();
+            } else {
+                klass = (Class<?>) arg.getType();
+            }
+            return new GraphQLList(DefaultTypeFunction.instance.apply(klass, arg));
+        }
+    }
+
+    private static class StreamFunction implements TypeFunction {
+
+        @Override
+        public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
+            if (!(annotatedType instanceof AnnotatedParameterizedType)) {
+                throw new IllegalArgumentException("Stream type parameter should be specified");
             }
             AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
             AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
@@ -195,6 +215,7 @@ public class DefaultTypeFunction implements TypeFunction {
 
         register(AbstractList.class, new ListFunction());
         register(List.class, new ListFunction());
+        register(Stream.class, new StreamFunction());
 
         register(Enum.class, new EnumFunction());
 
