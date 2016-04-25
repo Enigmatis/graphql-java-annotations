@@ -29,8 +29,7 @@ public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
     protected ExecutionResult completeValue(ExecutionContext executionContext, GraphQLType fieldType, List<Field> fields, Object result) {
         if (result instanceof Optional) {
             return super.completeValue(executionContext, fieldType, fields, ((Optional) result).orElse(null));
-        } else {
-            return super.completeValue(executionContext, fieldType, fields, result);
         }
+        return super.completeValue(executionContext, fieldType, fields, result);
     }
 }
