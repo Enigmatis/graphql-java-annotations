@@ -163,8 +163,8 @@ public class GraphQLAnnotations {
 
         GraphQLOutputType outputType = field.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
 
-        boolean isCursor = isCursor(field, field.getType(), type);
-        outputType = getGraphQLConnection(isCursor, field, type, outputType, builder);
+        boolean isConnection = isConnection(field, field.getType(), type);
+        outputType = getGraphQLConnection(isConnection, field, type, outputType, builder);
 
         builder.type(outputType);
 
@@ -185,9 +185,9 @@ public class GraphQLAnnotations {
         DataFetcher actualDataFetcher = dataFetcher == null ? new FieldDataFetcher(field.getName()) : dataFetcher.value().newInstance();
 
 
-        if (isCursor) {
+        if (isConnection) {
             if (List.class.isAssignableFrom(field.getType())) {
-                actualDataFetcher = new ConnectionDataFetcher(field.getAnnotation(GraphQLCursor.class).connection(), actualDataFetcher);
+                actualDataFetcher = new ConnectionDataFetcher(field.getAnnotation(GraphQLConnection.class).connection(), actualDataFetcher);
             }
         }
 
@@ -196,12 +196,12 @@ public class GraphQLAnnotations {
         return builder.build();
     }
 
-    private static GraphQLOutputType getGraphQLConnection(boolean isCursor, AccessibleObject field, GraphQLOutputType type, GraphQLOutputType outputType, GraphQLFieldDefinition.Builder builder) {
-        if (isCursor) {
+    private static GraphQLOutputType getGraphQLConnection(boolean isConnection, AccessibleObject field, GraphQLOutputType type, GraphQLOutputType outputType, GraphQLFieldDefinition.Builder builder) {
+        if (isConnection) {
             if (type instanceof GraphQLList) {
                 graphql.schema.GraphQLType wrappedType = ((GraphQLList) type).getWrappedType();
                 assert wrappedType instanceof GraphQLObjectType;
-                String annValue = field.getAnnotation(GraphQLCursor.class).name();
+                String annValue = field.getAnnotation(GraphQLConnection.class).name();
                 String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
                 Relay relay = new Relay();
                 GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, ((GraphQLObjectType) wrappedType).getFieldDefinitions());
@@ -212,8 +212,8 @@ public class GraphQLAnnotations {
         return outputType;
     }
 
-    private static boolean isCursor(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
-        return obj.isAnnotationPresent(GraphQLCursor.class) &&
+    private static boolean isConnection(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
+        return obj.isAnnotationPresent(GraphQLConnection.class) &&
                                type instanceof GraphQLList &&
                                ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType &&
                                List.class.isAssignableFrom(klass);
@@ -238,8 +238,8 @@ public class GraphQLAnnotations {
 
         GraphQLOutputType outputType = method.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
 
-        boolean isCursor = isCursor(method, method.getReturnType(), type);
-        outputType = getGraphQLConnection(isCursor, method, type, outputType, builder);
+        boolean isConnection = isConnection(method, method.getReturnType(), type);
+        outputType = getGraphQLConnection(isConnection, method, type, outputType, builder);
 
         builder.type(outputType);
 
@@ -298,9 +298,9 @@ public class GraphQLAnnotations {
             actualDataFetcher = new RelayMutationMethodDataFetcher(method, args, relay.getArgument("input").getType(), relay.getType());
         }
 
-        if (isCursor) {
+        if (isConnection) {
             if (List.class.isAssignableFrom(method.getReturnType())) {
-                actualDataFetcher = new ConnectionDataFetcher(method.getAnnotation(GraphQLCursor.class).connection(), actualDataFetcher);
+                actualDataFetcher = new ConnectionDataFetcher(method.getAnnotation(GraphQLConnection.class).connection(), actualDataFetcher);
             }
         }
 

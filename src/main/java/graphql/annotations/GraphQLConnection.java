@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GraphQLCursor {
+public @interface GraphQLConnection {
     /**
      * By default, a simple List connection is specified, but can be overridden using
      * this property to allow for more efficient fetching procedures (limiting database queries, etc.)

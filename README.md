@@ -138,4 +138,4 @@ Relay [specification for mutations](https://facebook.github.io/relay/graphql/mut
 
 ## Relay Connection
 
-You can use `@GraphQLCursor` annotation to make a field iterable in adherence to Relay Connection specification.
+You can use `@GraphQLConnection` annotation to make a field iterable in adherence to Relay [Connection specification](https://facebook.github.io/relay/graphql/connections.htm).

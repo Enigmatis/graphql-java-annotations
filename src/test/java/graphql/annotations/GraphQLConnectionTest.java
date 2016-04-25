@@ -14,7 +14,6 @@
  */
 package graphql.annotations;
 
-import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.relay.PageInfo;
@@ -35,7 +34,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class GraphQLCursorTest {
+public class GraphQLConnectionTest {
 
     @AllArgsConstructor
     public static class Obj {
@@ -47,7 +46,7 @@ public class GraphQLCursorTest {
 
     @AllArgsConstructor
     public static class TestListField {
-        @GraphQLField @GraphQLCursor
+        @GraphQLField @GraphQLConnection
         public List<Obj> objs;
     }
 
@@ -64,7 +63,7 @@ public class GraphQLCursorTest {
     @AllArgsConstructor
     public static class TestListMethod {
         private List<Obj> objs;
-        @GraphQLField @GraphQLCursor
+        @GraphQLField @GraphQLConnection
         public List<Obj> getObjs() {
             return this.objs;
         }
@@ -99,7 +98,7 @@ public class GraphQLCursorTest {
     @AllArgsConstructor
     public static class TestCustomConnection {
         private List<Obj> objs;
-        @GraphQLField @GraphQLCursor(connection = CustomConnection.class)
+        @GraphQLField @GraphQLConnection(connection = CustomConnection.class)
         public List<Obj> getObjs() {
             return this.objs;
         }
