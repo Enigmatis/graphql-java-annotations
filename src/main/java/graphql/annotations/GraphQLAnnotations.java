@@ -202,7 +202,7 @@ public class GraphQLAnnotations {
                 String annValue = field.getAnnotation(GraphQLConnection.class).name();
                 String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
                 Relay relay = new Relay();
-                GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, ((GraphQLObjectType) wrappedType).getFieldDefinitions());
+                GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
                 outputType = relay.connectionType(connectionName, edgeType, Collections.emptyList());
                 builder.argument(relay.getConnectionFieldArguments());
             }
