@@ -147,7 +147,7 @@ public class GraphQLObjectTest {
     }
 
     private static class TestObjectInherited extends TestObject {
-        @Override // Test overriding field
+        @Override @GraphQLName("field1") // Test overriding field
         public String field() {
             return "inherited";
         }
@@ -160,11 +160,12 @@ public class GraphQLObjectTest {
         assertEquals(object.getFieldDefinitions().size(), objectInherited.getFieldDefinitions().size());
 
         GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schemaInherited = newSchema().query(objectInherited).build();
 
         ExecutionResult result = new GraphQL(schema).execute("{field0}", new TestObject());
         assertEquals(((Map<String, Object>)result.getData()).get("field0"), "test");
-        result = new GraphQL(schema).execute("{field0}", new TestObjectInherited());
-        assertEquals(((Map<String, Object>)result.getData()).get("field0"), "inherited");
+        result = new GraphQL(schemaInherited).execute("{field1}", new TestObjectInherited());
+        assertEquals(((Map<String, Object>)result.getData()).get("field1"), "inherited");
     }
 
     public interface Iface {
