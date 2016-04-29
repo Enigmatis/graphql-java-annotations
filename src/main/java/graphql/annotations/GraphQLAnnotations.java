@@ -258,17 +258,19 @@ public class GraphQLAnnotations {
 
         GraphQLFieldDefinition relay = null;
         if (method.isAnnotationPresent(GraphQLRelayMutation.class)) {
-            if (!(outputType instanceof GraphQLObjectType)) {
-                throw new RuntimeException("outputType should be an object");
+            if (!(outputType instanceof GraphQLObjectType || outputType instanceof GraphQLInterfaceType)) {
+                throw new RuntimeException("outputType should be an object or an interface");
             }
             StringBuffer titleBuffer = new StringBuffer(method.getName());
             titleBuffer.setCharAt(0, Character.toUpperCase(titleBuffer.charAt(0)));
             String title = titleBuffer.toString();
+            List<GraphQLFieldDefinition> fieldDefinitions = outputType instanceof GraphQLObjectType ?
+                    ((GraphQLObjectType) outputType).getFieldDefinitions() :
+                    ((GraphQLInterfaceType) outputType).getFieldDefinitions();
             relay = new Relay().mutationWithClientMutationId(title, method.getName(),
                      args.stream().
                              map(t -> new GraphQLInputObjectField(t.getName(), t.getType())).
-                            collect(Collectors.toList()),
-                    ((GraphQLObjectType) outputType).getFieldDefinitions(), null);
+                            collect(Collectors.toList()), fieldDefinitions, null);
             builder.argument(relay.getArguments());
             builder.type(relay.getType());
         } else {

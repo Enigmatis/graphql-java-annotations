@@ -28,18 +28,32 @@ import static org.testng.Assert.*;
 
 public class RelayTest {
 
-    public static class Result {
+    public static class ResultTypeResolver implements TypeResolver {
+
+        @Override @SneakyThrows
+        public GraphQLObjectType getType(Object object) {
+            return GraphQLAnnotations.object(Result.class);
+        }
+    }
+
+    @GraphQLTypeResolver(ResultTypeResolver.class)
+    public interface IResult {
+        @GraphQLField
+        int getI();
+    }
+
+    public static class Result implements IResult{
         private final int i;
 
         public Result(int i) {
             this.i = i;
         }
 
-        @GraphQLField
         public int getI() {
             return i;
         }
     }
+
     public static class WrongReturnType {
         @GraphQLField @GraphQLRelayMutation
         public int doSomething() {
@@ -56,6 +70,11 @@ public class RelayTest {
         public Result doSomethingElse(int a, int b) {
             return new Result(a - b);
         }
+        @GraphQLField @GraphQLRelayMutation
+        public IResult doSomethingI() {
+            return new Result(0);
+        }
+
     }
 
     @Test(expectedExceptions = RuntimeException.class) @SneakyThrows
@@ -96,6 +115,29 @@ public class RelayTest {
         assertEquals(returns.get("i"), 0);
         assertEquals(returns.get("clientMutationId"), "1");
     }
+
+    @Test @SneakyThrows
+    public void interfaceReturningMutation() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
+
+        GraphQLFieldDefinition doSomething = object.getFieldDefinition("doSomethingI");
+
+        assertNotNull(doSomething);
+
+        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+
+        GraphQL graphQL = new GraphQL(schema, new EnhancedExecutionStrategy());
+
+        ExecutionResult result = graphQL.execute("mutation { doSomethingI(input: {clientMutationId: \"1\"}) { i clientMutationId } }", new TestObject());
+
+        assertEquals(result.getErrors().size(), 0);
+
+        Map<String, Object> returns = (Map<String, Object>) ((Map<String, Object>) result.getData()).get("doSomethingI");
+
+        assertEquals(returns.get("i"), 0);
+        assertEquals(returns.get("clientMutationId"), "1");
+    }
+
 
     @Test @SneakyThrows
     public void argMutation() {
