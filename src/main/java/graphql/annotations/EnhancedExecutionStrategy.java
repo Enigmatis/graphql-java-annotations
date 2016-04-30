@@ -19,9 +19,7 @@ import graphql.ExecutionResult;
 import graphql.execution.ExecutionContext;
 import graphql.execution.SimpleExecutionStrategy;
 import graphql.language.*;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLObjectType;
+import graphql.schema.*;
 import graphql.schema.GraphQLType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +52,11 @@ public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
 
     @Override
     protected ExecutionResult completeValue(ExecutionContext executionContext, GraphQLType fieldType, List<Field> fields, Object result) {
+        if (result instanceof Enum && fieldType instanceof GraphQLEnumType) {
+            return super.completeValue(executionContext, fieldType, fields, ((GraphQLEnumType) fieldType).getCoercing().parseValue(((Enum) result).name()));
+        }
         if (result instanceof Optional) {
-            return super.completeValue(executionContext, fieldType, fields, ((Optional) result).orElse(null));
+            return completeValue(executionContext, fieldType, fields, ((Optional) result).orElse(null));
         }
         return super.completeValue(executionContext, fieldType, fields, result);
     }

@@ -452,4 +452,25 @@ public class GraphQLObjectTest {
         assertEquals(v.get("empty"), "test");
         assertNull(v.get("nonempty"));
     }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class EnumTest {
+        public enum E { A, B };
+        @GraphQLField
+        public E e;
+    }
+
+    @Test @SneakyThrows
+    public void queryEnum() {
+        GraphQLObjectType object = GraphQLAnnotations.object(EnumTest.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = new GraphQL(schema, new EnhancedExecutionStrategy()).execute("{e}", new EnumTest(EnumTest.E.B));
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> v = (Map<String, Object>) result.getData();
+        assertEquals(v.get("e"), "B");
+    }
+
 }
