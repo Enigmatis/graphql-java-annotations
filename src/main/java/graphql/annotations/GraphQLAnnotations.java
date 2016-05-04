@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
+import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
 
@@ -269,7 +270,7 @@ public class GraphQLAnnotations {
                     ((GraphQLInterfaceType) outputType).getFieldDefinitions();
             relay = new Relay().mutationWithClientMutationId(title, method.getName(),
                      args.stream().
-                             map(t -> new GraphQLInputObjectField(t.getName(), t.getType())).
+                             map(t -> newInputObjectField().name(t.getName()).type(t.getType()).description(t.getDescription()).build()).
                             collect(Collectors.toList()), fieldDefinitions, null);
             builder.argument(relay.getArguments());
             builder.type(relay.getType());

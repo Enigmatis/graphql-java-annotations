@@ -67,7 +67,7 @@ public class RelayTest {
             return new Result(0);
         }
         @GraphQLField @GraphQLRelayMutation
-        public Result doSomethingElse(int a, int b) {
+        public Result doSomethingElse(@GraphQLDescription("A") int a, int b) {
             return new Result(a - b);
         }
         @GraphQLField @GraphQLRelayMutation
@@ -155,6 +155,7 @@ public class RelayTest {
         GraphQLInputObjectType inputType_ = (GraphQLInputObjectType) inputType;
         assertNotNull(inputType_.getField("a"));
         assertNotNull(inputType_.getField("b"));
+        assertEquals(inputType_.getField("a").getDescription(), "A");
 
         assertTrue(doSomethingElse.getType() instanceof GraphQLObjectType);
         GraphQLObjectType returnType = (GraphQLObjectType) doSomethingElse.getType();
