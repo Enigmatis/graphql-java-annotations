@@ -17,6 +17,7 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.*;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
@@ -51,7 +52,25 @@ public class GraphQLInterfaceTest {
     interface TestIface extends BaseTestIface {
     }
 
+    @GraphQLUnion(possibleTypes = TestObject1.class)
+    interface TestUnion extends BaseTestIface {
+    }
+
     static class TestObject implements TestIface {
+
+        @Override
+        public String value() {
+            return "a";
+        }
+    }
+
+    public static class TestObject1 implements TestUnion {
+
+        @GraphQLField
+        public TestUnion union;
+
+        @GraphQLField
+        public int i = 1;
 
         @Override
         public String value() {
@@ -61,10 +80,17 @@ public class GraphQLInterfaceTest {
 
     @Test @SneakyThrows
     public void test() {
-        GraphQLInterfaceType iface = GraphQLAnnotations.iface(TestIface.class);
+        GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(TestIface.class);
         List<GraphQLFieldDefinition> fields = iface.getFieldDefinitions();
         assertEquals(fields.size(), 1);
         assertEquals(fields.get(0).getName(), "value");
+    }
+
+    @Test @SneakyThrows
+    public void testUnion() {
+        GraphQLUnionType unionType = (GraphQLUnionType) GraphQLAnnotations.iface(TestUnion.class);
+        assertEquals(unionType.getTypes().size(), 1);
+        assertEquals(unionType.getTypes().get(0).getName(), "TestObject1");
     }
 
     @Test @SneakyThrows
@@ -87,6 +113,11 @@ public class GraphQLInterfaceTest {
         @GraphQLField public TestIface iface;
     }
 
+    @AllArgsConstructor
+    public static class UnionQuery {
+        @GraphQLField public TestUnion union;
+    }
+
     @Test @SneakyThrows
     public void query() {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
@@ -94,6 +125,15 @@ public class GraphQLInterfaceTest {
         ExecutionResult result = new GraphQL(schema).execute("{ iface { value } }");
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>)result.getData()).get("iface").get("value"), "a");
+    }
+
+    @Test @SneakyThrows
+    public void queryUnion() {
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(UnionQuery.class)).build();
+
+        ExecutionResult result = new GraphQL(schema).execute("{ union {  ... on TestObject1 { value }  } }", new UnionQuery(new TestObject1()));
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>)result.getData()).get("union").get("value"), "a");
     }
 
 }
