@@ -22,6 +22,7 @@ import graphql.schema.GraphQLType;
 import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.testng.Assert.*;
@@ -167,6 +168,49 @@ public class RelayTest {
         GraphQL graphQL = new GraphQL(schema, new EnhancedExecutionStrategy());
 
         ExecutionResult result = graphQL.execute("mutation { doSomethingElse(input: {a: 0, b: 1, clientMutationId: \"1\"}) { i clientMutationId } }", new TestObject());
+
+        assertEquals(result.getErrors().size(), 0);
+
+        Map<String, Object> returns = (Map<String, Object>) ((Map<String, Object>) result.getData()).get("doSomethingElse");
+
+        assertEquals(returns.get("i"), -1);
+        assertEquals(returns.get("clientMutationId"), "1");
+    }
+
+    @Test @SneakyThrows
+    public void argVariableMutation() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
+
+        GraphQLFieldDefinition doSomethingElse = object.getFieldDefinition("doSomethingElse");
+
+        assertNotNull(doSomethingElse);
+
+        assertEquals(doSomethingElse.getArguments().size(), 1);
+        GraphQLInputType input = doSomethingElse.getArgument("input").getType();
+        assertTrue(input instanceof GraphQLNonNull);
+        GraphQLType inputType = ((graphql.schema.GraphQLNonNull) input).getWrappedType();
+        assertTrue(inputType instanceof GraphQLInputObjectType);
+        GraphQLInputObjectType inputType_ = (GraphQLInputObjectType) inputType;
+        assertNotNull(inputType_.getField("a"));
+        assertNotNull(inputType_.getField("b"));
+
+        assertTrue(doSomethingElse.getType() instanceof GraphQLObjectType);
+        GraphQLObjectType returnType = (GraphQLObjectType) doSomethingElse.getType();
+
+        assertNotNull(returnType.getFieldDefinition("i"));
+        assertNotNull(returnType.getFieldDefinition("clientMutationId"));
+
+        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+
+        GraphQL graphQL = new GraphQL(schema, new EnhancedExecutionStrategy());
+
+        Map<String, Object> variables = new HashMap<>();
+        Map<String, Object> inputVariables = new HashMap<>();
+        inputVariables.put("a", 0);
+        inputVariables.put("b", 1);
+        inputVariables.put("clientMutationId", "1");
+        variables.put("input", inputVariables);
+        ExecutionResult result = graphQL.execute("mutation VariableMutation($input:DoSomethingElseInput!) { doSomethingElse(input: $input) { i clientMutationId } }", new TestObject(), variables);
 
         assertEquals(result.getErrors().size(), 0);
 
