@@ -24,25 +24,36 @@ import graphql.schema.GraphQLType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
 
     private static final Logger log = LoggerFactory.getLogger(EnhancedExecutionStrategy.class);
+    private static final String CLIENT_MUTATION_ID = "clientMutationId";
 
     @Override
     protected ExecutionResult resolveField(ExecutionContext executionContext, GraphQLObjectType parentType, Object source, List<Field> fields) {
         GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, fields.get(0));
         if (fieldDef == null) return null;
 
-        if (fieldDef.getName().contentEquals("clientMutationId")) {
+        if (fieldDef.getName().contentEquals(CLIENT_MUTATION_ID)) {
             Field field = (Field) executionContext.getOperationDefinition().getSelectionSet().getSelections().get(0);
-            ObjectValue value = (ObjectValue) field.getArguments().get(0).getValue();
-            StringValue clientMutationIdVal = (StringValue) value.getObjectFields().stream().filter(f -> f.getName().contentEquals("clientMutationId")).findFirst().get().getValue();
+            Argument argument = field.getArguments().get(0);
 
-            String clientMutationId = clientMutationIdVal.getValue();
+            Object clientMutationId;
+            if (argument.getValue() instanceof  VariableReference) {
+                VariableReference ref = (VariableReference) argument.getValue();
+                HashMap mutationInputVariables = (HashMap) executionContext.getVariables().get(ref.getName());
+                clientMutationId = mutationInputVariables.get(CLIENT_MUTATION_ID);
+            } else {
+                ObjectValue value = (ObjectValue) field.getArguments().get(0).getValue();
+                StringValue clientMutationIdVal = (StringValue) value.getObjectFields().stream()
+                        .filter(f -> f.getName().contentEquals(CLIENT_MUTATION_ID))
+                        .findFirst().get().getValue();
+                clientMutationId = clientMutationIdVal.getValue();
+            }
 
             return completeValue(executionContext, fieldDef.getType(), fields, clientMutationId);
         } else {
