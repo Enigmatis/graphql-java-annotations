@@ -389,7 +389,6 @@ public class GraphQLAnnotations {
 
     protected static GraphQLArgument argument(Parameter parameter, graphql.schema.GraphQLType t) throws IllegalAccessException, InstantiationException {
         GraphQLArgument.Builder builder = newArgument();
-        builder.name(parameter.getName());
         builder.type(parameter.getAnnotation(NotNull.class) == null ? (GraphQLInputType) t : new graphql.schema.GraphQLNonNull(t));
         GraphQLDescription description = parameter.getAnnotation(GraphQLDescription.class);
         if (description != null) {
@@ -402,6 +401,8 @@ public class GraphQLAnnotations {
         GraphQLName name = parameter.getAnnotation(GraphQLName.class);
         if ( name != null ) {
             builder.name(name.value());
+        } else {
+            builder.name(parameter.getName());
         }
         return builder.build();
     }
