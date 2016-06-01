@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/yrashk/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/yrashk/graphql-java-annotations)
+[![Build Status](https://travis-ci.org/graphql-java/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/yrashk/graphql-java-annotations)
 [ ![Download](https://api.bintray.com/packages/yrashk/maven/graphql-java-annotations/images/download.svg) ](https://bintray.com/yrashk/maven/graphql-java-annotations/_latestVersion)
 
 # GraphQL Annotations for Java
