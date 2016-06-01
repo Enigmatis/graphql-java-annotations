@@ -47,6 +47,14 @@ public class GraphQLSimpleSchemaTest {
             user.setName("Test Name");
             return user;
         }
+
+        @GraphQLField
+        @GraphQLInvokeDetached
+        public User defaultUser2() {
+            User user = new User();
+            user.setName("Test Name");
+            return user;
+        }
     }
 
     @Test @SneakyThrows
@@ -57,6 +65,16 @@ public class GraphQLSimpleSchemaTest {
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
         String actual = result.getData().toString();
         assertEquals(actual, "{defaultUser={name=Test Name}}");
+    }
+
+    @Test @SneakyThrows
+    public void staticCall() {
+        GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
+        GraphQL graphql = new GraphQL(newSchema().query(queryObject).build());
+
+        ExecutionResult result = graphql.execute("{ defaultUser2{ name } }");
+        String actual = result.getData().toString();
+        assertEquals(actual, "{defaultUser2={name=Test Name}}");
     }
 }
 
