@@ -188,8 +188,7 @@ public class GraphQLAnnotations {
 
             Class<?> declaringClass = getDeclaringClass(method);
 
-            boolean valid = !Modifier.isStatic(method.getModifiers()) &&
-                    (method.getAnnotation(GraphQLField.class) != null ||
+            boolean valid = (method.getAnnotation(GraphQLField.class) != null ||
                      declaringClass.getMethod(method.getName(), method.getParameterTypes()).getAnnotation(GraphQLField.class) != null);
 
             if (valid) {
