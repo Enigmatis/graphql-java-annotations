@@ -16,6 +16,7 @@ package graphql.annotations;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import lombok.SneakyThrows;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,15 +38,23 @@ class MethodDataFetcher implements DataFetcher {
         envIndex = parameterTypes.indexOf(DataFetchingEnvironment.class);
     }
 
+    @SneakyThrows
     @Override
     public Object get(DataFetchingEnvironment environment) {
-        if (environment.getSource() == null) return null;
         try {
+            Object obj;
+            GraphQLInvokeDetached annotationObj = method.getAnnotation(GraphQLInvokeDetached.class);
+            if (annotationObj == null) {
+                obj = environment.getSource();
+                if (environment.getSource() == null) return null;
+            } else {
+                obj = method.getDeclaringClass().newInstance();
+            }
             ArrayList args = new ArrayList<>(environment.getArguments().values());
             if (envIndex >= 0) {
                 args.add(envIndex, environment);
             }
-            return method.invoke(environment.getSource(), args.toArray());
+            return method.invoke(obj, args.toArray());
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
