@@ -25,9 +25,6 @@ import org.testng.annotations.Test;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 
-/**
- * Created by ngoel on 5/31/16.
- */
 public class GraphQLSimpleSchemaTest {
 
     public static class User {
@@ -44,9 +41,8 @@ public class GraphQLSimpleSchemaTest {
 
 
     public static class Query {
-        @GraphQLInvokeDetached
         @GraphQLField
-        public User defaultUser() {
+        public static User defaultUser() {
             User user = new User();
             user.setName("Test Name");
             return user;

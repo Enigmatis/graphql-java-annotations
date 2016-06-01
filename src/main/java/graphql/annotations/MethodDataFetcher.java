@@ -20,6 +20,7 @@ import lombok.SneakyThrows;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,10 +44,14 @@ class MethodDataFetcher implements DataFetcher {
     public Object get(DataFetchingEnvironment environment) {
         try {
             Object obj;
-            GraphQLInvokeDetached annotationObj = method.getAnnotation(GraphQLInvokeDetached.class);
-            if (annotationObj == null) {
+
+            if (Modifier.isStatic(method.getModifiers())) {
+                obj = null;
+            } else if (method.getAnnotation(GraphQLInvokeDetached.class) == null) {
                 obj = environment.getSource();
-                if (environment.getSource() == null) return null;
+                if (obj == null) {
+                    return null;
+                }
             } else {
                 obj = method.getDeclaringClass().newInstance();
             }
