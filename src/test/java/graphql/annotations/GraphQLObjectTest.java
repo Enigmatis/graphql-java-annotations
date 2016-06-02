@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -472,5 +473,21 @@ public class GraphQLObjectTest {
         Map<String, Object> v = (Map<String, Object>) result.getData();
         assertEquals(v.get("e"), "B");
     }
+
+    public static class ParametrizedArgsTest {
+        @GraphQLField
+        public String first(List<String> l) {
+            return l.get(0);
+        }
+    }
+
+    @Test @SneakyThrows
+    public void parametrizedArg() {
+        GraphQLObjectType object = GraphQLAnnotations.object(ParametrizedArgsTest.class);
+        GraphQLInputType t = object.getFieldDefinition("first").getArguments().get(0).getType();
+        assertTrue(t instanceof GraphQLList);
+        assertEquals(((GraphQLList)t).getWrappedType(), Scalars.GraphQLString);
+    }
+
 
 }
