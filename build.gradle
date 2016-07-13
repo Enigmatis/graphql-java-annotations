@@ -61,7 +61,7 @@ publishing {
     publications {
         MyPublication(MavenPublication) {
             from components.java
-            groupId project.name
+            groupId project.group
             artifactId project.name
             version project.version
 
