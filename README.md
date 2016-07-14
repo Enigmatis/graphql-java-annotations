@@ -9,17 +9,11 @@ syntax for GraphQL schema definition.
 ## Getting Started
 
 
-You can get packages from Bintray:
-
 (Gradle syntax)
 
 ```groovy
-repositories {
-    jcenter()
-}
-
 dependencies {
-  compile "graphql-java-annotations:graphql-java-annotations:${graphQLJavaAnnotationsVersion}"
+  compile "com.graphql-java:graphql-java-annotations:0.9.0"
 }
 ```
 
