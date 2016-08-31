@@ -67,9 +67,6 @@ public class GraphQLInterfaceTest {
     public static class TestObject1 implements TestUnion {
 
         @GraphQLField
-        public TestUnion union;
-
-        @GraphQLField
         public int i = 1;
 
         @Override

@@ -73,13 +73,18 @@ public class GraphQLAnnotations {
             typeAnnotation = new defaultGraphQLType();
         }
         TypeFunction typeFunction = typeAnnotation.value().newInstance();
-        Arrays.asList(unionAnnotation.possibleTypes()).stream().map(new Function<Class<?>, graphql.schema.GraphQLType>() {
-            @Override
-            @SneakyThrows
-            public graphql.schema.GraphQLType apply(Class<?> aClass) {
-                return typeFunction.apply(aClass, null);
-            }
-        }).forEach(builder::possibleType);
+
+        Arrays.asList(unionAnnotation.possibleTypes()).stream()
+                .map(new Function<Class<?>, graphql.schema.GraphQLType>() {
+                    @Override
+                    @SneakyThrows
+                    public graphql.schema.GraphQLType apply(Class<?> aClass) {
+                        return typeFunction.apply(aClass, null);
+                    }
+                })
+                .map(v -> (GraphQLObjectType)v)
+                .forEach(builder::possibleType);
+
         builder.typeResolver(new UnionTypeResolver(unionAnnotation.possibleTypes()));
         return builder;
     }
