@@ -353,9 +353,8 @@ public class GraphQLObjectTest {
         Map<String, Object> k1 = (Map<String, Object>)((Map<String, Object>) data.get("class2")).get("class1");
         assertEquals(k1.get("value"), "bye");
 
-//        TODO: pending resolution of https://github.com/andimarek/graphql-java/issues/118
-//        result = new GraphQL(schema).execute("{ class2 { class1 { class2 { name } } } }", class1);
-//        assertTrue(result.getErrors().isEmpty());
+        result = new GraphQL(schema).execute("{ class2 { class1 { class2 { value } } } }", class1);
+        assertTrue(result.getErrors().isEmpty());
     }
 
     private static class TestCustomType {
