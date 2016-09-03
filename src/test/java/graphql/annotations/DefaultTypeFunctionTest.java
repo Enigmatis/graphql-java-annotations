@@ -66,6 +66,8 @@ public class DefaultTypeFunctionTest {
     public void float_() {
         assertEquals(instance.apply(float.class, null), GraphQLFloat);
         assertEquals(instance.apply(Float.class, null), GraphQLFloat);
+        assertEquals(instance.apply(Double.class, null), GraphQLFloat);
+        assertEquals(instance.apply(double.class, null), GraphQLFloat);
     }
 
     @Test
