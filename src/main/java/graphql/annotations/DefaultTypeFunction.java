@@ -206,6 +206,8 @@ public class DefaultTypeFunction implements TypeFunction {
 
         register(Float.class, new FloatFunction());
         register(float.class, new FloatFunction());
+        register(Double.class, new FloatFunction());
+        register(double.class, new FloatFunction());
 
         register(Integer.class, new IntegerFunction());
         register(int.class, new IntegerFunction());
