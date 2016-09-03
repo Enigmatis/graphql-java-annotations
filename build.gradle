@@ -58,41 +58,8 @@ jar {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
-
-publishing {
-    publications {
-        MyPublication(MavenPublication) {
-            from components.java
-            groupId project.group
-            artifactId project.name
-            version project.version
-
-            artifact sourcesJar
-            artifact javadocJar
-        }
-    }
-}
-
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    publications = ['MyPublication']
-    publish = true
-    pkg {
-        repo = 'maven'
-        name = project.name
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/yrashk/graphql-java-annotations'
-        version {
-            name = project.version
-        }
-    }
-}
-
-afterReleaseBuild.dependsOn bintrayUpload
-
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
