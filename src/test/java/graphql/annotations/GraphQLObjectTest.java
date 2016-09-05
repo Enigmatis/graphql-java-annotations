@@ -405,7 +405,7 @@ public class GraphQLObjectTest {
         GraphQLInputObjectType inputObjectType = GraphQLAnnotations.inputObject(object);
         assertEquals(inputObjectType.getFields().size(), object.getFieldDefinitions().size());
     }
-    private static class UUIDTypeFunction implements TypeFunction {
+    public static class UUIDTypeFunction implements TypeFunction {
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             return GraphQLString;
