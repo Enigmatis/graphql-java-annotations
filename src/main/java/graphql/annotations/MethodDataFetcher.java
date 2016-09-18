@@ -16,27 +16,17 @@ package graphql.annotations;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLObjectType;
 import lombok.SneakyThrows;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.lang.reflect.*;
+import java.util.*;
 
 class MethodDataFetcher implements DataFetcher {
     private final Method method;
-    private final int envIndex;
 
     public MethodDataFetcher(Method method) {
         this.method = method;
-        List<Class<?>> parameterTypes = Arrays.asList(method.getParameters()).stream().
-                map(Parameter::getType).
-                collect(Collectors.toList());
-        envIndex = parameterTypes.indexOf(DataFetchingEnvironment.class);
     }
 
     @SneakyThrows
@@ -55,13 +45,32 @@ class MethodDataFetcher implements DataFetcher {
             } else {
                 obj = method.getDeclaringClass().newInstance();
             }
-            ArrayList args = new ArrayList<>(environment.getArguments().values());
-            if (envIndex >= 0) {
-                args.add(envIndex, environment);
-            }
-            return method.invoke(obj, args.toArray());
+            return method.invoke(obj, invocationArgs(environment));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SneakyThrows
+    private Object[] invocationArgs(DataFetchingEnvironment environment) {
+        List result = new ArrayList();
+        Iterator envArgs = environment.getArguments().values().iterator();
+        TypeFunction typeFunction = new DefaultTypeFunction();
+        for (Parameter p : method.getParameters()) {
+            Class<?> paramType = p.getType();
+            if (DataFetchingEnvironment.class.isAssignableFrom(paramType)) {
+                result.add(environment);
+                continue;
+            }
+            graphql.schema.GraphQLType graphQLType = typeFunction.apply(paramType, p.getAnnotatedType());
+            if (graphQLType instanceof GraphQLObjectType) {
+                Constructor<?> constructor = paramType.getConstructor(HashMap.class);
+                result.add(constructor.newInstance(envArgs.next()));
+
+            } else {
+                result.add(envArgs.next());
+            }
+        }
+        return result.toArray();
     }
 }
