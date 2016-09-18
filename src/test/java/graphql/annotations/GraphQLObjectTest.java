@@ -384,19 +384,35 @@ public class GraphQLObjectTest {
         assertEquals(object.getFieldDefinition("id").getType(), GraphQLString);
     }
 
+    private static class TestInputArgument {
+        @GraphQLField public String a;
+        @GraphQLField public int b;
+
+        public TestInputArgument(HashMap<String, Object> args) {
+            a = (String) args.get("a");
+            b = (int) args.get("b");
+        }
+    }
+
     private static class TestObjectInput {
         @GraphQLField
-        public TestObject test(TestObject testObject) {
-            return testObject;
+        public String test(int other, TestInputArgument arg) {
+            return arg.a;
         }
     }
 
     @Test @SneakyThrows
     public void inputObjectArgument() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
-        GraphQLArgument argument = object.getFieldDefinition("test").getArgument("testObject");
+        GraphQLArgument argument = object.getFieldDefinition("test").getArgument("arg");
         assertTrue(argument.getType() instanceof GraphQLInputObjectType);
-        assertEquals(argument.getName(), "testObject");
+        assertEquals(argument.getName(), "arg");
+
+        GraphQLSchema schema = newSchema().query(object).build();
+        ExecutionResult result = new GraphQL(schema).execute("{ test(arg: { a:\"ok\", b:2 }, other:0) }", new TestObjectInput());
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> v = (Map<String, Object>) result.getData();
+        assertEquals(v.get("test"), "ok");
     }
 
     @Test @SneakyThrows
