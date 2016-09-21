@@ -298,8 +298,14 @@ public class GraphQLAnnotations {
         TypeFunction typeFunction = annotation.value().newInstance();
         AnnotatedType annotatedReturnType = method.getAnnotatedReturnType();
 
-        GraphQLOutputType type = (GraphQLOutputType) typeFunction.apply(method.getReturnType(), annotatedReturnType);
+        TypeFunction outputTypeFunction;
+        if (method.getAnnotation(GraphQLBatched.class) != null) {
+            outputTypeFunction = new BatchedTypeFunction(typeFunction);
+        } else {
+            outputTypeFunction = typeFunction;
+        }
 
+        GraphQLOutputType type = (GraphQLOutputType) outputTypeFunction.apply(method.getReturnType(), annotatedReturnType);
         GraphQLOutputType outputType = method.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
 
         boolean isConnection = isConnection(method, method.getReturnType(), type);
@@ -358,7 +364,14 @@ public class GraphQLAnnotations {
         }
 
         GraphQLDataFetcher dataFetcher = method.getAnnotation(GraphQLDataFetcher.class);
-        DataFetcher actualDataFetcher = dataFetcher == null ? new MethodDataFetcher(method) : dataFetcher.value().newInstance();
+        DataFetcher actualDataFetcher;
+        if (dataFetcher == null && method.getAnnotation(GraphQLBatched.class) != null) {
+            actualDataFetcher = new BatchedMethodDataFetcher(method);
+        } else if (dataFetcher == null) {
+            actualDataFetcher = new MethodDataFetcher(method);
+        } else {
+            actualDataFetcher = dataFetcher.value().newInstance();
+        }
 
         if (method.isAnnotationPresent(GraphQLRelayMutation.class) && relay != null) {
             actualDataFetcher = new RelayMutationMethodDataFetcher(method, args, relay.getArgument("input").getType(), relay.getType());
