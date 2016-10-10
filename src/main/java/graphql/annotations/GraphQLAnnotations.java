@@ -200,7 +200,7 @@ public class GraphQLAnnotations {
                 builder.field(field(method));
             }
         }
-        for (Field field : object.getFields()) {
+        for (Field field : object.getDeclaredFields() ) {
             boolean valid = !Modifier.isStatic(field.getModifiers()) &&
                     field.getAnnotation(GraphQLField.class) != null;
             if (valid) {
