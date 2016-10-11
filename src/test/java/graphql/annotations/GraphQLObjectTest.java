@@ -79,6 +79,14 @@ public class GraphQLObjectTest {
             return null;
         }
 
+        @GraphQLField
+        public String publicTest = "public";
+
+        @Getter
+        @Setter
+        @GraphQLField
+        private String privateTest = "private";
+
     }
 
     private static class TestDefaults {
@@ -115,7 +123,7 @@ public class GraphQLObjectTest {
     public void fields() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
-        assertEquals(fields.size(), 5);
+        assertEquals(fields.size(), 7);
 
         fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
 
@@ -144,6 +152,9 @@ public class GraphQLObjectTest {
         assertEquals(fields.get(0).getName(), "deprecate");
         assertTrue(fields.get(0).isDeprecated());
         assertEquals(fields.get(0).getDeprecationReason(), "Reason");
+
+        assertEquals(fields.get(5).getName(), "privateTest");
+        assertEquals(fields.get(6).getName(), "publicTest");
 
     }
 
