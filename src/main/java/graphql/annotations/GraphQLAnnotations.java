@@ -200,19 +200,37 @@ public class GraphQLAnnotations {
                 builder.field(field(method));
             }
         }
-        for (Field field : object.getDeclaredFields() ) {
+
+        for (Field field : getAllFields(object).values()) {
             boolean valid = !Modifier.isStatic(field.getModifiers()) &&
                     field.getAnnotation(GraphQLField.class) != null;
             if (valid) {
                 builder.field(field(field));
             }
         }
+
         for (Class<?> iface : object.getInterfaces()) {
             if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
                 builder.withInterface((GraphQLInterfaceType) iface(iface));
             }
         }
         return builder;
+    }
+
+    protected static Map<String, Field> getAllFields(Class c) {
+        Map<String, Field> fields;
+
+        if(c.getSuperclass() != null) {
+            fields = getAllFields(c.getSuperclass());
+        } else {
+            fields = new HashMap<>();
+        }
+
+        for(Field f : c.getDeclaredFields()) {
+            fields.put(f.getName(), f);
+        }
+
+        return fields;
     }
 
 
