@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static graphql.Scalars.GraphQLBoolean;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
@@ -267,7 +268,23 @@ public class GraphQLAnnotations {
         }
 
         GraphQLDataFetcher dataFetcher = field.getAnnotation(GraphQLDataFetcher.class);
-        DataFetcher actualDataFetcher = dataFetcher == null ? new FieldDataFetcher(field.getName()) : dataFetcher.value().newInstance();
+        DataFetcher actualDataFetcher = dataFetcher != null ? dataFetcher.value().newInstance() : null;
+
+        if(actualDataFetcher == null) {
+
+            // if there is getter for fields type, use propertyDataFetcher, otherwise use method directly
+            if (outputType == GraphQLBoolean || (outputType instanceof GraphQLNonNull && ((GraphQLNonNull) outputType).getWrappedType() == GraphQLBoolean)) {
+                if(checkIfPrefixGetterExists(field.getDeclaringClass(), "is", field.getName()) || checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
+                    actualDataFetcher = new PropertyDataFetcher(field.getName());
+                }
+            } else if(checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
+                actualDataFetcher = new PropertyDataFetcher(field.getName());
+            }
+
+            if(actualDataFetcher == null) {
+                actualDataFetcher = new FieldDataFetcher(field.getName());
+            }
+        }
 
 
         if (isConnection) {
@@ -277,6 +294,18 @@ public class GraphQLAnnotations {
         builder.dataFetcher(actualDataFetcher);
 
         return new GraphQLFieldDefinitionWrapper(builder.build());
+    }
+
+    // check if there is getter for field, basic functionality taken from PropertyDataFetcher
+    private static boolean checkIfPrefixGetterExists(Class c, String prefix, String propertyName) {
+        String getterName = prefix + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+        try {
+            Method method = c.getMethod(getterName);
+        } catch (NoSuchMethodException x) {
+            return false;
+        }
+
+        return true;
     }
 
     private static GraphQLOutputType getGraphQLConnection(boolean isConnection, AccessibleObject field, GraphQLOutputType type, GraphQLOutputType outputType, GraphQLFieldDefinition.Builder builder) {

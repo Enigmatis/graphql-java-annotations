@@ -156,6 +156,9 @@ public class GraphQLObjectTest {
         assertEquals(fields.get(5).getName(), "privateTest");
         assertEquals(fields.get(6).getName(), "publicTest");
 
+        assertEquals(fields.get(5).getDataFetcher().getClass(), PropertyDataFetcher.class);
+        assertEquals(fields.get(6).getDataFetcher().getClass(), FieldDataFetcher.class);
+
     }
 
     private static class TestObjectInherited extends TestObject {
@@ -231,6 +234,19 @@ public class GraphQLObjectTest {
     public static class TestField {
         @GraphQLField @GraphQLName("field1")
         public String field = "test";
+    }
+
+    public static class PrivateTestField {
+
+        @Getter
+        @Setter
+        @GraphQLField @GraphQLName("field1")
+        private String field = "test";
+
+        @Getter
+        @Setter
+        @GraphQLField
+        private boolean booleanField = true;
     }
 
     @Test @SneakyThrows
@@ -313,6 +329,18 @@ public class GraphQLObjectTest {
         ExecutionResult result = new GraphQL(schema).execute("{field1}", new TestField());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>)result.getData()).get("field1"), "test");
+    }
+
+    @Test @SneakyThrows
+    public void queryPrivateField() {
+        GraphQLObjectType object = GraphQLAnnotations.object(PrivateTestField.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = new GraphQL(schema).execute("{field1, booleanField}", new PrivateTestField());
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, String>)result.getData()).get("field1"), "test");
+        assertTrue(((Map<String, Boolean>)result.getData()).get("booleanField"));
+
     }
 
     @Test @SneakyThrows
