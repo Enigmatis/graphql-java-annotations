@@ -109,3 +109,17 @@ modifyPom {
          }
      }
  }
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId 'com.graphql-java'
+            artifactId project.name
+            version project.version
+
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
