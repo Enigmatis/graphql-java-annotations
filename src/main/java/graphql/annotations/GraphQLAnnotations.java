@@ -111,9 +111,15 @@ public class GraphQLAnnotations {
         }
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
         if (typeResolver == null) {
-            throw new IllegalArgumentException(iface + " should have @GraphQLTypeResolver annotation defined");
+            try {
+                GraphQLObjectType t = object(iface);
+                TypeResolver resolver = object -> t;
+                builder.typeResolver(resolver);
+            } catch (NoSuchMethodException e) {
+            }
+        } else {
+            builder.typeResolver(typeResolver.value().newInstance());
         }
-        builder.typeResolver(typeResolver.value().newInstance());
         return builder;
     }
 
