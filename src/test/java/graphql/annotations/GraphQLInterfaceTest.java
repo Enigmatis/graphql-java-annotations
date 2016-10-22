@@ -38,14 +38,8 @@ public class GraphQLInterfaceTest {
     @Test
     @SneakyThrows
     public void noResolver() {
-        GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(NoResolverIface.class);
-        GraphQLObjectType object = GraphQLAnnotations.object(NoResolverIface.class);
-        assertEquals(iface.getTypeResolver().getType(new NoResolverIface() {
-            @Override public String value() {
-                return "test";
-            }
-        }), object);
-        List<GraphQLFieldDefinition> fields = iface.getFieldDefinitions();
+        GraphQLObjectType object = (GraphQLObjectType) GraphQLAnnotations.iface(NoResolverIface.class);
+        List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 1);
         assertEquals(fields.get(0).getName(), "value");
     }

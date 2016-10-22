@@ -48,9 +48,12 @@ public class GraphQLAnnotations {
      * @throws InstantiationException
      * @throws IllegalArgumentException if <code>iface</code> is not an interface or doesn't have <code>@GraphTypeResolver</code> annotation
      */
-    public static graphql.schema.GraphQLType iface(Class<?> iface) throws IllegalAccessException, InstantiationException {
+    public static graphql.schema.GraphQLType iface(Class<?> iface)
+            throws IllegalAccessException, InstantiationException, NoSuchMethodException {
         if (iface.getAnnotation(GraphQLUnion.class) != null) {
             return unionBuilder(iface).build();
+        } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class)) {
+            return object(iface);
         } else {
             return ifaceBuilder(iface).build();
         }
@@ -110,16 +113,7 @@ public class GraphQLAnnotations {
             }
         }
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
-        if (typeResolver == null) {
-            try {
-                GraphQLObjectType t = object(iface);
-                TypeResolver resolver = object -> t;
-                builder.typeResolver(resolver);
-            } catch (NoSuchMethodException e) {
-            }
-        } else {
-            builder.typeResolver(typeResolver.value().newInstance());
-        }
+        builder.typeResolver(typeResolver.value().newInstance());
         return builder;
     }
 
