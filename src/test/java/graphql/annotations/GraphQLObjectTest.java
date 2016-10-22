@@ -243,6 +243,12 @@ public class GraphQLObjectTest {
         @GraphQLField @GraphQLName("field1")
         private String field = "test";
 
+        @Accessors(fluent = true)
+        @Getter
+        @Setter
+        @GraphQLField
+        private String field2 = "test";
+
         @Getter
         @Setter
         @GraphQLField
@@ -336,9 +342,10 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(PrivateTestField.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{field1, booleanField}", new PrivateTestField());
+        ExecutionResult result = new GraphQL(schema).execute("{field1, field2, booleanField}", new PrivateTestField());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>)result.getData()).get("field1"), "test");
+        assertEquals(((Map<String, String>)result.getData()).get("field2"), "test");
         assertTrue(((Map<String, Boolean>)result.getData()).get("booleanField"));
 
     }

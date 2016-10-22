@@ -270,18 +270,33 @@ public class GraphQLAnnotations {
         GraphQLDataFetcher dataFetcher = field.getAnnotation(GraphQLDataFetcher.class);
         DataFetcher actualDataFetcher = dataFetcher != null ? dataFetcher.value().newInstance() : null;
 
-        if(actualDataFetcher == null) {
+        if (actualDataFetcher == null) {
+
+            StringBuffer fluentBuffer = new StringBuffer(field.getName());
+            fluentBuffer.setCharAt(0, Character.toLowerCase(fluentBuffer.charAt(0)));
+            String fluentGetter = fluentBuffer.toString();
+
+            boolean hasFluentGetter = false;
+            Method fluentMethod = null;
+            try {
+                fluentMethod = field.getDeclaringClass().getMethod(fluentGetter);
+                hasFluentGetter = true;
+            } catch (NoSuchMethodException x) {
+            }
 
             // if there is getter for fields type, use propertyDataFetcher, otherwise use method directly
             if (outputType == GraphQLBoolean || (outputType instanceof GraphQLNonNull && ((GraphQLNonNull) outputType).getWrappedType() == GraphQLBoolean)) {
-                if(checkIfPrefixGetterExists(field.getDeclaringClass(), "is", field.getName()) || checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
+                if (checkIfPrefixGetterExists(field.getDeclaringClass(), "is", field.getName()) ||
+                        checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
                     actualDataFetcher = new PropertyDataFetcher(field.getName());
                 }
-            } else if(checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
+            } else if (checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
                 actualDataFetcher = new PropertyDataFetcher(field.getName());
+            } else if (hasFluentGetter) {
+                actualDataFetcher = new MethodDataFetcher(fluentMethod);
             }
 
-            if(actualDataFetcher == null) {
+            if (actualDataFetcher == null) {
                 actualDataFetcher = new FieldDataFetcher(field.getName());
             }
         }
