@@ -160,7 +160,7 @@ public class DefaultTypeFunction implements TypeFunction {
                     GraphQLDescription fieldDescription = field.getAnnotation(GraphQLDescription.class);
                     Enum constant = constants.stream().filter(c -> c.name().contentEquals(n)).findFirst().get();
                     String name_ = fieldName == null ? n : fieldName.value();
-                    builder.value(name_, constant.ordinal(), fieldDescription == null ? name_ : fieldDescription.value());
+                    builder.value(name_, constant, fieldDescription == null ? name_ : fieldDescription.value());
                 } catch (NoSuchFieldException e) {
                 }
             });
