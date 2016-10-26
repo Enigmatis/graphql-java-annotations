@@ -29,6 +29,13 @@ public class BatchedMethodDataFetcher extends MethodDataFetcher {
         }
     }
 
+    public BatchedMethodDataFetcher(Method method, TypeFunction typeFunction) {
+        super(method, typeFunction);
+        if (!Modifier.isStatic(method.getModifiers())) {
+            throw new IllegalArgumentException("Batched method should be static");
+        }
+    }
+
     @SneakyThrows
     @Batched
     @Override

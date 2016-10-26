@@ -19,66 +19,108 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
+import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.osgi.service.component.annotations.*;
 
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static graphql.schema.GraphQLEnumType.newEnum;
 
+@Slf4j
+@Component(scope = ServiceScope.SINGLETON, property= "type=default")
 public class DefaultTypeFunction implements TypeFunction {
 
-    public static TypeFunction instance = new DefaultTypeFunction();
-    private static Map<String, BiFunction<Class<?>, AnnotatedType, GraphQLType>> registry;
+    @Reference(target = "(!(type=default))",
+               policyOption = ReferencePolicyOption.GREEDY)
+    protected List<TypeFunction> otherFunctions = new ArrayList<>();
 
-    private static class StringFunction implements TypeFunction {
+    @Override public Collection<Class<?>> getAcceptedTypes() {
+        List<Class<?>> list = registry.keySet().stream().collect(Collectors.toList());
+        List<Class<?>> others = otherFunctions.stream().flatMap(tf -> tf.getAcceptedTypes().stream())
+                                               .collect(Collectors.toList());
+        list.addAll(others);
+        return list;
+    }
+
+    private Map<Class<?>, BiFunction<Class<?>, AnnotatedType, GraphQLType>> registry;
+
+    GraphQLAnnotationsProcessor annotationsProcessor;
+
+    void setAnnotationsProcessor(GraphQLAnnotationsProcessor annotationsProcessor) {
+        this.annotationsProcessor = annotationsProcessor;
+    }
+
+    private class StringFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLString;
         }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Collections.singletonList(String.class);
+        }
     }
 
-    private static class BooleanFunction implements TypeFunction {
+    private class BooleanFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLBoolean;
         }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Arrays.asList(Boolean.class, boolean.class);
+        }
     }
 
-    private static class FloatFunction implements TypeFunction {
+    private class FloatFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLFloat;
         }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Arrays.asList(Float.class, float.class, Double.class, double.class);
+        }
     }
 
-    private static class IntegerFunction implements TypeFunction {
+    private class IntegerFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLInt;
         }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Arrays.asList(Integer.class, int.class);
+        }
     }
 
-    private static class LongFunction implements TypeFunction {
+    private class LongFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLLong;
         }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Arrays.asList(Long.class, long.class);
+        }
     }
 
-    private static class ListFunction implements TypeFunction {
+    private class ListFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
@@ -93,11 +135,15 @@ public class DefaultTypeFunction implements TypeFunction {
             } else {
                 klass = (Class<?>) arg.getType();
             }
-            return new GraphQLList(DefaultTypeFunction.instance.apply(klass, arg));
+            return new GraphQLList(DefaultTypeFunction.this.apply(klass, arg));
+        }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Arrays.asList(List.class, AbstractList.class);
         }
     }
 
-    private static class StreamFunction implements TypeFunction {
+    private class StreamFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
@@ -112,11 +158,15 @@ public class DefaultTypeFunction implements TypeFunction {
             } else {
                 klass = (Class<?>) arg.getType();
             }
-            return new GraphQLList(DefaultTypeFunction.instance.apply(klass, arg));
+            return new GraphQLList(DefaultTypeFunction.this.apply(klass, arg));
+        }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Collections.singletonList(Stream.class);
         }
     }
 
-    private static class OptionalFunction implements TypeFunction {
+    private class OptionalFunction implements TypeFunction {
 
         @Override
         @SneakyThrows
@@ -132,11 +182,15 @@ public class DefaultTypeFunction implements TypeFunction {
             } else {
                 klass = (Class<?>) arg.getType();
             }
-            return DefaultTypeFunction.instance.apply(klass, arg);
+            return DefaultTypeFunction.this.apply(klass, arg);
+        }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Collections.singletonList(Optional.class);
         }
     }
 
-    private static class EnumFunction implements TypeFunction {
+    private class EnumFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
@@ -167,9 +221,13 @@ public class DefaultTypeFunction implements TypeFunction {
 
             return builder.build();
         }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Collections.singletonList(Enum.class);
+        }
     }
 
-    private static class ObjectFunction implements TypeFunction {
+    private class ObjectFunction implements TypeFunction {
 
         private final Map<String, GraphQLTypeReference> processing = new ConcurrentHashMap<>();
         private final Map<String, GraphQLType> types = new ConcurrentHashMap<>();
@@ -185,49 +243,49 @@ public class DefaultTypeFunction implements TypeFunction {
                 processing.put(typeName, new GraphQLTypeReference(typeName));
                 GraphQLType type;
                 if (aClass.isInterface()) {
-                    type = GraphQLAnnotations.iface(aClass);
+                    type = annotationsProcessor.getInterface(aClass);
                 } else {
-                    type = GraphQLAnnotations.object(aClass);
+                    type = annotationsProcessor.getObject(aClass);
                 }
                 processing.remove(typeName);
                 types.put(typeName, type);
                 return type;
             }
         }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Collections.singletonList(Object.class);
+        }
     }
 
-    static {
+    public DefaultTypeFunction() {
         registry = new ConcurrentHashMap<>();
 
-        register(String.class, new StringFunction());
+        register(new StringFunction());
+        register(new BooleanFunction());
+        register(new FloatFunction());
+        register(new IntegerFunction());
 
-        register(Boolean.class, new BooleanFunction());
-        register(boolean.class, new BooleanFunction());
+        register(new LongFunction());
 
-        register(Float.class, new FloatFunction());
-        register(float.class, new FloatFunction());
-        register(Double.class, new FloatFunction());
-        register(double.class, new FloatFunction());
+        register(new ListFunction());
+        register(new StreamFunction());
 
-        register(Integer.class, new IntegerFunction());
-        register(int.class, new IntegerFunction());
+        register(new EnumFunction());
 
-        register(Long.class, new LongFunction());
-        register(long.class, new LongFunction());
+        register(new OptionalFunction());
 
-        register(AbstractList.class, new ListFunction());
-        register(List.class, new ListFunction());
-        register(Stream.class, new StreamFunction());
-
-        register(Enum.class, new EnumFunction());
-
-        register(Optional.class, new OptionalFunction());
-
-        register(Object.class, new ObjectFunction());
+        register(new ObjectFunction());
     }
 
-    public static Class<DefaultTypeFunction> register(Class<?> klass, TypeFunction function) {
-        registry.put(klass.getName(), function);
+    @Activate
+    protected void activate() {
+        otherFunctions.forEach(this::register);
+        log.info("{}", registry.keySet());
+    }
+
+    public Class<DefaultTypeFunction> register(TypeFunction function) {
+        function.getAcceptedTypes().forEach(t -> registry.put(t, function));
         return DefaultTypeFunction.class;
     }
 
@@ -235,7 +293,9 @@ public class DefaultTypeFunction implements TypeFunction {
     public GraphQLType apply(Class<?> klass, AnnotatedType annotatedType) {
         Class<?> t = klass;
 
-        while (!registry.containsKey(t.getName())) {
+        log.info("lookup {}", registry.keySet());
+        while (!registry.containsKey(t)) {
+
             if (t.getSuperclass() == null && t.isInterface()) {
                 t = Object.class;
                 continue;
@@ -246,7 +306,7 @@ public class DefaultTypeFunction implements TypeFunction {
             }
         }
 
-        GraphQLType result = registry.get(t.getName()).apply(klass, annotatedType);
+        GraphQLType result = registry.get(t).apply(klass, annotatedType);
 
         if (klass.getAnnotation(GraphQLNonNull.class) != null ||
             (annotatedType != null && annotatedType.getAnnotation(GraphQLNonNull.class) != null)) {

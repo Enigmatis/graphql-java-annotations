@@ -24,9 +24,15 @@ import java.util.*;
 
 class MethodDataFetcher implements DataFetcher {
     private final Method method;
+    private final TypeFunction typeFunction;
 
     public MethodDataFetcher(Method method) {
+        this(method, new DefaultTypeFunction());
+    }
+
+    public MethodDataFetcher(Method method, TypeFunction typeFunction) {
         this.method = method;
+        this.typeFunction = typeFunction;
     }
 
     @SneakyThrows
@@ -55,7 +61,6 @@ class MethodDataFetcher implements DataFetcher {
     private Object[] invocationArgs(DataFetchingEnvironment environment) {
         List result = new ArrayList();
         Iterator envArgs = environment.getArguments().values().iterator();
-        TypeFunction typeFunction = new DefaultTypeFunction();
         for (Parameter p : method.getParameters()) {
             Class<?> paramType = p.getType();
             if (DataFetchingEnvironment.class.isAssignableFrom(paramType)) {

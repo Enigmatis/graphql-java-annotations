@@ -17,7 +17,10 @@ package graphql.annotations;
 import graphql.schema.GraphQLType;
 
 import java.lang.reflect.AnnotatedType;
+import java.util.Collection;
 import java.util.function.BiFunction;
 
 public interface TypeFunction extends BiFunction<Class<?>, AnnotatedType, GraphQLType> {
+
+    Collection<Class<?>> getAcceptedTypes();
 }

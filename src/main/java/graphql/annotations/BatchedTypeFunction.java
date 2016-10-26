@@ -19,6 +19,7 @@ import graphql.schema.GraphQLList;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
+import java.util.Collection;
 import java.util.List;
 
 public class BatchedTypeFunction implements TypeFunction {
@@ -45,5 +46,9 @@ public class BatchedTypeFunction implements TypeFunction {
             klass = (Class<?>) arg.getType();
         }
         return defaultTypeFunction.apply(klass, arg);
+    }
+
+    @Override public Collection<Class<?>> getAcceptedTypes() {
+        return defaultTypeFunction.getAcceptedTypes();
     }
 }

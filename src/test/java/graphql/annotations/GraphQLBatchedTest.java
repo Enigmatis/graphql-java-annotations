@@ -26,10 +26,8 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static graphql.Scalars.GraphQLString;
-import static graphql.annotations.DefaultTypeFunction.instance;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

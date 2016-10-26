@@ -25,13 +25,11 @@ import org.testng.annotations.Test;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.function.Supplier;
 
 import static graphql.Scalars.GraphQLString;
-import static graphql.annotations.DefaultTypeFunction.instance;
-import static graphql.schema.GraphQLFieldDefinition.*;
+import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.*;
 
@@ -412,7 +410,7 @@ public class GraphQLObjectTest {
 
     @Test @SneakyThrows
     public void customType() {
-        DefaultTypeFunction.register(UUID.class, new UUIDTypeFunction());
+        GraphQLAnnotations.register(new UUIDTypeFunction());
         GraphQLObjectType object = GraphQLAnnotations.object(TestCustomType.class);
         assertEquals(object.getFieldDefinition("id").getType(), GraphQLString);
     }
@@ -471,6 +469,10 @@ public class GraphQLObjectTest {
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             return GraphQLString;
+        }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Collections.singletonList(UUID.class);
         }
     }
 
