@@ -19,9 +19,7 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
-import lombok.Setter;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.osgi.service.component.annotations.*;
 
 import java.lang.reflect.AnnotatedParameterizedType;
@@ -36,7 +34,6 @@ import java.util.stream.Stream;
 
 import static graphql.schema.GraphQLEnumType.newEnum;
 
-@Slf4j
 @Component(scope = ServiceScope.SINGLETON, property= "type=default")
 public class DefaultTypeFunction implements TypeFunction {
 
@@ -281,7 +278,6 @@ public class DefaultTypeFunction implements TypeFunction {
     @Activate
     protected void activate() {
         otherFunctions.forEach(this::register);
-        log.info("{}", registry.keySet());
     }
 
     public Class<DefaultTypeFunction> register(TypeFunction function) {
@@ -293,7 +289,6 @@ public class DefaultTypeFunction implements TypeFunction {
     public GraphQLType apply(Class<?> klass, AnnotatedType annotatedType) {
         Class<?> t = klass;
 
-        log.info("lookup {}", registry.keySet());
         while (!registry.containsKey(t)) {
 
             if (t.getSuperclass() == null && t.isInterface()) {

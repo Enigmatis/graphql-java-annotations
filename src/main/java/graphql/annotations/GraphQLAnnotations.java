@@ -41,7 +41,6 @@ import static graphql.schema.GraphQLUnionType.newUnionType;
  * A utility class for extracting GraphQL data structures from annotated
  * elements.
  */
-@Slf4j
 @Component
 public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
