@@ -167,26 +167,11 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                                                                          NoSuchMethodException {
         GraphQLObjectType.Builder builder = getObjectBuilder(object);
 
-        return new GraphQLObjectTypeWrapper(builder.build());
+        return new GraphQLObjectTypeWrapper(object, builder.build());
     }
 
     public static GraphQLObjectType object(Class<?> object) throws IllegalAccessException, InstantiationException, NoSuchMethodException {
         return getInstance().getObject(object);
-    }
-
-    public static class GraphQLObjectTypeWrapper extends GraphQLObjectType {
-
-        public GraphQLObjectTypeWrapper(GraphQLObjectType objectType) {
-            super(objectType.getName(), objectType.getDescription(), objectType.getFieldDefinitions(),
-                    objectType.getInterfaces());
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof GraphQLObjectType &&
-                   ((GraphQLObjectType) obj).getName().contentEquals(getName()) &&
-                   ((GraphQLObjectType) obj).getFieldDefinitions().equals(getFieldDefinitions());
-        }
     }
 
     public static class GraphQLFieldDefinitionWrapper extends GraphQLFieldDefinition {

@@ -118,6 +118,13 @@ public class GraphQLObjectTest {
     }
 
     @Test @SneakyThrows
+    public void objectClass() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
+        assertTrue(object instanceof GraphQLObjectTypeWrapper);
+        assertEquals(((GraphQLObjectTypeWrapper) object).getObjectClass(), TestObject.class);
+    }
+
+    @Test @SneakyThrows
     public void fields() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
