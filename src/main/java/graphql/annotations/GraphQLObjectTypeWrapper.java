@@ -17,7 +17,7 @@ package graphql.annotations;
 import graphql.schema.GraphQLObjectType;
 import lombok.Getter;
 
-public class GraphQLObjectTypeWrapper extends GraphQLObjectType {
+public class GraphQLObjectTypeWrapper extends GraphQLObjectType implements GraphQLObjectBackedByClass {
 
     @Getter
     private final Class<?> objectClass;
