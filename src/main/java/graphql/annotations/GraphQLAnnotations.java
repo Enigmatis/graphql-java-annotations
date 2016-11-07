@@ -19,7 +19,6 @@ import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
