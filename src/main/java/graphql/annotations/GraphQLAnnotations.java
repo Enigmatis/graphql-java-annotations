@@ -200,8 +200,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
             Class<?> declaringClass = getDeclaringClass(method);
 
-            boolean valid = (method.getAnnotation(GraphQLField.class) != null ||
-                     declaringClass.getMethod(method.getName(), method.getParameterTypes()).getAnnotation(GraphQLField.class) != null);
+            boolean valid =  (method.getAnnotation(GraphQLField.class) != null ||
+                     declaringClass.getMethod(method.getName(), method.getParameterTypes()).getAnnotation(GraphQLField.class) != null)
+                    && !method.isBridge();
 
             if (valid) {
                 builder.field(getField(method));

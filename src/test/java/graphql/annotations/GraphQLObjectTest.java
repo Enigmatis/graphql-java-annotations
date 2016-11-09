@@ -188,6 +188,38 @@ public class GraphQLObjectTest {
         assertEquals(((Map<String, Object>)result.getData()).get("field1"), "inherited");
     }
 
+    private static class TestObjectBridgMethodParent<Type> {
+        private final Type id;
+        public TestObjectBridgMethodParent(Type id) {
+            this.id = id;
+        }
+        public Type id() {
+            return id;
+        }
+    }
+    
+    private static class TestObjectBridgMethod extends TestObjectBridgMethodParent<Long> {
+
+        public TestObjectBridgMethod() {
+            super(1l);
+        }
+        
+        @Override @GraphQLField
+        public Long id() {
+            return super.id();
+        }
+    }
+    
+    @Test @SneakyThrows
+    public void methodInheritanceWithGenerics() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObjectBridgMethod.class);
+
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = new GraphQL(schema).execute("{id}", new TestObjectBridgMethod());
+        assertEquals(((Map<String, Object>)result.getData()).get("id"), 1l);
+    }
+    
     public interface Iface {
         @GraphQLField
         default String field() {
