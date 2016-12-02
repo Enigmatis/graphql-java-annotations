@@ -85,6 +85,13 @@ public class GraphQLObjectTest {
         @GraphQLField
         private String privateTest = "private";
 
+        @Getter
+        @Setter
+        @GraphQLNonNull
+        @GraphQLField
+        @GraphQLName("z_nonOptionalString")
+        private String z;
+
     }
 
     private static class TestDefaults {
@@ -128,7 +135,7 @@ public class GraphQLObjectTest {
     public void fields() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
-        assertEquals(fields.size(), 7);
+        assertEquals(fields.size(), 8);
 
         fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
 
@@ -164,6 +171,8 @@ public class GraphQLObjectTest {
         assertEquals(fields.get(5).getDataFetcher().getClass(), PropertyDataFetcher.class);
         assertEquals(fields.get(6).getDataFetcher().getClass(), FieldDataFetcher.class);
 
+        assertEquals(fields.get(7).getName(), "z_nonOptionalString");
+        assertTrue(fields.get(7).getType() instanceof graphql.schema.GraphQLNonNull);
     }
 
     private static class TestObjectInherited extends TestObject {
