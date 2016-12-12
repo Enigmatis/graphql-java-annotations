@@ -32,14 +32,14 @@ public @interface GraphQLConnection {
     /**
      * By default, a simple List connection is specified, but can be overridden using
      * this property to allow for more efficient fetching procedures (limiting database queries, etc.)
-     * @return
+     * @return a connection class
      */
     Class<? extends Connection> connection() default DispatchingConnection.class;
 
     /**
      * By default, wrapped type's name is used for naming TypeConnection, but can be overridden
      * using this property
-     * @return
+     * @return the wrapped type's name
      */
     String name() default "";
 }

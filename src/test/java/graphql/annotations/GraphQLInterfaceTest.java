@@ -36,7 +36,6 @@ public class GraphQLInterfaceTest {
     }
 
     @Test
-    @SneakyThrows
     public void noResolver() {
         GraphQLObjectType object = (GraphQLObjectType) GraphQLAnnotations.iface(NoResolverIface.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
@@ -50,7 +49,7 @@ public class GraphQLInterfaceTest {
         public GraphQLObjectType getType(Object object) {
             try {
                 return GraphQLAnnotations.object(TestObject.class);
-            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException e) {
+            } catch (GraphQLAnnotationsException e) {
                 return null;
             }
         }
@@ -89,7 +88,7 @@ public class GraphQLInterfaceTest {
         }
     }
 
-    @Test @SneakyThrows
+    @Test
     public void test() {
         GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(TestIface.class);
         List<GraphQLFieldDefinition> fields = iface.getFieldDefinitions();
@@ -97,14 +96,14 @@ public class GraphQLInterfaceTest {
         assertEquals(fields.get(0).getName(), "value");
     }
 
-    @Test @SneakyThrows
+    @Test
     public void testUnion() {
         GraphQLUnionType unionType = (GraphQLUnionType) GraphQLAnnotations.iface(TestUnion.class);
         assertEquals(unionType.getTypes().size(), 1);
         assertEquals(unionType.getTypes().get(0).getName(), "TestObject1");
     }
 
-    @Test @SneakyThrows
+    @Test
     public void testInterfaces() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
         List<GraphQLInterfaceType> ifaces = object.getInterfaces();
@@ -129,7 +128,7 @@ public class GraphQLInterfaceTest {
         @GraphQLField public TestUnion union;
     }
 
-    @Test @SneakyThrows
+    @Test
     public void query() {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
@@ -138,7 +137,7 @@ public class GraphQLInterfaceTest {
         assertEquals(((Map<String, Map<String, String>>)result.getData()).get("iface").get("value"), "a");
     }
 
-    @Test @SneakyThrows
+    @Test
     public void queryUnion() {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(UnionQuery.class)).build();
 

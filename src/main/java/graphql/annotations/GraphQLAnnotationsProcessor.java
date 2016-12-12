@@ -21,33 +21,71 @@ import graphql.schema.GraphQLUnionType;
 
 public interface GraphQLAnnotationsProcessor {
     /**
-     * @param iface interface
-     * @return
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws IllegalArgumentException if <code>iface</code> is not an interface or doesn't have <code>@GraphTypeResolver</code> annotation
+     * This will examine the class and if its annotated with {@link GraphQLUnion} it will return
+     * a {@link GraphQLUnionType.Builder}, if its annotated with {@link GraphQLTypeResolver} it will return
+     * a {@link GraphQLObjectType} otherwise it will return a {@link GraphQLInterfaceType.Builder}.
+     *
+     * @param iface interface to examine
+     *
+     * @return a GraphQLType that represents that interface
+     *
+     * @throws GraphQLAnnotationsException if the interface cannot be examined
+     * @throws IllegalArgumentException    if <code>iface</code> is not an interface
      */
-    graphql.schema.GraphQLType getInterface(Class<?> iface)
-            throws IllegalAccessException, InstantiationException, NoSuchMethodException;
-
-    GraphQLUnionType.Builder getUnionBuilder(Class<?> iface) throws InstantiationException,
-                                                                    IllegalAccessException;
-
-    GraphQLInterfaceType.Builder getIfaceBuilder(Class<?> iface) throws InstantiationException,
-                                                                        IllegalAccessException;
+    graphql.schema.GraphQLType getInterface(Class<?> iface) throws GraphQLAnnotationsException;
 
     /**
-     * @param object
-     * @return
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws NoSuchMethodException
+     * This will examine the class and return a {@link GraphQLUnionType.Builder} ready for further definition
+     *
+     * @param iface interface to examine
+     *
+     * @return a {@link GraphQLUnionType.Builder}
+     *
+     * @throws GraphQLAnnotationsException if the class cannot be examined
+     * @throws IllegalArgumentException    if <code>iface</code> is not an interface
      */
-    GraphQLObjectType getObject(Class<?> object) throws IllegalAccessException, InstantiationException,
-                                                        NoSuchMethodException;
+    GraphQLUnionType.Builder getUnionBuilder(Class<?> iface) throws GraphQLAnnotationsException, IllegalArgumentException;
 
-    GraphQLObjectType.Builder getObjectBuilder(Class<?> object) throws NoSuchMethodException,
-                                                                       InstantiationException, IllegalAccessException;
+    /**
+     * This will examine the class and return a {@link GraphQLInterfaceType.Builder} ready for further definition
+     *
+     * @param iface interface to examine
+     *
+     * @return a {@link GraphQLInterfaceType.Builder}
+     *
+     * @throws GraphQLAnnotationsException if the class cannot be examined
+     * @throws IllegalArgumentException    if <code>iface</code> is not an interface
+     */
+    GraphQLInterfaceType.Builder getIfaceBuilder(Class<?> iface) throws GraphQLAnnotationsException, IllegalArgumentException;
 
+    /**
+     * This will examine the object class and return a {@link GraphQLObjectType} representation
+     *
+     * @param object the object class to examine
+     *
+     * @return a {@link GraphQLObjectType} that represents that object class
+     *
+     * @throws GraphQLAnnotationsException if the object class cannot be examined
+     */
+    GraphQLObjectType getObject(Class<?> object) throws GraphQLAnnotationsException;
+
+    /**
+     * This will examine the object class and return a {@link GraphQLObjectType.Builder} ready for further definition
+     *
+     * @param object the object class to examine
+     *
+     * @return a {@link GraphQLObjectType.Builder} that represents that object class
+     *
+     * @throws GraphQLAnnotationsException if the object class cannot be examined
+     */
+    GraphQLObjectType.Builder getObjectBuilder(Class<?> object) throws GraphQLAnnotationsException;
+
+    /**
+     * This will turn a {@link GraphQLObjectType} into a corresponding {@link GraphQLInputObjectType}
+     *
+     * @param graphQLType the graphql object type
+     *
+     * @return a {@link GraphQLInputObjectType}
+     */
     GraphQLInputObjectType getInputObject(GraphQLObjectType graphQLType);
 }
