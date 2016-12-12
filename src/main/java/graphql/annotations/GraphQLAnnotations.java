@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,16 +15,40 @@
 package graphql.annotations;
 
 import graphql.relay.Relay;
-import graphql.schema.*;
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.FieldDataFetcher;
+import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectField;
+import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLInputType;
+import graphql.schema.GraphQLInterfaceType;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
-import lombok.Getter;
-import lombok.SneakyThrows;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLUnionType;
+import graphql.schema.PropertyDataFetcher;
+import graphql.schema.TypeResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,14 +69,17 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     public GraphQLAnnotations() {
         defaultTypeFunction = new DefaultTypeFunction();
-        ((DefaultTypeFunction)defaultTypeFunction).setAnnotationsProcessor(this);
+        ((DefaultTypeFunction) defaultTypeFunction).setAnnotationsProcessor(this);
     }
 
-    @Getter
     public static GraphQLAnnotations instance = new GraphQLAnnotations();
 
-    @Override public graphql.schema.GraphQLType getInterface(Class<?> iface)
-            throws IllegalAccessException, InstantiationException, NoSuchMethodException {
+    public static GraphQLAnnotations getInstance() {
+        return instance;
+    }
+
+    @Override
+    public graphql.schema.GraphQLType getInterface(Class<?> iface) throws GraphQLAnnotationsException {
         if (iface.getAnnotation(GraphQLUnion.class) != null) {
             return getUnionBuilder(iface).build();
         } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class)) {
@@ -62,13 +89,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
     }
 
-    public static graphql.schema.GraphQLType iface(Class<?> iface)
-            throws IllegalAccessException, NoSuchMethodException, InstantiationException {
+    public static graphql.schema.GraphQLType iface(Class<?> iface) throws GraphQLAnnotationsException {
         return getInstance().getInterface(iface);
     }
 
-    @Override public GraphQLUnionType.Builder getUnionBuilder(Class<?> iface) throws InstantiationException,
-                                                                                     IllegalAccessException {
+    @Override
+    public GraphQLUnionType.Builder getUnionBuilder(Class<?> iface) throws GraphQLAnnotationsException, IllegalArgumentException {
         if (!iface.isInterface()) {
             throw new IllegalArgumentException(iface + " is not an interface");
         }
@@ -86,32 +112,31 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         TypeFunction typeFunction = defaultTypeFunction;
 
         if (typeAnnotation != null) {
-            typeFunction = typeAnnotation.value().newInstance();
+            typeFunction = newInstance(typeAnnotation.value());
         }
 
         TypeFunction finalTypeFunction = typeFunction;
         Arrays.asList(unionAnnotation.possibleTypes()).stream()
-              .map(new Function<Class<?>, graphql.schema.GraphQLType>() {
+                .map(new Function<Class<?>, graphql.schema.GraphQLType>() {
                     @Override
-                    @SneakyThrows
                     public graphql.schema.GraphQLType apply(Class<?> aClass) {
                         return finalTypeFunction.apply(aClass, null);
                     }
                 })
-              .map(v -> (GraphQLObjectType)v)
-              .forEach(builder::possibleType);
+                .map(v -> (GraphQLObjectType) v)
+                .forEach(builder::possibleType);
 
         builder.typeResolver(new UnionTypeResolver(unionAnnotation.possibleTypes()));
         return builder;
     }
 
-    public static GraphQLUnionType.Builder unionBuilder(Class<?> iface) throws InstantiationException,
-                                                                         IllegalAccessException {
+    public static GraphQLUnionType.Builder unionBuilder(Class<?> iface) throws GraphQLAnnotationsException {
         return getInstance().getUnionBuilder(iface);
     }
 
-    @Override public GraphQLInterfaceType.Builder getIfaceBuilder(Class<?> iface) throws InstantiationException,
-                                                                                         IllegalAccessException {
+    @Override
+    public GraphQLInterfaceType.Builder getIfaceBuilder(Class<?> iface) throws GraphQLAnnotationsException,
+            IllegalArgumentException {
         if (!iface.isInterface()) {
             throw new IllegalArgumentException(iface + " is not an interface");
         }
@@ -131,12 +156,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             }
         }
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
-        builder.typeResolver(typeResolver.value().newInstance());
+        builder.typeResolver(newInstance(typeResolver.value()));
         return builder;
     }
 
-    public static GraphQLInterfaceType.Builder ifaceBuilder(Class<?> iface) throws InstantiationException,
-                                                                             IllegalAccessException {
+    public static GraphQLInterfaceType.Builder ifaceBuilder(Class<?> iface) throws GraphQLAnnotationsException,
+            IllegalAccessException {
         return getInstance().getIfaceBuilder(iface);
     }
 
@@ -162,14 +187,14 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     }
 
-    @Override public GraphQLObjectType getObject(Class<?> object) throws IllegalAccessException, InstantiationException,
-                                                                         NoSuchMethodException {
+    @Override
+    public GraphQLObjectType getObject(Class<?> object) throws GraphQLAnnotationsException {
         GraphQLObjectType.Builder builder = getObjectBuilder(object);
 
         return new GraphQLObjectTypeWrapper(object, builder.build());
     }
 
-    public static GraphQLObjectType object(Class<?> object) throws IllegalAccessException, InstantiationException, NoSuchMethodException {
+    public static GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
         return getInstance().getObject(object);
     }
 
@@ -177,7 +202,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         public GraphQLFieldDefinitionWrapper(GraphQLFieldDefinition fieldDefinition) {
             super(fieldDefinition.getName(), fieldDefinition.getDescription(), fieldDefinition.getType(),
-                    fieldDefinition.getDataFetcher(),fieldDefinition.getArguments(), fieldDefinition.getDeprecationReason());
+                    fieldDefinition.getDataFetcher(), fieldDefinition.getArguments(), fieldDefinition.getDeprecationReason());
         }
 
         @Override
@@ -187,8 +212,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
     }
 
-    @Override public GraphQLObjectType.Builder getObjectBuilder(Class<?> object) throws NoSuchMethodException,
-                                                                                        InstantiationException, IllegalAccessException {
+    @Override
+    public GraphQLObjectType.Builder getObjectBuilder(Class<?> object) throws GraphQLAnnotationsException {
         GraphQLObjectType.Builder builder = newObject();
         GraphQLName name = object.getAnnotation(GraphQLName.class);
         builder.name(name == null ? object.getSimpleName() : name.value());
@@ -200,9 +225,14 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
             Class<?> declaringClass = getDeclaringClass(method);
 
-            boolean valid =  (method.getAnnotation(GraphQLField.class) != null ||
-                     declaringClass.getMethod(method.getName(), method.getParameterTypes()).getAnnotation(GraphQLField.class) != null)
-                    && !method.isBridge();
+            boolean valid = false;
+            try {
+                valid = (method.getAnnotation(GraphQLField.class) != null ||
+                        declaringClass.getMethod(method.getName(), method.getParameterTypes()).getAnnotation(GraphQLField.class) != null)
+                        && !method.isBridge();
+            } catch (NoSuchMethodException e) {
+                throw new GraphQLAnnotationsException("Unable to introspect method : " + method, e);
+            }
 
             if (valid) {
                 builder.field(getField(method));
@@ -225,8 +255,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return builder;
     }
 
-    public static GraphQLObjectType.Builder objectBuilder(Class<?> object) throws NoSuchMethodException,
-                                                                              InstantiationException, IllegalAccessException {
+    public static GraphQLObjectType.Builder objectBuilder(Class<?> object) throws GraphQLAnnotationsException {
         return getInstance().getObjectBuilder(object);
     }
 
@@ -234,13 +263,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     protected Map<String, Field> getAllFields(Class c) {
         Map<String, Field> fields;
 
-        if(c.getSuperclass() != null) {
+        if (c.getSuperclass() != null) {
             fields = getAllFields(c.getSuperclass());
         } else {
             fields = new HashMap<>();
         }
 
-        for(Field f : c.getDeclaredFields()) {
+        for (Field f : c.getDeclaredFields()) {
             fields.put(f.getName(), f);
         }
 
@@ -248,7 +277,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
 
-    protected GraphQLFieldDefinition getField(Field field) throws IllegalAccessException, InstantiationException {
+    protected GraphQLFieldDefinition getField(Field field) throws GraphQLAnnotationsException {
         GraphQLFieldDefinition.Builder builder = newFieldDefinition();
         GraphQLName name = field.getAnnotation(GraphQLName.class);
         builder.name(name == null ? field.getName() : name.value());
@@ -257,7 +286,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         TypeFunction typeFunction = defaultTypeFunction;
 
         if (annotation != null) {
-            typeFunction = annotation.value().newInstance();
+            typeFunction = newInstance(annotation.value());
         }
 
         GraphQLOutputType type = (GraphQLOutputType) typeFunction.apply(field.getType(), field.getAnnotatedType());
@@ -283,7 +312,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
 
         GraphQLDataFetcher dataFetcher = field.getAnnotation(GraphQLDataFetcher.class);
-        DataFetcher actualDataFetcher = dataFetcher != null ? dataFetcher.value().newInstance() : null;
+        DataFetcher actualDataFetcher = dataFetcher != null ? newInstance(dataFetcher.value()) : null;
 
         if (actualDataFetcher == null) {
 
@@ -360,12 +389,11 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private boolean isConnection(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
         return obj.isAnnotationPresent(GraphQLConnection.class) &&
-                               type instanceof GraphQLList &&
-                               ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType;
+                type instanceof GraphQLList &&
+                ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType;
     }
 
-    protected GraphQLFieldDefinition getField(Method method) throws InstantiationException,
-                                                                         IllegalAccessException {
+    protected GraphQLFieldDefinition getField(Method method) throws GraphQLAnnotationsException {
         GraphQLFieldDefinition.Builder builder = newFieldDefinition();
 
         String name = method.getName().replaceFirst("^(is|get|set)(.+)", "$2");
@@ -377,7 +405,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         TypeFunction typeFunction = defaultTypeFunction;
 
         if (annotation != null) {
-            typeFunction = annotation.value().newInstance();
+            typeFunction = newInstance(annotation.value());
         }
         AnnotatedType annotatedReturnType = method.getAnnotatedReturnType();
 
@@ -401,7 +429,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         List<GraphQLArgument> args = Arrays.asList(method.getParameters()).stream().
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
                 map(new Function<Parameter, GraphQLArgument>() {
-                    @Override @SneakyThrows
+                    @Override
                     public GraphQLArgument apply(Parameter parameter) {
                         Class<?> t = parameter.getType();
                         graphql.schema.GraphQLType graphQLType = finalTypeFunction.apply(t, parameter.getAnnotatedType());
@@ -425,8 +453,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                     ((GraphQLObjectType) outputType).getFieldDefinitions() :
                     ((GraphQLInterfaceType) outputType).getFieldDefinitions();
             relay = new Relay().mutationWithClientMutationId(title, method.getName(),
-                     args.stream().
-                             map(t -> newInputObjectField().name(t.getName()).type(t.getType()).description(t.getDescription()).build()).
+                    args.stream().
+                            map(t -> newInputObjectField().name(t.getName()).type(t.getType()).description(t.getDescription()).build()).
                             collect(Collectors.toList()), fieldDefinitions, null);
             builder.argument(relay.getArguments());
             builder.type(relay.getType());
@@ -454,7 +482,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         } else if (dataFetcher == null) {
             actualDataFetcher = new MethodDataFetcher(method, typeFunction);
         } else {
-            actualDataFetcher = dataFetcher.value().newInstance();
+            actualDataFetcher = newInstance(dataFetcher.value());
         }
 
         if (method.isAnnotationPresent(GraphQLRelayMutation.class) && relay != null) {
@@ -474,7 +502,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return getInstance().getField(method);
 
     }
-    @Override public GraphQLInputObjectType getInputObject(GraphQLObjectType graphQLType) {
+
+    @Override
+    public GraphQLInputObjectType getInputObject(GraphQLObjectType graphQLType) {
         GraphQLObjectType object = graphQLType;
         return new GraphQLInputObjectType(object.getName(), object.getDescription(),
                 object.getFieldDefinitions().stream().
@@ -497,7 +527,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     protected GraphQLArgument getArgument(Parameter parameter, graphql.schema.GraphQLType t) throws
-        IllegalAccessException, InstantiationException {
+            GraphQLAnnotationsException {
         GraphQLArgument.Builder builder = newArgument();
         builder.type(parameter.getAnnotation(NotNull.class) == null ? (GraphQLInputType) t : new graphql.schema.GraphQLNonNull(t));
         GraphQLDescription description = parameter.getAnnotation(GraphQLDescription.class);
@@ -506,10 +536,10 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
         GraphQLDefaultValue defaultValue = parameter.getAnnotation(GraphQLDefaultValue.class);
         if (defaultValue != null) {
-            builder.defaultValue(defaultValue.value().newInstance().get());
+            builder.defaultValue(newInstance(defaultValue.value()).get());
         }
         GraphQLName name = parameter.getAnnotation(GraphQLName.class);
-        if ( name != null ) {
+        if (name != null) {
             builder.name(name.value());
         } else {
             builder.name(parameter.getName());
@@ -522,7 +552,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     @Reference(target = "(type=default)")
     public void setDefaultTypeFunction(TypeFunction function) {
         defaultTypeFunction = function;
-        ((DefaultTypeFunction)defaultTypeFunction).setAnnotationsProcessor(this);
+        ((DefaultTypeFunction) defaultTypeFunction).setAnnotationsProcessor(this);
     }
 
     public void registerType(TypeFunction typeFunction) {
@@ -554,12 +584,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             this.actualDataFetcher = actualDataFetcher;
         }
 
-        @Override @SneakyThrows
+        @Override
         public Object get(DataFetchingEnvironment environment) {
             // Exclude arguments
             DataFetchingEnvironment env = new DataFetchingEnvironment(environment.getSource(), new HashMap<>(), environment.getContext(),
                     environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema());
-            Connection conn = constructor.newInstance(actualDataFetcher.get(env));
+            Connection conn = constructNewInstance(constructor, actualDataFetcher.get(env));
             return conn.get(environment);
         }
     }
@@ -572,7 +602,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                     forEach(c -> types.put(c, defaultTypeFunction.apply(c, null)));
         }
 
-        @Override @SneakyThrows
+        @Override
         public GraphQLObjectType getType(Object object) {
             Optional<Map.Entry<Class<?>, graphql.schema.GraphQLType>> maybeType = types.entrySet().
                     stream().filter(e -> e.getKey().isAssignableFrom(object.getClass())).findFirst();
@@ -581,6 +611,23 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             } else {
                 throw new RuntimeException("Unknown type " + object.getClass());
             }
+        }
+    }
+
+    private <T> T newInstance(Class<T> clazz) throws GraphQLAnnotationsException {
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new GraphQLAnnotationsException("Unable to instantiate class : " + clazz, e);
+        }
+    }
+
+    private static <T> T constructNewInstance(Constructor<T> constructor, Object... args) throws GraphQLAnnotationsException {
+        try {
+            return constructor.newInstance(args);
+
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new GraphQLAnnotationsException("Unable to instantiate via constructor : " + constructor, e);
         }
     }
 }

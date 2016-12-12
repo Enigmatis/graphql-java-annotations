@@ -4,3 +4,4 @@
 *.ipr
 *.iws
 /.nb-gradle/
+.idea
