@@ -17,8 +17,6 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.*;
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -28,6 +26,7 @@ import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+@SuppressWarnings("unchecked")
 public class GraphQLInterfaceTest {
 
     interface NoResolverIface {
@@ -123,9 +122,12 @@ public class GraphQLInterfaceTest {
         @GraphQLField public TestIface iface;
     }
 
-    @AllArgsConstructor
     public static class UnionQuery {
         @GraphQLField public TestUnion union;
+
+        public UnionQuery(TestUnion union) {
+            this.union = union;
+        }
     }
 
     @Test

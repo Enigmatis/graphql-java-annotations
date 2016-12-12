@@ -16,7 +16,6 @@ package graphql.annotations;
 
 import graphql.execution.batched.Batched;
 import graphql.schema.DataFetchingEnvironment;
-import lombok.SneakyThrows;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -36,7 +35,6 @@ public class BatchedMethodDataFetcher extends MethodDataFetcher {
         }
     }
 
-    @SneakyThrows
     @Batched
     @Override
     public Object get(DataFetchingEnvironment environment) {

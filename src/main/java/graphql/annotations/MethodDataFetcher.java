@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,20 @@ package graphql.annotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLObjectType;
-import lombok.SneakyThrows;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import static graphql.annotations.ReflectionKit.constructNewInstance;
+import static graphql.annotations.ReflectionKit.constructor;
+import static graphql.annotations.ReflectionKit.newInstance;
 
 class MethodDataFetcher implements DataFetcher {
     private final Method method;
@@ -35,7 +45,6 @@ class MethodDataFetcher implements DataFetcher {
         this.typeFunction = typeFunction;
     }
 
-    @SneakyThrows
     @Override
     public Object get(DataFetchingEnvironment environment) {
         try {
@@ -49,7 +58,7 @@ class MethodDataFetcher implements DataFetcher {
                     return null;
                 }
             } else {
-                obj = method.getDeclaringClass().newInstance();
+                obj = newInstance(method.getDeclaringClass());
             }
             return method.invoke(obj, invocationArgs(environment));
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -57,9 +66,8 @@ class MethodDataFetcher implements DataFetcher {
         }
     }
 
-    @SneakyThrows
     private Object[] invocationArgs(DataFetchingEnvironment environment) {
-        List result = new ArrayList();
+        List<Object> result = new ArrayList<>();
         Iterator envArgs = environment.getArguments().values().iterator();
         for (Parameter p : method.getParameters()) {
             Class<?> paramType = p.getType();
@@ -69,8 +77,8 @@ class MethodDataFetcher implements DataFetcher {
             }
             graphql.schema.GraphQLType graphQLType = typeFunction.apply(paramType, p.getAnnotatedType());
             if (graphQLType instanceof GraphQLObjectType) {
-                Constructor<?> constructor = paramType.getConstructor(HashMap.class);
-                result.add(constructor.newInstance(envArgs.next()));
+                Constructor<?> constructor = constructor(paramType, HashMap.class);
+                result.add(constructNewInstance(constructor, envArgs.next()));
 
             } else {
                 result.add(envArgs.next());

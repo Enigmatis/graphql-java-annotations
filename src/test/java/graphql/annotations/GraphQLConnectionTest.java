@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,6 @@ import graphql.relay.PageInfo;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -32,26 +30,34 @@ import java.util.stream.Stream;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+@SuppressWarnings("unchecked")
 public class GraphQLConnectionTest {
 
-    @AllArgsConstructor
     public static class Obj {
         @GraphQLField
         public String id;
         @GraphQLField
         public String val;
+
+        public Obj(String id, String val) {
+            this.id = id;
+            this.val = val;
+        }
     }
 
-    @AllArgsConstructor
     public static class TestListField {
-        @GraphQLField @GraphQLConnection
+        @GraphQLField
+        @GraphQLConnection
         public List<Obj> objs;
+
+        public TestListField(List<Obj> objs) {
+            this.objs = objs;
+        }
     }
 
-    @Test @SneakyThrows
+    @Test
     public void fieldList() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestListField.class);
         GraphQLSchema schema = newSchema().query(object).build();
@@ -63,21 +69,28 @@ public class GraphQLConnectionTest {
         testResult("objs", result);
     }
 
-    @AllArgsConstructor
     public static class TestConnections {
         private List<Obj> objs;
-        @GraphQLField @GraphQLConnection
+
+        public TestConnections(List<Obj> objs) {
+            this.objs = objs;
+        }
+
+        @GraphQLField
+        @GraphQLConnection
         public List<Obj> getObjs() {
             return this.objs;
         }
-        @GraphQLField @GraphQLConnection
+
+        @GraphQLField
+        @GraphQLConnection
         public Stream<Obj> getObjStream() {
             Obj[] a = new Obj[objs.size()];
             return Stream.of(objs.toArray(a));
         }
     }
 
-    @Test @SneakyThrows
+    @Test
     public void methodList() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
         GraphQLSchema schema = newSchema().query(object).build();
@@ -100,7 +113,7 @@ public class GraphQLConnectionTest {
         assertEquals(edges.get(0).get("node").get("val"), "test");
     }
 
-    @Test @SneakyThrows
+    @Test
     public void methodStream() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
         GraphQLSchema schema = newSchema().query(object).build();
@@ -128,16 +141,22 @@ public class GraphQLConnectionTest {
             return connection;
         }
     }
-    @AllArgsConstructor
+
     public static class TestCustomConnection {
         private List<Obj> objs;
-        @GraphQLField @GraphQLConnection(connection = CustomConnection.class)
+
+        public TestCustomConnection(List<Obj> objs) {
+            this.objs = objs;
+        }
+
+        @GraphQLField
+        @GraphQLConnection(connection = CustomConnection.class)
         public List<Obj> getObjs() {
             return this.objs;
         }
     }
 
-    @Test @SneakyThrows
+    @Test
     public void customConnection() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestCustomConnection.class);
         GraphQLSchema schema = newSchema().query(object).build();

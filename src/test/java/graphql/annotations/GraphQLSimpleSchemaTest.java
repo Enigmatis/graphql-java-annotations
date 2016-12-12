@@ -17,9 +17,6 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLObjectType;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
 import static graphql.schema.GraphQLSchema.newSchema;
@@ -29,9 +26,15 @@ public class GraphQLSimpleSchemaTest {
 
     public static class User {
 
-        @Getter
-        @Setter
         private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
 
         @GraphQLField
         public String name() {
@@ -57,7 +60,7 @@ public class GraphQLSimpleSchemaTest {
         }
     }
 
-    @Test @SneakyThrows
+    @Test
     public void detachedCall() {
         GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
         GraphQL graphql = new GraphQL(newSchema().query(queryObject).build());
@@ -67,7 +70,7 @@ public class GraphQLSimpleSchemaTest {
         assertEquals(actual, "{defaultUser={name=Test Name}}");
     }
 
-    @Test @SneakyThrows
+    @Test
     public void staticCall() {
         GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
         GraphQL graphql = new GraphQL(newSchema().query(queryObject).build());

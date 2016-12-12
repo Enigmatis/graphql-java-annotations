@@ -19,7 +19,6 @@ import graphql.GraphQL;
 import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLType;
-import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -27,11 +26,12 @@ import java.util.Map;
 
 import static org.testng.Assert.*;
 
+@SuppressWarnings("unchecked")
 public class RelayTest {
 
     public static class ResultTypeResolver implements TypeResolver {
 
-        @Override @SneakyThrows
+        @Override
         public GraphQLObjectType getType(Object object) {
             return GraphQLAnnotations.object(Result.class);
         }
@@ -78,12 +78,12 @@ public class RelayTest {
 
     }
 
-    @Test(expectedExceptions = RuntimeException.class) @SneakyThrows
+    @Test(expectedExceptions = RuntimeException.class)
     public void notAnObjectType() {
         GraphQLObjectType object = GraphQLAnnotations.object(WrongReturnType.class);
     }
 
-    @Test @SneakyThrows
+    @Test
     public void noArgMutation() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
 
@@ -117,7 +117,7 @@ public class RelayTest {
         assertEquals(returns.get("clientMutationId"), "1");
     }
 
-    @Test @SneakyThrows
+    @Test
     public void interfaceReturningMutation() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
 
@@ -140,7 +140,7 @@ public class RelayTest {
     }
 
 
-    @Test @SneakyThrows
+    @Test
     public void argMutation() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
 
@@ -178,7 +178,7 @@ public class RelayTest {
         assertEquals(returns.get("clientMutationId"), "1");
     }
 
-    @Test @SneakyThrows
+    @Test
     public void argVariableMutation() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
 
