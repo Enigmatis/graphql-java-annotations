@@ -16,10 +16,8 @@ package graphql.annotations;
 
 import graphql.schema.*;
 import graphql.schema.GraphQLType;
-import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
-import java.lang.reflect.AnnotatedParameterizedType;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,15 +87,15 @@ public class DefaultTypeFunctionTest {
 
 
     @SuppressWarnings("unused")
-    public List<List<@GraphQLNonNull String>> listMethod() { return null;};
+    public List<List<@GraphQLNonNull String>> listMethod() { return null;}
 
     @SuppressWarnings("unused")
-    public Stream<List<@GraphQLNonNull String>> streamMethod() { return null;};
+    public Stream<List<@GraphQLNonNull String>> streamMethod() { return null;}
 
     @Test
     public void list() throws NoSuchMethodException {
         DefaultTypeFunction instance = new DefaultTypeFunction();
-        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("listMethod").getReturnType(), (AnnotatedParameterizedType) getClass().getMethod("listMethod").getAnnotatedReturnType());
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("listMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
         assertTrue(type instanceof GraphQLList);
         GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
         assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
@@ -115,7 +113,7 @@ public class DefaultTypeFunctionTest {
     @Test
     public void stream() throws NoSuchMethodException {
         DefaultTypeFunction instance = new DefaultTypeFunction();
-        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("streamMethod").getReturnType(), (AnnotatedParameterizedType) getClass().getMethod("listMethod").getAnnotatedReturnType());
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("streamMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
         assertTrue(type instanceof GraphQLList);
         GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
         assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
@@ -124,12 +122,12 @@ public class DefaultTypeFunctionTest {
     }
 
     @SuppressWarnings("unused")
-    public Optional<List<@GraphQLNonNull String>> optionalMethod() { return Optional.empty();};
+    public Optional<List<@GraphQLNonNull String>> optionalMethod() { return Optional.empty();}
 
     @Test
     public void optional() throws NoSuchMethodException {
         DefaultTypeFunction instance = new DefaultTypeFunction();
-        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("optionalMethod").getReturnType(), (AnnotatedParameterizedType) getClass().getMethod("listMethod").getAnnotatedReturnType());
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("optionalMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
         assertTrue(type instanceof GraphQLList);
         GraphQLType subtype = ((GraphQLList) type).getWrappedType();
         assertTrue(subtype instanceof graphql.schema.GraphQLNonNull);
@@ -157,8 +155,8 @@ public class DefaultTypeFunctionTest {
         public Class2 class2;
     }
 
-    @Test @SneakyThrows
-    public void recursiveTypes() {
+    @Test
+    public void recursiveTypes() throws Exception {
         DefaultTypeFunction instance = (DefaultTypeFunction) GraphQLAnnotations.getInstance().defaultTypeFunction;
         GraphQLType type = instance.apply(Class1.class, Class2.class.getField("class1").getAnnotatedType());
         GraphQLFieldDefinition class1class2 = ((GraphQLObjectType) type).getFieldDefinition("class2");

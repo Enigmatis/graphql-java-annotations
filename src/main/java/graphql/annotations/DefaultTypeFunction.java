@@ -19,7 +19,6 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
-import lombok.SneakyThrows;
 import org.osgi.service.component.annotations.*;
 
 import java.lang.reflect.AnnotatedParameterizedType;
@@ -166,7 +165,6 @@ public class DefaultTypeFunction implements TypeFunction {
     private class OptionalFunction implements TypeFunction {
 
         @Override
-        @SneakyThrows
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             if (!(annotatedType instanceof AnnotatedParameterizedType)) {
                 throw new IllegalArgumentException("Optional type parameter should be specified");
@@ -230,7 +228,6 @@ public class DefaultTypeFunction implements TypeFunction {
         private final Map<String, GraphQLType> types = new ConcurrentHashMap<>();
 
         @Override
-        @SneakyThrows
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             GraphQLName name = aClass.getAnnotation(GraphQLName.class);
             String typeName = name == null ? aClass.getSimpleName() : name.value();

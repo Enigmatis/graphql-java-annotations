@@ -39,7 +39,6 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -53,6 +52,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static graphql.Scalars.GraphQLBoolean;
+import static graphql.annotations.ReflectionKit.constructNewInstance;
+import static graphql.annotations.ReflectionKit.newInstance;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
@@ -316,7 +317,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         if (actualDataFetcher == null) {
 
-            StringBuffer fluentBuffer = new StringBuffer(field.getName());
+            StringBuilder fluentBuffer = new StringBuilder(field.getName());
             fluentBuffer.setCharAt(0, Character.toLowerCase(fluentBuffer.charAt(0)));
             String fluentGetter = fluentBuffer.toString();
 
@@ -428,17 +429,14 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         TypeFunction finalTypeFunction = typeFunction;
         List<GraphQLArgument> args = Arrays.asList(method.getParameters()).stream().
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
-                map(new Function<Parameter, GraphQLArgument>() {
-                    @Override
-                    public GraphQLArgument apply(Parameter parameter) {
-                        Class<?> t = parameter.getType();
-                        graphql.schema.GraphQLType graphQLType = finalTypeFunction.apply(t, parameter.getAnnotatedType());
-                        if (graphQLType instanceof GraphQLObjectType) {
-                            GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType);
-                            graphQLType = inputObject;
-                        }
-                        return getArgument(parameter, graphQLType);
+                map(parameter -> {
+                    Class<?> t = parameter.getType();
+                    graphql.schema.GraphQLType graphQLType = finalTypeFunction.apply(t, parameter.getAnnotatedType());
+                    if (graphQLType instanceof GraphQLObjectType) {
+                        GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType);
+                        graphQLType = inputObject;
                     }
+                    return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 
         GraphQLFieldDefinition relay = null;
@@ -446,7 +444,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             if (!(outputType instanceof GraphQLObjectType || outputType instanceof GraphQLInterfaceType)) {
                 throw new RuntimeException("outputType should be an object or an interface");
             }
-            StringBuffer titleBuffer = new StringBuffer(method.getName());
+            StringBuilder titleBuffer = new StringBuilder(method.getName());
             titleBuffer.setCharAt(0, Character.toUpperCase(titleBuffer.charAt(0)));
             String title = titleBuffer.toString();
             List<GraphQLFieldDefinition> fieldDefinitions = outputType instanceof GraphQLObjectType ?
@@ -611,23 +609,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             } else {
                 throw new RuntimeException("Unknown type " + object.getClass());
             }
-        }
-    }
-
-    private <T> T newInstance(Class<T> clazz) throws GraphQLAnnotationsException {
-        try {
-            return clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new GraphQLAnnotationsException("Unable to instantiate class : " + clazz, e);
-        }
-    }
-
-    private static <T> T constructNewInstance(Constructor<T> constructor, Object... args) throws GraphQLAnnotationsException {
-        try {
-            return constructor.newInstance(args);
-
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new GraphQLAnnotationsException("Unable to instantiate via constructor : " + constructor, e);
         }
     }
 }

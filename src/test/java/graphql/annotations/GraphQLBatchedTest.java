@@ -20,7 +20,6 @@ import graphql.GraphQL;
 import graphql.execution.batched.BatchedExecutionStrategy;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -32,6 +31,7 @@ import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+@SuppressWarnings("unchecked")
 public class GraphQLBatchedTest {
     private static class SimpleBatchedField {
         @GraphQLField
@@ -49,8 +49,7 @@ public class GraphQLBatchedTest {
     }
 
     @Test
-    @SneakyThrows
-    public void batchedDataFetcher() {
+    public void batchedDataFetcher() throws Throwable {
         GraphQLObjectType nestedObject = GraphQLAnnotations.object(SimpleBatchedField.class);
         assertEquals(nestedObject.getFieldDefinition("a").getType(), GraphQLString);
 
@@ -77,7 +76,7 @@ public class GraphQLBatchedTest {
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class) @SneakyThrows
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void noStaticField() {
         GraphQLObjectType object = GraphQLAnnotations.object(NoStaticBatchedField.class);
     }
@@ -90,7 +89,7 @@ public class GraphQLBatchedTest {
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class) @SneakyThrows
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void noListField() {
         GraphQLObjectType object = GraphQLAnnotations.object(NoStaticBatchedField.class);
     }
@@ -103,7 +102,7 @@ public class GraphQLBatchedTest {
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class) @SneakyThrows
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void noParameterizedReturnField() {
         GraphQLObjectType object = GraphQLAnnotations.object(NoStaticBatchedField.class);
     }
