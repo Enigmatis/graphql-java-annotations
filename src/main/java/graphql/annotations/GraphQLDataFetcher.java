@@ -25,4 +25,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GraphQLDataFetcher {
     Class<? extends DataFetcher> value();
+    String[] args() default {};
 }
