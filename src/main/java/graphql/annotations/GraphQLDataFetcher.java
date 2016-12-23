@@ -26,4 +26,5 @@ import java.lang.annotation.Target;
 public @interface GraphQLDataFetcher {
     Class<? extends DataFetcher> value();
     String[] args() default {};
+    boolean firstArgIsTargetName() default false;
 }

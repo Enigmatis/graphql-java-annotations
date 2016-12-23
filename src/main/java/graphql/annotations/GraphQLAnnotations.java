@@ -52,6 +52,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.annotations.ReflectionKit.constructNewInstance;
@@ -326,7 +327,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         GraphQLDataFetcher dataFetcher = field.getAnnotation(GraphQLDataFetcher.class);
         DataFetcher actualDataFetcher = null;
         if (nonNull(dataFetcher)) {
-            final String[] args = dataFetcher.args();
+            final String[] args;
+            if ( dataFetcher.firstArgIsTargetName() ) {
+                args = Stream.concat(Stream.of(field.getName()), stream(dataFetcher.args())).toArray(String[]::new);
+            } else {
+                args = dataFetcher.args();
+            }
             if (args.length == 0) {
                 actualDataFetcher = newInstance(dataFetcher.value());
             } else {

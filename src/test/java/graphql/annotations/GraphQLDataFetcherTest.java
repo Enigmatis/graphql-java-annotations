@@ -26,6 +26,7 @@ import graphql.schema.PropertyDataFetcher;
 import org.testng.annotations.Test;
 
 import static graphql.schema.GraphQLSchema.newSchema;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -39,12 +40,13 @@ public class GraphQLDataFetcherTest {
     final GraphQL graphql = new GraphQL(schema);
 
     // When
-    final ExecutionResult result = graphql.execute("{sample {isGreat}}");
+    final ExecutionResult result = graphql.execute("{sample {isGreat isBad}}");
 
     // Then
     final HashMap<String, Object> data = (HashMap) result.getData();
     assertNotNull(data);
     assertTrue(((HashMap<String,Boolean>)data.get("sample")).get("isGreat"));
+    assertTrue(((HashMap<String,Boolean>)data.get("sample")).get("isBad"));
   }
 
   @GraphQLName("Query")
@@ -60,6 +62,11 @@ public class GraphQLDataFetcherTest {
     @GraphQLField
     @GraphQLDataFetcher(value = PropertyDataFetcher.class, args = "isGreat")
     private Boolean isGreat = false; // Defaults to FieldDataFetcher
+
+    @GraphQLField
+    @GraphQLDataFetcher(value = SampleMultiArgDataFetcher.class, firstArgIsTargetName = true, args = {"true"})
+    private Boolean isBad = false; // Defaults to FieldDataFetcher
+
   }
 
   public static class SampleDataFetcher implements DataFetcher {
@@ -69,8 +76,28 @@ public class GraphQLDataFetcherTest {
     }
   }
 
+  public static class SampleMultiArgDataFetcher extends PropertyDataFetcher {
+    private boolean flip = false;
+
+    public SampleMultiArgDataFetcher(String target, String flip) {
+      super(target);
+      this.flip = Boolean.valueOf(flip);
+    }
+
+    @Override
+    public Object get(DataFetchingEnvironment environment) {
+      final Object result = super.get(environment);
+      if ( flip ) {
+        return !(Boolean)result;
+      } else {
+        return result;
+      }
+    }
+  }
+
   public static class Sample {
     private Boolean isGreat = true;
+    private Boolean isBad = false;
 
     public Boolean getIsGreat() {
       return isGreat;
@@ -78,6 +105,14 @@ public class GraphQLDataFetcherTest {
 
     public void setIsGreat(final Boolean isGreat) {
       this.isGreat = isGreat;
+    }
+
+    public Boolean getIsBad() {
+      return isBad;
+    }
+
+    public void setIsBad(Boolean bad) {
+      isBad = bad;
     }
   }
 }
