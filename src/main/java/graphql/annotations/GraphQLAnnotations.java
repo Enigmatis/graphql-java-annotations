@@ -44,10 +44,12 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -149,7 +151,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (description != null) {
             builder.description(description.value());
         }
-        for (Method method : iface.getMethods()) {
+        for (Method method : getOrderedMethods(iface)) {
             boolean valid = !Modifier.isStatic(method.getModifiers()) &&
                     method.getAnnotation(GraphQLField.class) != null;
             if (valid) {
@@ -222,7 +224,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (description != null) {
             builder.description(description.value());
         }
-        for (Method method : object.getMethods()) {
+        for (Method method : getOrderedMethods(object)) {
 
             Class<?> declaringClass = getDeclaringClass(method);
 
@@ -261,13 +263,19 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
 
+    protected List<Method> getOrderedMethods(Class c) {
+        return Arrays.stream(c.getMethods())
+                .sorted(Comparator.comparing(Method::getName))
+                .collect(Collectors.toList());
+    }
+
     protected Map<String, Field> getAllFields(Class c) {
         Map<String, Field> fields;
 
         if (c.getSuperclass() != null) {
             fields = getAllFields(c.getSuperclass());
         } else {
-            fields = new HashMap<>();
+            fields = new TreeMap<>();
         }
 
         for (Field f : c.getDeclaredFields()) {
