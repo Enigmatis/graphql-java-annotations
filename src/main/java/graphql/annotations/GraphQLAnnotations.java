@@ -62,6 +62,9 @@ import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static graphql.schema.GraphQLUnionType.newUnionType;
+import static java.util.Arrays.stream;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * A utility class for extracting GraphQL data structures from annotated
@@ -321,7 +324,19 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
 
         GraphQLDataFetcher dataFetcher = field.getAnnotation(GraphQLDataFetcher.class);
-        DataFetcher actualDataFetcher = dataFetcher != null ? newInstance(dataFetcher.value()) : null;
+        DataFetcher actualDataFetcher = null;
+        if (nonNull(dataFetcher)) {
+            final String[] args = dataFetcher.args();
+            if (args.length == 0) {
+                actualDataFetcher = newInstance(dataFetcher.value());
+            } else {
+                try {
+                    final Constructor<? extends DataFetcher> ctr = dataFetcher.value().getDeclaredConstructor(
+                      stream(args).map(v -> String.class).toArray(Class[]::new));
+                    actualDataFetcher = constructNewInstance(ctr, (Object[]) args);
+                } catch (final NoSuchMethodException e) {}
+            }
+        }
 
         if (actualDataFetcher == null) {
 
