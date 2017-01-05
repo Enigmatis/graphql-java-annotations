@@ -69,6 +69,7 @@ public class SomeObject {
   }
 }
 ```
+> Note: You need to use `-parameters` javac option to compile, which makes argument name as the default GraphQL name. Otherwise, you will need to add the `@GraphQLName("value")` annotation to specify one.
 
 You can also inject `DataFetchingEnvironment` as an argument, at any position:
 
