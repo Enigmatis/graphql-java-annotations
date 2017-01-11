@@ -119,10 +119,21 @@ By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum,
 
 Stream type is also supported and treated as a list.
 
-If you want to register an additional type (for example, UUID), you have to implement `TypeFunction` for it and register it with `DefaultTypeFunction`:
+If you want to register an additional type (for example, UUID), you have to create a new class implementing `TypeFunction` for it:
 
 ```java
-DefaultTypeFunction.register(UUID.class, new UUIDTypeFunction());
+public class UUIDTypeFunction implements TypeFunction {
+    ...
+}
+```
+
+And register it with `GraphQLAnnotations`:
+
+```java
+GraphQLAnnotations.register(new UUIDTypeFunction())
+
+// or if not using a static version of GraphQLAnnotations:
+// new GraphQLAnnotations().registerType(new UUIDTypeFunction())
 ```
 
 You can also specify custom type function for any field with `@GraphQLType` annotation.
