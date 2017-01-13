@@ -14,6 +14,7 @@
  */
 package graphql.annotations;
 
+import graphql.GraphQLException;
 import graphql.relay.Relay;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -54,18 +55,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static graphql.Scalars.GraphQLBoolean;
-import static graphql.annotations.ReflectionKit.constructNewInstance;
-import static graphql.annotations.ReflectionKit.newInstance;
-import static graphql.schema.GraphQLArgument.newArgument;
-import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
-import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
-import static graphql.schema.GraphQLInterfaceType.newInterface;
-import static graphql.schema.GraphQLObjectType.newObject;
-import static graphql.schema.GraphQLUnionType.newUnionType;
-import static java.util.Arrays.stream;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import static graphql.Scalars.*;
+import static graphql.annotations.ReflectionKit.*;
+import static graphql.schema.GraphQLArgument.*;
+import static graphql.schema.GraphQLFieldDefinition.*;
+import static graphql.schema.GraphQLInputObjectField.*;
+import static graphql.schema.GraphQLInterfaceType.*;
+import static graphql.schema.GraphQLObjectType.*;
+import static graphql.schema.GraphQLUnionType.*;
+import static java.util.Arrays.*;
+import static java.util.Objects.*;
 
 /**
  * A utility class for extracting GraphQL data structures from annotated
@@ -89,7 +88,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     public graphql.schema.GraphQLType getInterface(Class<?> iface) throws GraphQLAnnotationsException {
         if (iface.getAnnotation(GraphQLUnion.class) != null) {
             return getUnionBuilder(iface).build();
-        } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class)) {
+        } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class) && TypeResolversLoader.get(iface) == null) {
             return getObject(iface);
         } else {
             return getIfaceBuilder(iface).build();
@@ -162,8 +161,17 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 builder.field(getField(method));
             }
         }
-        GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
-        builder.typeResolver(newInstance(typeResolver.value()));
+        GraphQLTypeResolver typeResolverAnnotation = iface.getAnnotation(GraphQLTypeResolver.class);
+        TypeResolver typeResolver;
+        if(typeResolverAnnotation == null){
+            typeResolver = TypeResolversLoader.get(iface);
+        } else {
+            typeResolver = newInstance(typeResolverAnnotation.value());
+        }
+        if(typeResolver == null){
+            throw new GraphQLException(new IllegalStateException("Can't find a TypeResolver for "+iface));
+        }
+        builder.typeResolver(typeResolver);
         return builder;
     }
 

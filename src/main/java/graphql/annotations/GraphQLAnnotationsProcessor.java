@@ -22,7 +22,8 @@ import graphql.schema.GraphQLUnionType;
 public interface GraphQLAnnotationsProcessor {
     /**
      * This will examine the class and if its annotated with {@link GraphQLUnion} it will return
-     * a {@link GraphQLUnionType.Builder}, if its not annotated with {@link GraphQLTypeResolver} it will return
+     * a {@link GraphQLUnionType.Builder}, if its not annotated with {@link GraphQLTypeResolver} and there's no
+     * TypeResolverSupplier provided as a service, it will return
      * a {@link GraphQLObjectType} otherwise it will return a {@link GraphQLInterfaceType.Builder}.
      *
      * @param iface interface to examine
