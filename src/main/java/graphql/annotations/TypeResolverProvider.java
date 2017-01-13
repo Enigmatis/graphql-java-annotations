@@ -19,15 +19,6 @@ import graphql.schema.TypeResolver;
 /**
  * @author Francois Delalleau
  */
-public class TypeResolversLoader extends AbstractLoader<TypeResolver,TypeResolverProvider> {
+public interface TypeResolverProvider extends Provider<TypeResolver> {
 
-  private static final TypeResolversLoader INSTANCE = new TypeResolversLoader();
-
-  public static TypeResolversLoader getInstance() {
-    return INSTANCE;
-  }
-
-  private TypeResolversLoader() {
-    super(TypeResolverProvider.class);
-  }
 }

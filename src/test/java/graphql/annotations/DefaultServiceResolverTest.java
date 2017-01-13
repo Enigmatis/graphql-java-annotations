@@ -19,15 +19,21 @@ import graphql.schema.TypeResolver;
 /**
  * @author Francois Delalleau
  */
-public class TypeResolversLoader extends AbstractLoader<TypeResolver,TypeResolverProvider> {
+public class DefaultServiceResolverTest implements TypeResolverProvider {
 
-  private static final TypeResolversLoader INSTANCE = new TypeResolversLoader();
-
-  public static TypeResolversLoader getInstance() {
-    return INSTANCE;
+  @Override
+  public Class<?> forClass() {
+    return GraphQLInterfaceTest.TestIfaceService.class;
   }
 
-  private TypeResolversLoader() {
-    super(TypeResolverProvider.class);
+  @Override
+  public TypeResolver get() {
+    return o -> {
+      try {
+        return GraphQLAnnotations.object(GraphQLInterfaceTest.TestIfaceServiceObject.class);
+      } catch (GraphQLAnnotationsException e) {
+        return null;
+      }
+    };
   }
 }

@@ -14,20 +14,13 @@
  */
 package graphql.annotations;
 
-import graphql.schema.TypeResolver;
+import java.util.function.Supplier;
 
 /**
  * @author Francois Delalleau
  */
-public class TypeResolversLoader extends AbstractLoader<TypeResolver,TypeResolverProvider> {
+public interface Provider<T> extends Supplier<T> {
 
-  private static final TypeResolversLoader INSTANCE = new TypeResolversLoader();
+  Class<?> forClass();
 
-  public static TypeResolversLoader getInstance() {
-    return INSTANCE;
-  }
-
-  private TypeResolversLoader() {
-    super(TypeResolverProvider.class);
-  }
 }

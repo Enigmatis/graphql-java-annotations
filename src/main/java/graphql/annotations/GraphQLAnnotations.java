@@ -86,9 +86,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     @Override
     public graphql.schema.GraphQLType getInterface(Class<?> iface) throws GraphQLAnnotationsException {
-        if (iface.getAnnotation(GraphQLUnion.class) != null) {
+        if (iface.getAnnotation(GraphQLUnion.class) != null || UnionTypesLoader.getInstance().get(iface) != null) {
             return getUnionBuilder(iface).build();
-        } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class) && TypeResolversLoader.get(iface) == null) {
+        } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class) && TypeResolversLoader.getInstance().get(iface) == null) {
             return getObject(iface);
         } else {
             return getIfaceBuilder(iface).build();
@@ -122,7 +122,16 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
 
         TypeFunction finalTypeFunction = typeFunction;
-        Arrays.asList(unionAnnotation.possibleTypes()).stream()
+        Class<?>[] possibleTypes;
+        if(unionAnnotation != null){
+            possibleTypes = unionAnnotation.possibleTypes();
+        } else {
+            possibleTypes = UnionTypesLoader.getInstance().get(iface);
+        }
+        if(possibleTypes == null){
+            throw new GraphQLException(new IllegalStateException("Can't find possible types array for "+iface));
+        }
+        Arrays.asList(possibleTypes).stream()
                 .map(new Function<Class<?>, graphql.schema.GraphQLType>() {
                     @Override
                     public graphql.schema.GraphQLType apply(Class<?> aClass) {
@@ -132,7 +141,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 .map(v -> (GraphQLObjectType) v)
                 .forEach(builder::possibleType);
 
-        builder.typeResolver(new UnionTypeResolver(unionAnnotation.possibleTypes()));
+        builder.typeResolver(new UnionTypeResolver(possibleTypes));
         return builder;
     }
 
@@ -164,7 +173,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         GraphQLTypeResolver typeResolverAnnotation = iface.getAnnotation(GraphQLTypeResolver.class);
         TypeResolver typeResolver;
         if(typeResolverAnnotation == null){
-            typeResolver = TypeResolversLoader.get(iface);
+            typeResolver = TypeResolversLoader.getInstance().get(iface);
         } else {
             typeResolver = newInstance(typeResolverAnnotation.value());
         }

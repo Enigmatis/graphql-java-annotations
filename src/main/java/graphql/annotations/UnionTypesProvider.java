@@ -14,20 +14,9 @@
  */
 package graphql.annotations;
 
-import graphql.schema.TypeResolver;
-
 /**
  * @author Francois Delalleau
  */
-public class TypeResolversLoader extends AbstractLoader<TypeResolver,TypeResolverProvider> {
+public interface UnionTypesProvider extends Provider<Class<?>[]> {
 
-  private static final TypeResolversLoader INSTANCE = new TypeResolversLoader();
-
-  public static TypeResolversLoader getInstance() {
-    return INSTANCE;
-  }
-
-  private TypeResolversLoader() {
-    super(TypeResolverProvider.class);
-  }
 }

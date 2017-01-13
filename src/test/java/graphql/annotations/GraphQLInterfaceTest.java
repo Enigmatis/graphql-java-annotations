@@ -64,8 +64,18 @@ public class GraphQLInterfaceTest {
     interface TestIface extends BaseTestIface {
     }
 
+    interface TestIfaceService{
+        @GraphQLField
+        boolean service();
+    }
+
     @GraphQLUnion(possibleTypes = TestObject1.class)
     interface TestUnion extends BaseTestIface {
+    }
+
+    interface TestUnionService {
+        @GraphQLField
+        boolean service();
     }
 
     static class TestObject implements TestIface {
@@ -73,6 +83,22 @@ public class GraphQLInterfaceTest {
         @Override
         public String value() {
             return "a";
+        }
+    }
+
+    public static class TestIfaceServiceObject implements TestIfaceService {
+
+        @Override
+        public boolean service() {
+            return true;
+        }
+    }
+
+    public static class TestUnionServiceObject implements TestUnionService {
+
+        @Override
+        public boolean service() {
+            return true;
         }
     }
 
@@ -96,10 +122,25 @@ public class GraphQLInterfaceTest {
     }
 
     @Test
+    public void testService() {
+        GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(TestIfaceService.class);
+        List<GraphQLFieldDefinition> fields = iface.getFieldDefinitions();
+        assertEquals(fields.size(), 1);
+        assertEquals(fields.get(0).getName(), "service");
+    }
+
+    @Test
     public void testUnion() {
         GraphQLUnionType unionType = (GraphQLUnionType) GraphQLAnnotations.iface(TestUnion.class);
         assertEquals(unionType.getTypes().size(), 1);
         assertEquals(unionType.getTypes().get(0).getName(), "TestObject1");
+    }
+
+    @Test
+    public void testUnionService() {
+        GraphQLUnionType unionType = (GraphQLUnionType) GraphQLAnnotations.iface(TestUnionService.class);
+        assertEquals(unionType.getTypes().size(), 1);
+        assertEquals(unionType.getTypes().get(0).getName(), "TestUnionServiceObject");
     }
 
     @Test
