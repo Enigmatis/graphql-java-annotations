@@ -139,6 +139,29 @@ public class DefaultTypeFunction implements TypeFunction {
         }
     }
 
+    private class SetFunction implements TypeFunction {
+
+        @Override
+        public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
+            if (!(annotatedType instanceof AnnotatedParameterizedType)) {
+                throw new IllegalArgumentException("List type parameter should be specified");
+            }
+            AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
+            AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
+            Class<?> klass;
+            if (arg.getType() instanceof ParameterizedType) {
+                klass = (Class<?>)((ParameterizedType)(arg.getType())).getRawType();
+            } else {
+                klass = (Class<?>) arg.getType();
+            }
+            return new GraphQLList(DefaultTypeFunction.this.apply(klass, arg));
+        }
+
+        @Override public Collection<Class<?>> getAcceptedTypes() {
+            return Arrays.asList(Set.class);
+        }
+    }
+
     private class StreamFunction implements TypeFunction {
 
         @Override
@@ -266,6 +289,7 @@ public class DefaultTypeFunction implements TypeFunction {
 
         register(new ListFunction());
         register(new StreamFunction());
+        register(new SetFunction());
 
         register(new EnumFunction());
 

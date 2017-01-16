@@ -18,10 +18,7 @@ import graphql.schema.*;
 import graphql.schema.GraphQLType;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,10 +89,24 @@ public class DefaultTypeFunctionTest {
     @SuppressWarnings("unused")
     public Stream<List<@GraphQLNonNull String>> streamMethod() { return null;}
 
+    @SuppressWarnings("unused")
+    public Set<Set<@GraphQLNonNull String>> setMethod() { return null;}
+
     @Test
     public void list() throws NoSuchMethodException {
         DefaultTypeFunction instance = new DefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("listMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
+        assertTrue(type instanceof GraphQLList);
+        GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
+        assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
+        graphql.schema.GraphQLNonNull wrappedType = (graphql.schema.GraphQLNonNull) subtype.getWrappedType();
+        assertEquals(wrappedType.getWrappedType(), GraphQLString);
+    }
+
+    @Test
+    public void set() throws NoSuchMethodException {
+        DefaultTypeFunction instance = new DefaultTypeFunction();
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("setMethod").getReturnType(), getClass().getMethod("setMethod").getAnnotatedReturnType());
         assertTrue(type instanceof GraphQLList);
         GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
         assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
