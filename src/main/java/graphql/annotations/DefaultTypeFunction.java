@@ -209,35 +209,50 @@ public class DefaultTypeFunction implements TypeFunction {
     }
 
     private class EnumFunction implements TypeFunction {
+        private final Map<String, GraphQLTypeReference> processing = new ConcurrentHashMap<>();
+        private final Map<String, GraphQLType> types = new ConcurrentHashMap<>();
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
-            Class<? extends Enum> enumClass = (Class<? extends Enum>) aClass;
-            GraphQLEnumType.Builder builder = newEnum();
-
             GraphQLName name = aClass.getAnnotation(GraphQLName.class);
-            builder.name(name == null ? aClass.getSimpleName() : name.value());
+            String typeName = name == null ? aClass.getSimpleName() : name.value();
 
-            GraphQLDescription description = aClass.getAnnotation(GraphQLDescription.class);
-            if (description != null) {
-                builder.description(description.value());
-            }
+            if (types.containsKey(typeName)) {
+                return types.get(typeName);
+            } else if(processing.containsKey(typeName)) {
+                return processing.getOrDefault(typeName, new GraphQLTypeReference(typeName));
+            } else {
 
-            List<Enum> constants = Arrays.asList(enumClass.getEnumConstants());
+                processing.put(typeName, new GraphQLTypeReference(typeName));
 
-            Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).forEachOrdered(n -> {
-                try {
-                    Field field = aClass.getField(n);
-                    GraphQLName fieldName = field.getAnnotation(GraphQLName.class);
-                    GraphQLDescription fieldDescription = field.getAnnotation(GraphQLDescription.class);
-                    Enum constant = constants.stream().filter(c -> c.name().contentEquals(n)).findFirst().get();
-                    String name_ = fieldName == null ? n : fieldName.value();
-                    builder.value(name_, constant, fieldDescription == null ? name_ : fieldDescription.value());
-                } catch (NoSuchFieldException e) {
+                Class<? extends Enum> enumClass = (Class<? extends Enum>) aClass;
+                GraphQLEnumType.Builder builder = newEnum();
+                builder.name(typeName);
+
+                GraphQLDescription description = aClass.getAnnotation(GraphQLDescription.class);
+                if (description != null) {
+                    builder.description(description.value());
                 }
-            });
 
-            return builder.build();
+                List<Enum> constants = Arrays.asList(enumClass.getEnumConstants());
+
+                Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).forEachOrdered(n -> {
+                    try {
+                        Field field = aClass.getField(n);
+                        GraphQLName fieldName = field.getAnnotation(GraphQLName.class);
+                        GraphQLDescription fieldDescription = field.getAnnotation(GraphQLDescription.class);
+                        Enum constant = constants.stream().filter(c -> c.name().contentEquals(n)).findFirst().get();
+                        String name_ = fieldName == null ? n : fieldName.value();
+                        builder.value(name_, constant, fieldDescription == null ? name_ : fieldDescription.value());
+                    } catch (NoSuchFieldException e) {
+                    }
+                });
+
+                final GraphQLEnumType type = builder.build();
+                types.put(typeName, type);
+                processing.remove(type);
+                return type;
+            }
         }
 
         @Override public Collection<Class<?>> getAcceptedTypes() {
