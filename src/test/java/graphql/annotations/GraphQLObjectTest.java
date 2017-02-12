@@ -46,6 +46,7 @@ import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -684,5 +685,30 @@ public class GraphQLObjectTest {
         assertEquals(((GraphQLList) t).getWrappedType(), Scalars.GraphQLString);
     }
 
+    @GraphQLField
+    public static class InheritGraphQLFieldTest {
+        public String inheritedOn;
+
+        @GraphQLField(false)
+        public String forcedOff;
+
+        public String getOn() {
+            return "on";
+        }
+
+        @GraphQLField(false)
+        public String getOff() {
+            return "off";
+        }
+    }
+
+    @Test
+    public void inheritGraphQLField() {
+        GraphQLObjectType object = GraphQLAnnotations.object(InheritGraphQLFieldTest.class);
+        assertNotNull(object.getFieldDefinition("on"));
+        assertNull(object.getFieldDefinition("off"));
+        assertNotNull(object.getFieldDefinition("inheritedOn"));
+        assertNull(object.getFieldDefinition("forcedOff"));
+    }
 
 }

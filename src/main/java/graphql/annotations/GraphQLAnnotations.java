@@ -36,6 +36,7 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -46,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -172,26 +174,76 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return getInstance().getIfaceBuilder(iface);
     }
 
-    private Class<?> getDeclaringClass(Method method) {
-        Class<?> object = method.getDeclaringClass();
-        Class<?> declaringClass = object;
-        for (Class<?> iface : object.getInterfaces()) {
+    private static Boolean isGraphQLField(AnnotatedElement element) {
+        GraphQLField annotation = element.getAnnotation(GraphQLField.class);
+        if (annotation == null) {
+            return null;
+        }
+        return annotation.value();
+    }
+
+    /**
+     * breadthFirst parental ascent looking for closest method declaration with explicit annotation
+     *
+     * @param method The method to match
+     * @return The closest GraphQLField annotation
+     */
+    private boolean breadthFirstSearch(Method method) {
+        final List<Class<?>> queue = new LinkedList<>();
+        final String methodName = method.getName();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        queue.add(method.getDeclaringClass());
+        do {
+            Class<?> cls = queue.remove(0);
+
             try {
-                iface.getMethod(method.getName(), method.getParameterTypes());
-                declaringClass = iface;
+                method = cls.getDeclaredMethod(methodName, parameterTypes);
+                Boolean gqf = isGraphQLField(method);
+                if (gqf != null) {
+                    return gqf;
+                }
             } catch (NoSuchMethodException e) {
             }
-        }
 
-        try {
-            if (object.getSuperclass() != null) {
-                object.getSuperclass().getMethod(method.getName(), method.getParameterTypes());
-                declaringClass = object.getSuperclass();
+            Boolean gqf = isGraphQLField(cls);
+            if (gqf != null) {
+                return gqf;
             }
-        } catch (NoSuchMethodException e) {
-        }
-        return declaringClass;
 
+            // add interfaces to places to search
+            for (Class<?> iface : cls.getInterfaces()) {
+                queue.add(iface);
+            }
+            // add parent class to places to search
+            Class<?> nxt = cls.getSuperclass();
+            if (nxt != null) {
+                queue.add(nxt);
+            }
+        } while (!queue.isEmpty());
+        return false;
+    }
+
+    /**
+     * direct parental ascent looking for closest declaration with explicit annotation
+     *
+     * @param field The field to find
+     * @return The closest GraphQLField annotation
+     */
+    private boolean parentalSearch(Field field) {
+        Boolean gqf = isGraphQLField(field);
+        if (gqf != null) {
+            return gqf;
+        }
+        Class<?> cls = field.getDeclaringClass();
+
+        do {
+            gqf = isGraphQLField(cls);
+            if (gqf != null) {
+                return gqf;
+            }
+            cls = cls.getSuperclass();
+        } while (cls != null);
+        return false;
     }
 
     @Override
@@ -228,28 +280,21 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (description != null) {
             builder.description(description.value());
         }
+
         for (Method method : getOrderedMethods(object)) {
-
-            Class<?> declaringClass = getDeclaringClass(method);
-
-            boolean valid = false;
-            try {
-                valid = (method.getAnnotation(GraphQLField.class) != null ||
-                        declaringClass.getMethod(method.getName(), method.getParameterTypes()).getAnnotation(GraphQLField.class) != null)
-                        && !method.isBridge();
-            } catch (NoSuchMethodException e) {
-                throw new GraphQLAnnotationsException("Unable to introspect method : " + method, e);
+            if(method.isBridge() || method.isSynthetic()) {
+                continue;
             }
-
-            if (valid) {
+            if (breadthFirstSearch(method)) {
                 builder.field(getField(method));
             }
         }
 
         for (Field field : getAllFields(object).values()) {
-            boolean valid = !Modifier.isStatic(field.getModifiers()) &&
-                    field.getAnnotation(GraphQLField.class) != null;
-            if (valid) {
+            if(Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            if (parentalSearch(field)) {
                 builder.field(getField(field));
             }
         }
