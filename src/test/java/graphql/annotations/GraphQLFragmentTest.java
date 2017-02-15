@@ -31,9 +31,12 @@ public class GraphQLFragmentTest {
 
     static Map<String, GraphQLObjectType> registry;
 
+    /**
+     * Test a query which returns a list (RootObject.items) of two different classes (MyObject + MyObject2) which implement the same interface (MyInterface).
+     */
     @Test
-    public void test() throws Exception {
-
+    public void testInterfaceInlineFragment() throws Exception {
+        // Given
         registry = new HashMap<>();
 
         GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(MyInterface.class);
@@ -54,9 +57,11 @@ public class GraphQLFragmentTest {
 
         GraphQL graphQL2 = new GraphQL(schema);
 
+        // When
         ExecutionResult graphQLResult = graphQL2.execute("{items { ... on MyObject {a, my {b}} ... on MyObject2 {a, b}  }}", new RootObject());
         Set resultMap = ((Map) graphQLResult.getData()).entrySet();
 
+        // Then
         assertEquals(graphQLResult.getErrors().size(), 0);
         assertEquals(resultMap.size(), 1);
     }
