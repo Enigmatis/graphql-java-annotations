@@ -92,7 +92,7 @@ public String field(@GraphQLName("val") String value) {
 }
 ```
 
-In addition, `@GraphQLDefaultValue` can be used to set a default value to a parameter. Due to limitations of annotations, the default valueu has to be provided by a class that implements `Supplier<Object>`:
+In addition, `@GraphQLDefaultValue` can be used to set a default value to a parameter. Due to limitations of annotations, the default value has to be provided by a class that implements `Supplier<Object>`:
 
 ```java
 public static class DefaultValue implements Supplier<Object> {
