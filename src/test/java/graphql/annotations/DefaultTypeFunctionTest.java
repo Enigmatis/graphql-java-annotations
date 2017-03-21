@@ -31,9 +31,10 @@ public class DefaultTypeFunctionTest {
         @GraphQLName("someA") @GraphQLDescription("a") A, B
     }
 
+
     @Test
     public void enumeration() {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         GraphQLType enumeration = instance.apply(A.class, null);
         assertTrue(enumeration instanceof GraphQLEnumType);
         List<GraphQLEnumValueDefinition> values = ((GraphQLEnumType) enumeration).getValues();
@@ -48,20 +49,20 @@ public class DefaultTypeFunctionTest {
 
     @Test
     public void string() {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.apply(String.class, null), GraphQLString);
     }
 
     @Test
     public void bool() {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.apply(boolean.class, null), GraphQLBoolean);
         assertEquals(instance.apply(Boolean.class, null), GraphQLBoolean);
     }
 
     @Test
     public void float_() {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.apply(float.class, null), GraphQLFloat);
         assertEquals(instance.apply(Float.class, null), GraphQLFloat);
         assertEquals(instance.apply(Double.class, null), GraphQLFloat);
@@ -70,14 +71,14 @@ public class DefaultTypeFunctionTest {
 
     @Test
     public void integer() {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.apply(int.class, null), GraphQLInt);
         assertEquals(instance.apply(Integer.class, null), GraphQLInt);
     }
 
     @Test
     public void long_() {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.apply(long.class, null), GraphQLLong);
         assertEquals(instance.apply(Long.class, null), GraphQLLong);
     }
@@ -87,49 +88,68 @@ public class DefaultTypeFunctionTest {
     public List<List<@GraphQLNonNull String>> listMethod() { return null;}
 
     @SuppressWarnings("unused")
+    public Iterable<Iterable<@GraphQLNonNull String>> iterableMethod() { return null;}
+
+    @SuppressWarnings("unused")
+    public Collection<Collection<@GraphQLNonNull String>> collectionMethod() { return null;}
+
+
+    @SuppressWarnings("unused")
     public Stream<List<@GraphQLNonNull String>> streamMethod() { return null;}
 
     @SuppressWarnings("unused")
     public Set<Set<@GraphQLNonNull String>> setMethod() { return null;}
 
-    @Test
-    public void list() throws NoSuchMethodException {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
-        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("listMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
+    // GraphqlList(GraphqlList(GraphQlString) is expected here
+    private void assertIsGraphListOfListOfString(GraphQLType type) {
         assertTrue(type instanceof GraphQLList);
         GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
         assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
         graphql.schema.GraphQLNonNull wrappedType = (graphql.schema.GraphQLNonNull) subtype.getWrappedType();
         assertEquals(wrappedType.getWrappedType(), GraphQLString);
+    }
+
+    @Test
+    public void list() throws NoSuchMethodException {
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("listMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
+        assertIsGraphListOfListOfString(type);
+    }
+
+
+    @Test
+    public void iterable() throws NoSuchMethodException {
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("iterableMethod").getReturnType(), getClass().getMethod("iterableMethod").getAnnotatedReturnType());
+        assertIsGraphListOfListOfString(type);
+    }
+
+    @Test
+    public void collection() throws NoSuchMethodException {
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("collectionMethod").getReturnType(), getClass().getMethod("collectionMethod").getAnnotatedReturnType());
+        assertIsGraphListOfListOfString(type);
     }
 
     @Test
     public void set() throws NoSuchMethodException {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("setMethod").getReturnType(), getClass().getMethod("setMethod").getAnnotatedReturnType());
-        assertTrue(type instanceof GraphQLList);
-        GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
-        assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
-        graphql.schema.GraphQLNonNull wrappedType = (graphql.schema.GraphQLNonNull) subtype.getWrappedType();
-        assertEquals(wrappedType.getWrappedType(), GraphQLString);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void unparametrizedList() {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
-        List v = new LinkedList();
-        instance.apply(v.getClass(), null);
+        assertIsGraphListOfListOfString(type);
     }
 
     @Test
     public void stream() throws NoSuchMethodException {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("streamMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
-        assertTrue(type instanceof GraphQLList);
-        GraphQLList subtype = (GraphQLList) ((GraphQLList) type).getWrappedType();
-        assertTrue(subtype.getWrappedType() instanceof graphql.schema.GraphQLNonNull);
-        graphql.schema.GraphQLNonNull wrappedType = (graphql.schema.GraphQLNonNull) subtype.getWrappedType();
-        assertEquals(wrappedType.getWrappedType(), GraphQLString);
+        assertIsGraphListOfListOfString(type);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void unparametrizedList() {
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        List v = new LinkedList();
+        instance.apply(v.getClass(), null);
     }
 
     @SuppressWarnings("unused")
@@ -137,7 +157,7 @@ public class DefaultTypeFunctionTest {
 
     @Test
     public void optional() throws NoSuchMethodException {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.apply(getClass().getMethod("optionalMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
         assertTrue(type instanceof GraphQLList);
         GraphQLType subtype = ((GraphQLList) type).getWrappedType();
@@ -149,7 +169,7 @@ public class DefaultTypeFunctionTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void unparametrizedOptional() {
-        DefaultTypeFunction instance = new DefaultTypeFunction();
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         Optional v = Optional.empty();
         instance.apply(v.getClass(), null);
     }
@@ -176,4 +196,11 @@ public class DefaultTypeFunctionTest {
         assertTrue(((GraphQLObjectType)class1class2.getType()).getFieldDefinition("class2").getType() instanceof GraphQLTypeReference);
     }
 
+
+    private DefaultTypeFunction testedDefaultTypeFunction() {
+        // wire up the ability
+        DefaultTypeFunction defaultTypeFunction = new DefaultTypeFunction();
+        defaultTypeFunction.setAnnotationsProcessor(GraphQLAnnotations.getInstance());
+        return defaultTypeFunction;
+    }
 }

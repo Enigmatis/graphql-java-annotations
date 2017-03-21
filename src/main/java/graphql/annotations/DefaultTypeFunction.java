@@ -19,13 +19,27 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.component.annotations.ServiceScope;
 
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
+import java.util.AbstractCollection;
+import java.util.AbstractList;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -33,17 +47,18 @@ import java.util.stream.Stream;
 
 import static graphql.schema.GraphQLEnumType.newEnum;
 
-@Component(scope = ServiceScope.SINGLETON, property= "type=default")
+@Component(scope = ServiceScope.SINGLETON, property = "type=default")
 public class DefaultTypeFunction implements TypeFunction {
 
     @Reference(target = "(!(type=default))",
-               policyOption = ReferencePolicyOption.GREEDY)
+            policyOption = ReferencePolicyOption.GREEDY)
     protected List<TypeFunction> otherFunctions = new ArrayList<>();
 
-    @Override public Collection<Class<?>> getAcceptedTypes() {
+    @Override
+    public Collection<Class<?>> getAcceptedTypes() {
         List<Class<?>> list = registry.keySet().stream().collect(Collectors.toList());
         List<Class<?>> others = otherFunctions.stream().flatMap(tf -> tf.getAcceptedTypes().stream())
-                                               .collect(Collectors.toList());
+                .collect(Collectors.toList());
         list.addAll(others);
         return list;
     }
@@ -63,7 +78,8 @@ public class DefaultTypeFunction implements TypeFunction {
             return Scalars.GraphQLString;
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Collections.singletonList(String.class);
         }
     }
@@ -75,7 +91,8 @@ public class DefaultTypeFunction implements TypeFunction {
             return Scalars.GraphQLBoolean;
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Arrays.asList(Boolean.class, boolean.class);
         }
     }
@@ -87,7 +104,8 @@ public class DefaultTypeFunction implements TypeFunction {
             return Scalars.GraphQLFloat;
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Arrays.asList(Float.class, float.class, Double.class, double.class);
         }
     }
@@ -99,7 +117,8 @@ public class DefaultTypeFunction implements TypeFunction {
             return Scalars.GraphQLInt;
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Arrays.asList(Integer.class, int.class);
         }
     }
@@ -111,12 +130,16 @@ public class DefaultTypeFunction implements TypeFunction {
             return Scalars.GraphQLLong;
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Arrays.asList(Long.class, long.class);
         }
     }
 
-    private class ListFunction implements TypeFunction {
+    /**
+     * Support for the Iterable things like Lists / Sets / Collections and so on..
+     */
+    private class IterableFunction implements TypeFunction {
 
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
@@ -127,38 +150,24 @@ public class DefaultTypeFunction implements TypeFunction {
             AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
             Class<?> klass;
             if (arg.getType() instanceof ParameterizedType) {
-                klass = (Class<?>)((ParameterizedType)(arg.getType())).getRawType();
+                klass = (Class<?>) ((ParameterizedType) (arg.getType())).getRawType();
             } else {
                 klass = (Class<?>) arg.getType();
             }
             return new GraphQLList(DefaultTypeFunction.this.apply(klass, arg));
         }
-
-        @Override public Collection<Class<?>> getAcceptedTypes() {
-            return Arrays.asList(List.class, AbstractList.class);
-        }
-    }
-
-    private class SetFunction implements TypeFunction {
 
         @Override
-        public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
-            if (!(annotatedType instanceof AnnotatedParameterizedType)) {
-                throw new IllegalArgumentException("List type parameter should be specified");
-            }
-            AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
-            AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
-            Class<?> klass;
-            if (arg.getType() instanceof ParameterizedType) {
-                klass = (Class<?>)((ParameterizedType)(arg.getType())).getRawType();
-            } else {
-                klass = (Class<?>) arg.getType();
-            }
-            return new GraphQLList(DefaultTypeFunction.this.apply(klass, arg));
-        }
-
-        @Override public Collection<Class<?>> getAcceptedTypes() {
-            return Arrays.asList(Set.class);
+        public Collection<Class<?>> getAcceptedTypes() {
+            return Arrays.asList(
+                    List.class,
+                    AbstractList.class,
+                    Set.class,
+                    AbstractSet.class,
+                    Collection.class,
+                    AbstractCollection.class,
+                    Iterable.class
+            );
         }
     }
 
@@ -173,14 +182,15 @@ public class DefaultTypeFunction implements TypeFunction {
             AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
             Class<?> klass;
             if (arg.getType() instanceof ParameterizedType) {
-                klass = (Class<?>)((ParameterizedType)(arg.getType())).getRawType();
+                klass = (Class<?>) ((ParameterizedType) (arg.getType())).getRawType();
             } else {
                 klass = (Class<?>) arg.getType();
             }
             return new GraphQLList(DefaultTypeFunction.this.apply(klass, arg));
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Collections.singletonList(Stream.class);
         }
     }
@@ -196,14 +206,15 @@ public class DefaultTypeFunction implements TypeFunction {
             AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
             Class<?> klass;
             if (arg.getType() instanceof ParameterizedType) {
-                klass = (Class<?>)((ParameterizedType)(arg.getType())).getRawType();
+                klass = (Class<?>) ((ParameterizedType) (arg.getType())).getRawType();
             } else {
                 klass = (Class<?>) arg.getType();
             }
             return DefaultTypeFunction.this.apply(klass, arg);
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Collections.singletonList(Optional.class);
         }
     }
@@ -219,12 +230,13 @@ public class DefaultTypeFunction implements TypeFunction {
 
             if (types.containsKey(typeName)) {
                 return types.get(typeName);
-            } else if(processing.containsKey(typeName)) {
+            } else if (processing.containsKey(typeName)) {
                 return processing.getOrDefault(typeName, new GraphQLTypeReference(typeName));
             } else {
 
                 processing.put(typeName, new GraphQLTypeReference(typeName));
 
+                //noinspection unchecked
                 Class<? extends Enum> enumClass = (Class<? extends Enum>) aClass;
                 GraphQLEnumType.Builder builder = newEnum();
                 builder.name(typeName);
@@ -244,18 +256,20 @@ public class DefaultTypeFunction implements TypeFunction {
                         Enum constant = constants.stream().filter(c -> c.name().contentEquals(n)).findFirst().get();
                         String name_ = fieldName == null ? n : fieldName.value();
                         builder.value(name_, constant, fieldDescription == null ? name_ : fieldDescription.value());
-                    } catch (NoSuchFieldException e) {
+                    } catch (NoSuchFieldException ignore) {
                     }
                 });
 
                 final GraphQLEnumType type = builder.build();
                 types.put(typeName, type);
+                //noinspection SuspiciousMethodCalls
                 processing.remove(type);
                 return type;
             }
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Collections.singletonList(Enum.class);
         }
     }
@@ -287,7 +301,8 @@ public class DefaultTypeFunction implements TypeFunction {
             }
         }
 
-        @Override public Collection<Class<?>> getAcceptedTypes() {
+        @Override
+        public Collection<Class<?>> getAcceptedTypes() {
             return Collections.singletonList(Object.class);
         }
     }
@@ -302,9 +317,8 @@ public class DefaultTypeFunction implements TypeFunction {
 
         register(new LongFunction());
 
-        register(new ListFunction());
+        register(new IterableFunction());
         register(new StreamFunction());
-        register(new SetFunction());
 
         register(new EnumFunction());
 
@@ -342,7 +356,7 @@ public class DefaultTypeFunction implements TypeFunction {
         GraphQLType result = registry.get(t).apply(klass, annotatedType);
 
         if (klass.getAnnotation(GraphQLNonNull.class) != null ||
-            (annotatedType != null && annotatedType.getAnnotation(GraphQLNonNull.class) != null)) {
+                (annotatedType != null && annotatedType.getAnnotation(GraphQLNonNull.class) != null)) {
             result = new graphql.schema.GraphQLNonNull(result);
         }
 
