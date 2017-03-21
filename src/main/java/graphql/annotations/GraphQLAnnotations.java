@@ -66,7 +66,6 @@ import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static graphql.schema.GraphQLUnionType.newUnionType;
 import static java.util.Arrays.stream;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -75,6 +74,8 @@ import static java.util.Objects.nonNull;
  */
 @Component
 public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
+
+    private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
 
     public GraphQLAnnotations() {
         defaultTypeFunction = new DefaultTypeFunction();
@@ -89,13 +90,20 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     @Override
     public graphql.schema.GraphQLType getInterface(Class<?> iface) throws GraphQLAnnotationsException {
-        if (iface.getAnnotation(GraphQLUnion.class) != null) {
-            return getUnionBuilder(iface).build();
-        } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class)) {
-            return getObject(iface);
-        } else {
-            return getIfaceBuilder(iface).build();
+        String typeName = getTypeName(iface);
+        graphql.schema.GraphQLType type = typeRegistry.get(typeName);
+        if (type != null) { // type already exists, do not build a new new one
+            return type;
         }
+        if (iface.getAnnotation(GraphQLUnion.class) != null) {
+            type = getUnionBuilder(iface).build();
+        } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class)) {
+            type = getObject(iface);
+        } else {
+            type = getIfaceBuilder(iface).build();
+        }
+        typeRegistry.put(typeName, type);
+        return type;
     }
 
     public static graphql.schema.GraphQLType iface(Class<?> iface) throws GraphQLAnnotationsException {
@@ -110,8 +118,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         GraphQLUnionType.Builder builder = newUnionType();
 
         GraphQLUnion unionAnnotation = iface.getAnnotation(GraphQLUnion.class);
-        GraphQLName name = iface.getAnnotation(GraphQLName.class);
-        builder.name(name == null ? iface.getSimpleName() : name.value());
+        builder.name(getTypeName(iface));
         GraphQLDescription description = iface.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());
@@ -143,6 +150,11 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return getInstance().getUnionBuilder(iface);
     }
 
+    public String getTypeName(Class<?> objectClass) {
+        GraphQLName name = objectClass.getAnnotation(GraphQLName.class);
+        return (name == null ? objectClass.getSimpleName() : name.value());
+    }
+
     @Override
     public GraphQLInterfaceType.Builder getIfaceBuilder(Class<?> iface) throws GraphQLAnnotationsException,
             IllegalArgumentException {
@@ -151,8 +163,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
         GraphQLInterfaceType.Builder builder = newInterface();
 
-        GraphQLName name = iface.getAnnotation(GraphQLName.class);
-        builder.name(name == null ? iface.getSimpleName() : name.value());
+        builder.name(getTypeName(iface));
         GraphQLDescription description = iface.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());
@@ -274,8 +285,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     @Override
     public GraphQLObjectType.Builder getObjectBuilder(Class<?> object) throws GraphQLAnnotationsException {
         GraphQLObjectType.Builder builder = newObject();
-        GraphQLName name = object.getAnnotation(GraphQLName.class);
-        builder.name(name == null ? object.getSimpleName() : name.value());
+        builder.name(getTypeName(object));
         GraphQLDescription description = object.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());
@@ -635,6 +645,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         getInstance().registerType(typeFunction);
     }
 
+    public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {
+        return typeRegistry;
+    }
 
     private static class ConnectionDataFetcher implements DataFetcher {
         private final Class<? extends Connection> connection;
