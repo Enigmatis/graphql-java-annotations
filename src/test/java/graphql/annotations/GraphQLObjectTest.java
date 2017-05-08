@@ -547,10 +547,26 @@ public class GraphQLObjectTest {
         }
     }
 
+    private static class ListInputArgument {
+        @GraphQLField
+        public String a;
+        @GraphQLField
+        public List<String> b;
+
+        public ListInputArgument(HashMap<String, Object> args) {
+            a = (String) args.get("a");
+            b = (List<String>) args.get("b");
+        }
+    }
+
     private static class TestObjectInput {
         @GraphQLField
         public String test(int other, @GraphQLNonNull TestInputArgument arg) {
             return arg.a;
+        }
+        @GraphQLField
+        public String testWithList(ListInputArgument arg) {
+            return arg.b.get(0);
         }
     }
 
@@ -566,6 +582,20 @@ public class GraphQLObjectTest {
         assertTrue(result.getErrors().isEmpty());
         Map<String, Object> v = (Map<String, Object>) result.getData();
         assertEquals(v.get("test"), "ok");
+    }
+
+    @Test
+    public void inputListObjectArgument() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
+        GraphQLArgument argument = object.getFieldDefinition("testWithList").getArgument("arg");
+        assertTrue(argument.getType() instanceof GraphQLInputObjectType);
+        assertEquals(argument.getName(), "arg");
+
+        GraphQLSchema schema = newSchema().query(object).build();
+        ExecutionResult result = new GraphQL(schema).execute("{ testWithList(arg: { a:\"ok\", b:[\"one\", \"two\"] }) }", new TestObjectInput());
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> v = (Map<String, Object>) result.getData();
+        assertEquals(v.get("testWithList"), "one");
     }
 
     @Test

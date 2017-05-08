@@ -26,6 +26,7 @@ import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
+import graphql.schema.GraphQLModifiedType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLUnionType;
@@ -519,9 +520,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                     if (graphQLType instanceof GraphQLObjectType) {
                         GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType);
                         graphQLType = inputObject;
-                    } else if (graphQLType instanceof GraphQLNonNull &&
-                            ((GraphQLNonNull) graphQLType).getWrappedType() instanceof GraphQLObjectType) {
-                        GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) ((GraphQLNonNull) graphQLType).getWrappedType());
+                    } else if (graphQLType instanceof GraphQLModifiedType &&
+                            ((GraphQLModifiedType) graphQLType).getWrappedType() instanceof GraphQLObjectType) {
+                        GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) ((GraphQLModifiedType) graphQLType).getWrappedType());
                         graphQLType = inputObject;
                     }
                     return getArgument(parameter, graphQLType);
