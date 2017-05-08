@@ -549,7 +549,7 @@ public class GraphQLObjectTest {
 
     private static class TestObjectInput {
         @GraphQLField
-        public String test(int other, TestInputArgument arg) {
+        public String test(int other, @GraphQLNonNull TestInputArgument arg) {
             return arg.a;
         }
     }

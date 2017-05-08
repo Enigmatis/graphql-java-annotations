@@ -519,6 +519,10 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                     if (graphQLType instanceof GraphQLObjectType) {
                         GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType);
                         graphQLType = inputObject;
+                    } else if (graphQLType instanceof GraphQLNonNull &&
+                            ((GraphQLNonNull) graphQLType).getWrappedType() instanceof GraphQLObjectType) {
+                        GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) ((GraphQLNonNull) graphQLType).getWrappedType());
+                        graphQLType = inputObject;
                     }
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
