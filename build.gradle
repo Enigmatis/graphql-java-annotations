@@ -4,8 +4,6 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
-        classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.1.0'
     }
 }
@@ -21,30 +19,23 @@ apply plugin: 'idea'
 apply plugin: 'osgi'
 apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'com.jfrog.bintray'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
-apply plugin: 'io.codearte.nexus-staging'
-apply plugin: 'com.bmuschko.nexus'
+// custom tasks for creating source/javadoc jars
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
 
 idea {
     project {
         languageLevel = '1.8'
         vcs = 'Git'
-        ipr.withXml { xmlFile ->
-            // enable 'Annotation Processors'
-            xmlFile.asNode().component.find {
-                println(it)
-                return it.@name == 'CompilerConfiguration'
-            }['annotationProcessing'][0].replaceNode {
-                annotationProcessing {
-                    profile(default: true, name: 'Default', useClasspath: 'true', enabled: true)
-                }
-            }
-        }
-        // TODO: add -parameters to IDEA's javac
     }
 }
 
@@ -84,45 +75,9 @@ dependencies {
 
 test.useTestNG()
 
-modifyPom {
-     project {
-         name 'graphql-java-annotations'
-         description 'Annotations-based syntax for GraphQL schema definition'
-         url 'https://github.com/graphql-java/graphql-java-annotations'
-         inceptionYear '2016'
-
-         scm {
-             url 'https://github.com/graphql-java/graphql-java-annotations'
-             connection 'scm:https://yrashk@github.com/graphql-java/graphql-java-annotations.git'
-             developerConnection 'scm:git://github.com/graphql-java/graphql-java-annotations.git'
-         }
-
-         licenses {
-             license {
-                 name 'The Apache Software License, Version 2.0'
-                 url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                 distribution 'repo'
-             }
-         }
-
-         developers {
-             developer {
-                 id 'yrashk'
-                 name 'Yurii Rashkovskii'
-                 email 'yrashk@gmail.com'
-             }
-             developer {
-                 id 'apottere'
-                 name 'Andrew Potter'
-                 email 'Andrew.Potter@coxautoinc.com'
-             }
-         }
-     }
- }
-
 publishing {
     publications {
-        MyPublication(MavenPublication) {
+        maven(MavenPublication) {
             from components.java
             groupId 'com.graphql-java'
             artifactId project.name
@@ -130,6 +85,61 @@ publishing {
 
             artifact sourcesJar
             artifact javadocJar
+
+            pom.withXml {
+                asNode().children().last() + {
+                    resolveStrategy = Closure.DELEGATE_FIRST
+                    name 'graphql-java-annotations'
+                    description 'Annotations-based syntax for GraphQL schema definition'
+                    url 'https://github.com/graphql-java/graphql-java-annotations'
+                    inceptionYear '2016'
+
+                    scm {
+                        url 'https://github.com/graphql-java/graphql-java-annotations'
+                        connection 'scm:https://yrashk@github.com/graphql-java/graphql-java-annotations.git'
+                        developerConnection 'scm:git://github.com/graphql-java/graphql-java-annotations.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'yrashk'
+                            name 'Yurii Rashkovskii'
+                            email 'yrashk@gmail.com'
+                        }
+                        developer {
+                            id 'apottere'
+                            name 'Andrew Potter'
+                            email 'Andrew.Potter@coxautoinc.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+afterReleaseBuild.dependsOn bintrayUpload
+
+bintray {
+    user = System.getenv('BINTRAY_USER') ?: project.findProperty('BINTRAY_USER') ?: ''
+    key = System.getenv('BINTRAY_KEY') ?: project.findProperty('BINTRAY_KEY') ?: ''
+    publications = ['maven']
+    publish = true
+    pkg {
+        repo = 'maven'
+        name = project.name
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/graphql-java/graphql-java-servlet'
+        version {
+            name = project.version
         }
     }
 }
