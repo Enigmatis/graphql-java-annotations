@@ -111,6 +111,11 @@ modifyPom {
                  name 'Yurii Rashkovskii'
                  email 'yrashk@gmail.com'
              }
+             developer {
+                 id 'apottere'
+                 name 'Andrew Potter'
+                 email 'Andrew.Potter@coxautoinc.com'
+             }
          }
      }
  }
