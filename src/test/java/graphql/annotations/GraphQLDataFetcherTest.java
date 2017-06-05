@@ -16,7 +16,11 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.schema.*;
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.PropertyDataFetcher;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
