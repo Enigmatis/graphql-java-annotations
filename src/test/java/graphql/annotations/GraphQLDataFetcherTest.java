@@ -14,16 +14,12 @@
  */
 package graphql.annotations;
 
-import java.util.HashMap;
-
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.PropertyDataFetcher;
+import graphql.schema.*;
 import org.testng.annotations.Test;
+
+import java.util.HashMap;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertFalse;
@@ -33,7 +29,7 @@ import static org.testng.Assert.assertTrue;
 public class GraphQLDataFetcherTest {
 
   @Test
-  public void shouldUsePreferredConstructor() {
+  public void shouldUsePreferredConstructorForField() {
     // Given
     final GraphQLObjectType object = GraphQLAnnotations.object(GraphQLDataFetcherTest.TestGraphQLQuery.class);
     final GraphQLSchema schema = newSchema().query(object).build();
@@ -49,6 +45,38 @@ public class GraphQLDataFetcherTest {
     assertTrue(((HashMap<String,Boolean>)data.get("sample")).get("isBad"));
   }
 
+  @Test
+  public void shouldUseProvidedSoloArgumentForDataFetcherDeclaredInMethod() {
+    // Given
+    final GraphQLObjectType object = GraphQLAnnotations.object(TestMethodWithDataFetcherGraphQLQuery.class);
+    final GraphQLSchema schema = newSchema().query(object).build();
+    final GraphQL graphql = new GraphQL(schema);
+
+    // When
+    final ExecutionResult result = graphql.execute("{great}");
+
+    // Then
+    final HashMap<String, Object> data = (HashMap) result.getData();
+    assertNotNull(data);
+    assertFalse((Boolean)data.get("great"));
+  }
+
+  @Test
+  public void shouldUseTargetAndArgumentsForDataFetcherDeclaredInMethod() {
+    // Given
+    final GraphQLObjectType object = GraphQLAnnotations.object(TestMethodWithDataFetcherGraphQLQuery.class);
+    final GraphQLSchema schema = newSchema().query(object).build();
+    final GraphQL graphql = new GraphQL(schema);
+
+    // When
+    final ExecutionResult result = graphql.execute("{sample {bad}}");
+
+    // Then
+    final HashMap<String, Object> data = (HashMap) result.getData();
+    assertNotNull(data);
+    assertTrue(((HashMap<String,Boolean>)data.get("sample")).get("bad"));
+  }
+
   @GraphQLName("Query")
   public static class TestGraphQLQuery {
     @GraphQLField
@@ -56,6 +84,17 @@ public class GraphQLDataFetcherTest {
     public TestSample sample() { // Note that GraphQL uses TestSample to build the graph
       return null;
     }
+  }
+
+  @GraphQLName("Query")
+  public static class TestMethodWithDataFetcherGraphQLQuery {
+    @GraphQLField
+    @GraphQLDataFetcher(value = SampleOneArgDataFetcher.class, args = "true")
+    public Boolean great() { return false; }
+
+    @GraphQLField
+    @GraphQLDataFetcher(SampleDataFetcher.class)
+    public TestSampleMethod sample() { return null; }
   }
 
   public static class TestSample {
@@ -69,10 +108,35 @@ public class GraphQLDataFetcherTest {
 
   }
 
+  public static class TestSampleMethod {
+
+    @GraphQLField
+    @GraphQLDataFetcher(value = SampleMultiArgDataFetcher.class, firstArgIsTargetName = true, args = {"true"})
+    public Boolean isBad() { return false; } // Defaults to FieldDataFetcher
+
+  }
+
   public static class SampleDataFetcher implements DataFetcher {
     @Override
     public Object get(final DataFetchingEnvironment environment) {
       return new Sample(); // Notice that it return a Sample, not a TestSample
+    }
+  }
+
+  public static class SampleOneArgDataFetcher implements DataFetcher {
+    private boolean flip = false;
+
+    public SampleOneArgDataFetcher(String flip) {
+      this.flip = Boolean.valueOf(flip);
+    }
+
+    @Override
+    public Object get(DataFetchingEnvironment environment) {
+      if ( flip ) {
+        return !flip;
+      } else {
+        return flip;
+      }
     }
   }
 
