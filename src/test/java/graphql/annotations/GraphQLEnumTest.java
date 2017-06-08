@@ -62,7 +62,7 @@ public class GraphQLEnumTest {
     @Test
     public void test() throws IllegalAccessException, NoSuchMethodException, InstantiationException {
         GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
-        GraphQL graphql = new GraphQL(newSchema().query(queryObject).build());
+        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
         assertEquals(result.getData().toString(), "{defaultUser={name=ONE}}");

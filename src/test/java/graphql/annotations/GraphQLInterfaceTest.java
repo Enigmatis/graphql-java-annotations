@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,16 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.schema.*;
+import graphql.TypeResolutionEnvironment;
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInterfaceType;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLUnionType;
+import graphql.schema.TypeResolver;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -45,7 +54,7 @@ public class GraphQLInterfaceTest {
     public static class Resolver implements TypeResolver {
 
         @Override
-        public GraphQLObjectType getType(Object object) {
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
             try {
                 return GraphQLAnnotations.object(TestObject.class);
             } catch (GraphQLAnnotationsException e) {
@@ -105,7 +114,7 @@ public class GraphQLInterfaceTest {
     @Test
     public void testInterfaces() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
-        List<GraphQLInterfaceType> ifaces = object.getInterfaces();
+        List<GraphQLOutputType> ifaces = object.getInterfaces();
         assertEquals(ifaces.size(), 1);
         assertEquals(ifaces.get(0).getName(), "TestIface");
     }
@@ -117,13 +126,16 @@ public class GraphQLInterfaceTest {
             return new TestObject();
         }
     }
+
     static class Query {
         @GraphQLDataFetcher(IfaceFetcher.class)
-        @GraphQLField public TestIface iface;
+        @GraphQLField
+        public TestIface iface;
     }
 
     public static class UnionQuery {
-        @GraphQLField public TestUnion union;
+        @GraphQLField
+        public TestUnion union;
 
         public UnionQuery(TestUnion union) {
             this.union = union;
@@ -134,18 +146,20 @@ public class GraphQLInterfaceTest {
     public void query() {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{ iface { value } }");
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ iface { value } }");
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, Map<String, String>>)result.getData()).get("iface").get("value"), "a");
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("iface").get("value"), "a");
     }
 
     @Test
     public void queryUnion() {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(UnionQuery.class)).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{ union {  ... on TestObject1 { value }  } }", new UnionQuery(new TestObject1()));
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ union {  ... on TestObject1 { value }  } }", new UnionQuery(new TestObject1()));
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, Map<String, String>>)result.getData()).get("union").get("value"), "a");
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("union").get("value"), "a");
     }
 
 }

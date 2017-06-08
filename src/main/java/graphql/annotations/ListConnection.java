@@ -18,8 +18,8 @@ import graphql.relay.SimpleListConnection;
 
 import java.util.List;
 
-public class ListConnection extends SimpleListConnection implements Connection {
-    public ListConnection(List<?> data) {
+public class ListConnection<T> extends SimpleListConnection<T> {
+    public ListConnection(List<T> data) {
         super(data);
     }
 }

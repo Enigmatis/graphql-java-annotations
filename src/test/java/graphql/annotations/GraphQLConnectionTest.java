@@ -16,18 +16,17 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.relay.PageInfo;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static graphql.annotations.util.RelayKit.EMPTY_CONNECTION;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -62,7 +61,8 @@ public class GraphQLConnectionTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestListField.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
                 new TestListField(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
         assertTrue(result.getErrors().isEmpty());
 
@@ -83,7 +83,7 @@ public class GraphQLConnectionTest {
         }
 
         @GraphQLField
-        @GraphQLConnection
+        @GraphQLConnection(name = "objStream")
         public Stream<Obj> getObjStream() {
             Obj[] a = new Obj[objs.size()];
             return Stream.of(objs.toArray(a));
@@ -95,7 +95,8 @@ public class GraphQLConnectionTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
                 new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
 
         assertTrue(result.getErrors().isEmpty());
@@ -105,7 +106,7 @@ public class GraphQLConnectionTest {
     }
 
     public void testResult(String name, ExecutionResult result) {
-        Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = (Map<String, Map<String, List<Map<String, Map<String, Object>>>>>) result.getData();
+        Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
         List<Map<String, Map<String, Object>>> edges = data.get(name).get("edges");
 
         assertEquals(edges.size(), 1);
@@ -118,7 +119,8 @@ public class GraphQLConnectionTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{ objStream(first: 1) { edges { cursor node { id, val } } } }",
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ objStream(first: 1) { edges { cursor node { id, val } } } }",
                 new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
 
         assertTrue(result.getErrors().isEmpty());
@@ -134,11 +136,7 @@ public class GraphQLConnectionTest {
 
         @Override
         public Object get(DataFetchingEnvironment environment) {
-            graphql.relay.Connection connection = new graphql.relay.Connection();
-            connection.setEdges(Collections.emptyList());
-            PageInfo pageInfo = new PageInfo();
-            connection.setPageInfo(pageInfo);
-            return connection;
+            return EMPTY_CONNECTION;
         }
     }
 
@@ -161,7 +159,8 @@ public class GraphQLConnectionTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestCustomConnection.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
                 new TestCustomConnection(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
 
         assertTrue(result.getErrors().isEmpty());

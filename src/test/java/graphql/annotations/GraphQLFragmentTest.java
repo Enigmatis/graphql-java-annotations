@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,13 +16,19 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.TypeResolutionEnvironment;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.TypeResolver;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -53,9 +59,9 @@ public class GraphQLFragmentTest {
 
         GraphQLSchema schema = GraphQLSchema.newSchema()
                 .query(rootType)
-                .build(new HashSet(Arrays.asList(iface, rootType, objectType, objectType2)));
+                .build(new HashSet<>(Arrays.<graphql.schema.GraphQLType>asList(iface, objectType)));
 
-        GraphQL graphQL2 = new GraphQL(schema);
+        GraphQL graphQL2 = GraphQL.newGraphQL(schema).build();
 
         // When
         ExecutionResult graphQLResult = graphQL2.execute("{items { ... on MyObject {a, my {b}} ... on MyObject2 {a, b}  }}", new RootObject());
@@ -110,8 +116,8 @@ public class GraphQLFragmentTest {
     public static class MyTypeResolver implements TypeResolver {
 
         @Override
-        public GraphQLObjectType getType(Object object) {
-            return registry.get(object.getClass().getSimpleName());
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+            return registry.get(env.getObject().getClass().getSimpleName());
         }
     }
 
