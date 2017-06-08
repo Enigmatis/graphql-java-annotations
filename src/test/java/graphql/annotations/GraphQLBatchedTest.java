@@ -55,7 +55,7 @@ public class GraphQLBatchedTest {
 
         GraphQLObjectType object = GraphQLAnnotations.object(TestBatchedObject.class);
         GraphQLSchema schema = newSchema().query(object).build();
-        GraphQL graphql = new GraphQL(schema, new BatchedExecutionStrategy());
+        GraphQL graphql = GraphQL.newGraphQL(schema).queryExecutionStrategy(new BatchedExecutionStrategy()).build();
         ExecutionResult result = graphql.execute("{ fields { a } }", new TestBatchedObject());
         List errors = result.getErrors();
         for (Object e : errors) {

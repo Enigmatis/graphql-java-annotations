@@ -16,6 +16,7 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.TypeResolutionEnvironment;
 import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLType;
@@ -32,7 +33,7 @@ public class RelayTest {
     public static class ResultTypeResolver implements TypeResolver {
 
         @Override
-        public GraphQLObjectType getType(Object object) {
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
             return GraphQLAnnotations.object(Result.class);
         }
     }
@@ -105,7 +106,7 @@ public class RelayTest {
 
         GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
 
-        GraphQL graphQL = new GraphQL(schema, new EnhancedExecutionStrategy());
+        GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
         ExecutionResult result = graphQL.execute("mutation { doSomething(input: {clientMutationId: \"1\"}) { i clientMutationId } }", new TestObject());
 
@@ -127,7 +128,7 @@ public class RelayTest {
 
         GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
 
-        GraphQL graphQL = new GraphQL(schema, new EnhancedExecutionStrategy());
+        GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
         ExecutionResult result = graphQL.execute("mutation { doSomethingI(input: {clientMutationId: \"1\"}) { i clientMutationId } }", new TestObject());
 
@@ -166,7 +167,7 @@ public class RelayTest {
 
         GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
 
-        GraphQL graphQL = new GraphQL(schema, new EnhancedExecutionStrategy());
+        GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
         ExecutionResult result = graphQL.execute("mutation { doSomethingElse(input: {a: 0, b: 1, clientMutationId: \"1\"}) { i clientMutationId } }", new TestObject());
 
@@ -203,7 +204,7 @@ public class RelayTest {
 
         GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
 
-        GraphQL graphQL = new GraphQL(schema, new EnhancedExecutionStrategy());
+        GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
         Map<String, Object> variables = new HashMap<>();
         Map<String, Object> inputVariables = new HashMap<>();

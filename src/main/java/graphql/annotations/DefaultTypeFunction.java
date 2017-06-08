@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,6 +45,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static graphql.annotations.util.NamingKit.toGraphqlName;
 import static graphql.schema.GraphQLEnumType.newEnum;
 
 @Component(scope = ServiceScope.SINGLETON, property = "type=default")
@@ -226,7 +227,7 @@ public class DefaultTypeFunction implements TypeFunction {
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             GraphQLName name = aClass.getAnnotation(GraphQLName.class);
-            String typeName = name == null ? aClass.getSimpleName() : name.value();
+            String typeName = toGraphqlName(name == null ? aClass.getSimpleName() : name.value());
 
             if (types.containsKey(typeName)) {
                 return types.get(typeName);
@@ -282,7 +283,7 @@ public class DefaultTypeFunction implements TypeFunction {
         @Override
         public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
             GraphQLName name = aClass.getAnnotation(GraphQLName.class);
-            String typeName = name == null ? aClass.getName() : name.value();
+            String typeName = toGraphqlName(name == null ? aClass.getName() : name.value());
             if (types.containsKey(typeName)) {
                 return types.get(typeName);
             } else if (processing.containsKey(typeName)) {
@@ -293,7 +294,7 @@ public class DefaultTypeFunction implements TypeFunction {
                 if (aClass.isInterface()) {
                     type = annotationsProcessor.getInterface(aClass);
                 } else {
-                    type = annotationsProcessor.getObject(aClass);
+                    type = annotationsProcessor.getObjectOrRef(aClass);
                 }
                 types.put(typeName, type);
                 processing.remove(typeName);
