@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@ package graphql.annotations;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLUnionType;
 
 public interface GraphQLAnnotationsProcessor {
@@ -70,6 +71,18 @@ public interface GraphQLAnnotationsProcessor {
     GraphQLObjectType getObject(Class<?> object) throws GraphQLAnnotationsException;
 
     /**
+     * This will examine the object class and return a {@link GraphQLOutputType} representation
+     * which may be a {@link GraphQLObjectType} or a {@link graphql.schema.GraphQLTypeReference}
+     *
+     * @param object the object class to examine
+     *
+     * @return a {@link GraphQLOutputType} that represents that object class
+     *
+     * @throws GraphQLAnnotationsException if the object class cannot be examined
+     */
+    GraphQLOutputType getObjectOrRef(Class<?> object) throws GraphQLAnnotationsException;
+
+    /**
      * This will examine the object class and return a {@link GraphQLObjectType.Builder} ready for further definition
      *
      * @param object the object class to examine
@@ -84,8 +97,9 @@ public interface GraphQLAnnotationsProcessor {
      * This will turn a {@link GraphQLObjectType} into a corresponding {@link GraphQLInputObjectType}
      *
      * @param graphQLType the graphql object type
+     * @param newNamePrefix since graphql types MUST be unique, this prefix will be applied to the new input types
      *
      * @return a {@link GraphQLInputObjectType}
      */
-    GraphQLInputObjectType getInputObject(GraphQLObjectType graphQLType);
+    GraphQLInputObjectType getInputObject(GraphQLObjectType graphQLType, String newNamePrefix);
 }
