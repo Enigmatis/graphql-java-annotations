@@ -118,9 +118,9 @@ public class GraphQLDataFetcherTest {
         @GraphQLDataFetcher(value = SampleMultiArgDataFetcher.class, firstArgIsTargetName = true, args = {"true"})
         public Boolean isBad() { return false; } // Defaults to FieldDataFetcher
 
-        }
+    }
 
-        public static class SampleDataFetcher implements DataFetcher {
+    public static class SampleDataFetcher implements DataFetcher {
         @Override
         public Object get(final DataFetchingEnvironment environment) {
             return new Sample(); // Notice that it return a Sample, not a TestSample
@@ -155,7 +155,7 @@ public class GraphQLDataFetcherTest {
         @Override
         public Object get(DataFetchingEnvironment environment) {
             final Object result = super.get(environment);
-            if ( flip ) {
+            if (flip) {
                 return !(Boolean)result;
             } else {
                 return result;
