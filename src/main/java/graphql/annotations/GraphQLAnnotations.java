@@ -188,7 +188,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return builder;
     }
 
-
     public static GraphQLInterfaceType.Builder ifaceBuilder(Class<?> iface) throws GraphQLAnnotationsException,
             IllegalAccessException {
         return getInstance().getIfaceBuilder(iface);
@@ -410,22 +409,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         GraphQLDataFetcher dataFetcher = field.getAnnotation(GraphQLDataFetcher.class);
         DataFetcher actualDataFetcher = null;
         if (nonNull(dataFetcher)) {
-            final String[] args;
-            if (dataFetcher.firstArgIsTargetName()) {
-                args = Stream.concat(Stream.of(field.getName()), stream(dataFetcher.args())).toArray(String[]::new);
-            } else {
-                args = dataFetcher.args();
-            }
-            if (args.length == 0) {
-                actualDataFetcher = newInstance(dataFetcher.value());
-            } else {
-                try {
-                    final Constructor<? extends DataFetcher> ctr = dataFetcher.value().getDeclaredConstructor(
-                            stream(args).map(v -> String.class).toArray(Class[]::new));
-                    actualDataFetcher = constructNewInstance(ctr, (Object[]) args);
-                } catch (final NoSuchMethodException e) {
-                }
-            }
+            actualDataFetcher = constructDataFetcher(field.getName(), dataFetcher);
         }
 
         if (actualDataFetcher == null) {
@@ -467,6 +451,26 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         builder.dataFetcher(actualDataFetcher);
 
         return new GraphQLFieldDefinitionWrapper(builder.build());
+    }
+
+    private DataFetcher constructDataFetcher(String fieldName, GraphQLDataFetcher annotatedDataFetcher) {
+        final String[] args;
+        if ( annotatedDataFetcher.firstArgIsTargetName() ) {
+            args = Stream.concat(Stream.of(fieldName), stream(annotatedDataFetcher.args())).toArray(String[]::new);
+        } else {
+            args = annotatedDataFetcher.args();
+        }
+        if (args.length == 0) {
+            return newInstance(annotatedDataFetcher.value());
+        } else {
+            try {
+                final Constructor<? extends DataFetcher> ctr = annotatedDataFetcher.value().getDeclaredConstructor(
+                        stream(args).map(v -> String.class).toArray(Class[]::new));
+                return constructNewInstance(ctr, (Object[]) args);
+            } catch (final NoSuchMethodException e) {
+                throw new GraphQLAnnotationsException("Unable to instantiate DataFetcher via constructor for: " + fieldName, e);
+            }
+        }
     }
 
     protected GraphQLFieldDefinition field(Field field) throws IllegalAccessException, InstantiationException {
@@ -592,7 +596,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         } else if (dataFetcher == null) {
             actualDataFetcher = new MethodDataFetcher(method, typeFunction);
         } else {
-            actualDataFetcher = newInstance(dataFetcher.value());
+            actualDataFetcher = constructDataFetcher(method.getName(), dataFetcher);
         }
 
         if (method.isAnnotationPresent(GraphQLRelayMutation.class) && relay != null) {
