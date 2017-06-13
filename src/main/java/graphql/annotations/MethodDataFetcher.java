@@ -16,6 +16,7 @@ package graphql.annotations;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLModifiedType;
 import graphql.schema.GraphQLObjectType;
 
 import java.lang.reflect.Constructor;
@@ -76,7 +77,7 @@ class MethodDataFetcher implements DataFetcher {
                 continue;
             }
             graphql.schema.GraphQLType graphQLType = typeFunction.apply(paramType, p.getAnnotatedType());
-            if (graphQLType instanceof GraphQLObjectType) {
+            if (graphQLType instanceof GraphQLObjectType || graphQLType instanceof GraphQLModifiedType) {
                 Constructor<?> constructor = constructor(paramType, HashMap.class);
                 result.add(constructNewInstance(constructor, envArgs.next()));
 
