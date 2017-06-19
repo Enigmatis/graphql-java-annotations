@@ -17,21 +17,11 @@ package graphql.annotations;
 import graphql.schema.GraphQLType;
 
 import java.lang.reflect.AnnotatedType;
-import java.util.function.BiFunction;
 
 /**
  * A GraphQLType builder for java types.
  */
-public interface TypeFunction extends BiFunction<Class<?>, AnnotatedType, GraphQLType> {
-    /**
-     * @deprecated Override {@link #buildType(String, Class, AnnotatedType)} as an alternative.
-     * This interface will not extend {@link BiFunction} in a future release.
-     */
-    @Deprecated
-    default GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
-        return buildType(aClass, annotatedType);
-    }
-
+public interface TypeFunction {
     /**
      * Get the graphql type name that will be used to build the type.
      * The type name is passed to the {@link #buildType} method when building the type.
@@ -69,7 +59,5 @@ public interface TypeFunction extends BiFunction<Class<?>, AnnotatedType, GraphQ
      * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
      * @return The built {@link GraphQLType}
      */
-    default GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
-        return apply(aClass, annotatedType);
-    }
+    GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType);
 }

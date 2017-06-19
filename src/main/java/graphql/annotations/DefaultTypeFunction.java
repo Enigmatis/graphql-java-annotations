@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import static graphql.annotations.util.NamingKit.toGraphqlName;
@@ -47,7 +48,7 @@ public class DefaultTypeFunction implements TypeFunction {
             policyOption = ReferencePolicyOption.GREEDY)
     protected List<TypeFunction> otherFunctions = new ArrayList<>();
 
-    private ArrayList<TypeFunction> typeFunctions;
+    private CopyOnWriteArrayList<TypeFunction> typeFunctions;
 
     GraphQLAnnotationsProcessor annotationsProcessor;
 
@@ -335,7 +336,7 @@ public class DefaultTypeFunction implements TypeFunction {
     }
 
     public DefaultTypeFunction() {
-        typeFunctions = new ArrayList<>();
+        typeFunctions = new CopyOnWriteArrayList<>();
 
         typeFunctions.add(new StringFunction());
         typeFunctions.add(new BooleanFunction());
