@@ -12,7 +12,7 @@ syntax for GraphQL schema definition.
 
 ```groovy
 dependencies {
-  compile "com.graphql-java:graphql-java-annotations:0.13.1"
+  compile "com.graphql-java:graphql-java-annotations:0.14.0"
 }
 ```
 

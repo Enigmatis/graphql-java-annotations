@@ -221,9 +221,10 @@ public class GraphQLObjectTest {
         GraphQLSchema schema = newSchema().query(object).build();
         GraphQLSchema schemaInherited = newSchema().query(objectInherited).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{field0}", new TestObject());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field0}", new TestObject());
         assertEquals(((Map<String, Object>) result.getData()).get("field0"), "test");
-        result = new GraphQL(schemaInherited).execute("{field1}", new TestObjectInherited());
+        GraphQL graphQL = GraphQL.newGraphQL(schemaInherited).build();
+        result = graphQL.execute("{field1}", new TestObjectInherited());
         assertEquals(((Map<String, Object>) result.getData()).get("field1"), "inherited");
     }
 
@@ -258,7 +259,7 @@ public class GraphQLObjectTest {
 
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{id}", new TestObjectBridgMethod());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{id}", new TestObjectBridgMethod());
         assertEquals(((Map<String, Object>) result.getData()).get("id"), 1L);
     }
 
@@ -407,7 +408,7 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestDataFetcher.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{field someField}", new TestObject());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field someField}", new TestObject());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("field"), "test");
         assertEquals(((Map<String, String>) result.getData()).get("someField"), "test");
@@ -418,15 +419,15 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{field0}", new TestObject());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field0}", new TestObject());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("field0"), "test");
 
-        result = new GraphQL(schema).execute("{fieldWithArgs(a: \"test\", b: \"passed\")}", new TestObject());
+        result = GraphQL.newGraphQL(schema).build().execute("{fieldWithArgs(a: \"test\", b: \"passed\")}", new TestObject());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("fieldWithArgs"), "passed");
 
-        result = new GraphQL(schema).execute("{fieldWithArgsAndEnvironment(a: \"test\", b: \"passed\")}", new TestObject());
+        result = GraphQL.newGraphQL(schema).build().execute("{fieldWithArgsAndEnvironment(a: \"test\", b: \"passed\")}", new TestObject());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("fieldWithArgsAndEnvironment"), "test");
 
@@ -437,7 +438,7 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestField.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{field1}", new TestField());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field1}", new TestField());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("field1"), "test");
     }
@@ -447,7 +448,7 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(PrivateTestField.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{field1, field2, booleanField}", new PrivateTestField());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field1, field2, booleanField}", new PrivateTestField());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("field1"), "test");
         assertEquals(((Map<String, String>) result.getData()).get("field2"), "test");
@@ -460,7 +461,7 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema).execute("{fieldWithArgs(a: \"test\")}", new TestObject());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{fieldWithArgs(a: \"test\")}", new TestObject());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("fieldWithArgs"), "default");
     }
@@ -493,18 +494,18 @@ public class GraphQLObjectTest {
         class2.value = "hello";
         class1.value = "bye";
 
-        ExecutionResult result = new GraphQL(schema).execute("{ class2 { value } }", class1);
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{ class2 { value } }", class1);
         assertTrue(result.getErrors().isEmpty());
         Map<String, Object> data = (Map<String, Object>) result.getData();
         assertEquals(((Map<String, Object>) data.get("class2")).get("value"), "hello");
 
-        result = new GraphQL(schema).execute("{ class2 { class1 { value } } }", class1);
+        result = GraphQL.newGraphQL(schema).build().execute("{ class2 { class1 { value } } }", class1);
         assertTrue(result.getErrors().isEmpty());
         data = (Map<String, Object>) result.getData();
         Map<String, Object> k1 = (Map<String, Object>) ((Map<String, Object>) data.get("class2")).get("class1");
         assertEquals(k1.get("value"), "bye");
 
-        result = new GraphQL(schema).execute("{ class2 { class1 { class2 { value } } } }", class1);
+        result = GraphQL.newGraphQL(schema).build().execute("{ class2 { class1 { class2 { value } } } }", class1);
         assertTrue(result.getErrors().isEmpty());
     }
 
@@ -563,7 +564,7 @@ public class GraphQLObjectTest {
         assertEquals(argument.getName(), "arg");
 
         GraphQLSchema schema = newSchema().query(object).build();
-        ExecutionResult result = new GraphQL(schema).execute("{ test(arg: { a:\"ok\", b:2 }, other:0) }", new TestObjectInput());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{ test(arg: { a:\"ok\", b:2 }, other:0) }", new TestObjectInput());
         assertTrue(result.getErrors().isEmpty());
         Map<String, Object> v = (Map<String, Object>) result.getData();
         assertEquals(v.get("test"), "ok");
@@ -572,7 +573,7 @@ public class GraphQLObjectTest {
     @Test
     public void inputObject() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
-        GraphQLInputObjectType inputObjectType = GraphQLAnnotations.inputObject(object);
+        GraphQLInputObjectType inputObjectType = GraphQLAnnotations.inputObject(object, "input");
         assertEquals(inputObjectType.getFields().size(), object.getFieldDefinitions().size());
     }
 
@@ -621,7 +622,8 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(OptionalTest.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = new GraphQL(schema, new EnhancedExecutionStrategy()).execute("{empty, nonempty}", new OptionalTest());
+        GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
+        ExecutionResult result = graphQL.execute("{empty, nonempty}", new OptionalTest());
         assertTrue(result.getErrors().isEmpty());
         Map<String, Object> v = (Map<String, Object>) result.getData();
         assertNull(v.get("empty"));
@@ -631,7 +633,7 @@ public class GraphQLObjectTest {
     @Test
     public void optionalInput() {
         GraphQLObjectType object = GraphQLAnnotations.object(OptionalTest.class);
-        GraphQLInputObjectType inputObject = GraphQLAnnotations.inputObject(object);
+        GraphQLInputObjectType inputObject = GraphQLAnnotations.inputObject(object, "input");
         GraphQLObjectType mutation = GraphQLObjectType.newObject().name("mut").field(newFieldDefinition().name("test").type(object).
                 argument(GraphQLArgument.newArgument().type(inputObject).name("input").build()).dataFetcher(environment -> {
             Map<String, String> input = environment.getArgument("input");
@@ -639,7 +641,8 @@ public class GraphQLObjectTest {
         }).build()).build();
         GraphQLSchema schema = newSchema().query(object).mutation(mutation).build();
 
-        ExecutionResult result = new GraphQL(schema, new EnhancedExecutionStrategy()).execute("mutation {test(input: {empty: \"test\"}) { empty nonempty } }", new OptionalTest());
+        GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
+        ExecutionResult result = graphQL.execute("mutation {test(input: {empty: \"test\"}) { empty nonempty } }", new OptionalTest());
         assertTrue(result.getErrors().isEmpty());
         Map<String, Object> v = (Map<String, Object>) ((Map<String, Object>) result.getData()).get("test");
         assertEquals(v.get("empty"), "test");
@@ -669,8 +672,9 @@ public class GraphQLObjectTest {
     public void queryEnum() {
         GraphQLObjectType object = GraphQLAnnotations.object(EnumTest.class);
         GraphQLSchema schema = newSchema().query(object).build();
+        GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
-        ExecutionResult result = new GraphQL(schema, new EnhancedExecutionStrategy()).execute("{e}", new EnumTest(EnumTest.E.B));
+        ExecutionResult result = graphQL.execute("{e}", new EnumTest(EnumTest.E.B));
         assertTrue(result.getErrors().isEmpty());
         Map<String, Object> v = (Map<String, Object>) result.getData();
         assertEquals(v.get("e"), "B");
