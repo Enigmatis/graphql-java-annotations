@@ -28,7 +28,7 @@ public class NamingKit {
      *
      * @param name the name to ensure
      *
-     * @return
+     * @return a valid name
      */
     public static String toGraphqlName(String name) {
         if (VALID_NAME.matcher(name).matches()) {
