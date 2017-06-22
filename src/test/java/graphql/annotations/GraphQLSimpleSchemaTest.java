@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,8 +62,9 @@ public class GraphQLSimpleSchemaTest {
 
     @Test
     public void detachedCall() {
-        GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
-        GraphQL graphql = new GraphQL(newSchema().query(queryObject).build());
+        GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
+        GraphQLObjectType queryObject = graphQLAnnotations.object(Query.class);
+        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
         String actual = result.getData().toString();
@@ -72,8 +73,9 @@ public class GraphQLSimpleSchemaTest {
 
     @Test
     public void staticCall() {
-        GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
-        GraphQL graphql = new GraphQL(newSchema().query(queryObject).build());
+        GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
+        GraphQLObjectType queryObject = graphQLAnnotations.object(Query.class);
+        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser2{ name } }");
         String actual = result.getData().toString();

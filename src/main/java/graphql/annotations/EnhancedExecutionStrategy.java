@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,27 +14,35 @@
  */
 package graphql.annotations;
 
-import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.execution.ExecutionContext;
+import graphql.execution.ExecutionParameters;
 import graphql.execution.SimpleExecutionStrategy;
-import graphql.language.*;
-import graphql.schema.*;
+import graphql.execution.TypeInfo;
+import graphql.language.Argument;
+import graphql.language.Field;
+import graphql.language.ObjectValue;
+import graphql.language.StringValue;
+import graphql.language.VariableReference;
+import graphql.schema.GraphQLEnumType;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static graphql.execution.ExecutionParameters.newParameters;
+import static graphql.execution.TypeInfoWorkaround.newTypeInfo;
+
 public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
 
-    private static final Logger log = LoggerFactory.getLogger(EnhancedExecutionStrategy.class);
     private static final String CLIENT_MUTATION_ID = "clientMutationId";
 
     @Override
-    protected ExecutionResult resolveField(ExecutionContext executionContext, GraphQLObjectType parentType, Object source, List<Field> fields) {
+    protected ExecutionResult resolveField(ExecutionContext executionContext, ExecutionParameters parameters, List<Field> fields) {
+        GraphQLObjectType parentType = (GraphQLObjectType) parameters.typeInfo().type();
         GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, fields.get(0));
         if (fieldDef == null) return null;
 
@@ -43,7 +51,7 @@ public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
             Argument argument = field.getArguments().get(0);
 
             Object clientMutationId;
-            if (argument.getValue() instanceof  VariableReference) {
+            if (argument.getValue() instanceof VariableReference) {
                 VariableReference ref = (VariableReference) argument.getValue();
                 HashMap mutationInputVariables = (HashMap) executionContext.getVariables().get(ref.getName());
                 clientMutationId = mutationInputVariables.get(CLIENT_MUTATION_ID);
@@ -55,20 +63,45 @@ public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
                 clientMutationId = clientMutationIdVal.getValue();
             }
 
-            return completeValue(executionContext, fieldDef.getType(), fields, clientMutationId);
+            TypeInfo fieldTypeInfo = newTypeInfo(fieldDef.getType(), parameters.typeInfo());
+            ExecutionParameters newParameters = newParameters()
+                    .arguments(parameters.arguments())
+                    .fields(parameters.fields())
+                    .typeInfo(fieldTypeInfo)
+                    .source(clientMutationId)
+                    .build();
+
+
+            return completeValue(executionContext, newParameters, fields);
         } else {
-            return super.resolveField(executionContext, parentType, source, fields);
+            return super.resolveField(executionContext, parameters, fields);
         }
     }
 
     @Override
-    protected ExecutionResult completeValue(ExecutionContext executionContext, GraphQLType fieldType, List<Field> fields, Object result) {
+    protected ExecutionResult completeValue(ExecutionContext executionContext, ExecutionParameters parameters, List<Field> fields) {
+        GraphQLType fieldType = parameters.typeInfo().type();
+        Object result = parameters.source();
         if (result instanceof Enum && fieldType instanceof GraphQLEnumType) {
-            return super.completeValue(executionContext, fieldType, fields, ((GraphQLEnumType) fieldType).getCoercing().parseValue(((Enum) result).name()));
+            Object value = ((GraphQLEnumType) fieldType).getCoercing().parseValue(((Enum) result).name());
+            return super.completeValue(executionContext, withSource(parameters, value), fields);
         }
         if (result instanceof Optional) {
-            return completeValue(executionContext, fieldType, fields, ((Optional) result).orElse(null));
+            Object value = ((Optional<?>) result).orElse(null);
+            return completeValue(executionContext, withSource(parameters, value), fields);
         }
-        return super.completeValue(executionContext, fieldType, fields, result);
+        return super.completeValue(executionContext, parameters, fields);
+    }
+
+    /*
+      Creates a new parameters with the specified object as its source
+     */
+    private ExecutionParameters withSource(ExecutionParameters parameters, Object source) {
+        return newParameters()
+                .arguments(parameters.arguments())
+                .fields(parameters.fields())
+                .typeInfo(parameters.typeInfo())
+                .source(source)
+                .build();
     }
 }

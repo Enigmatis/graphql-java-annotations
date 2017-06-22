@@ -17,10 +17,47 @@ package graphql.annotations;
 import graphql.schema.GraphQLType;
 
 import java.lang.reflect.AnnotatedType;
-import java.util.Collection;
-import java.util.function.BiFunction;
 
-public interface TypeFunction extends BiFunction<Class<?>, AnnotatedType, GraphQLType> {
+/**
+ * A GraphQLType builder for java types.
+ */
+public interface TypeFunction {
+    /**
+     * Get the graphql type name that will be used to build the type.
+     * The type name is passed to the {@link #buildType} method when building the type.
+     * @param aClass The java type to build the type name for
+     * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
+     * @return The graphql type name
+     */
+    default String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
+        return null;
+    }
 
-    Collection<Class<?>> getAcceptedTypes();
+    /**
+     * Get whether this builder handles the given type.
+     * @param aClass The java type to build the type name for
+     * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
+     * @return True if this builder can build the type
+     */
+    boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType);
+
+    /**
+     * Build a {@link GraphQLType} object from a java type.
+     * This is a convenience method for calling {@link #buildType(String, Class, AnnotatedType)} without a type name.
+     * @param aClass The java type to build the type name for
+     * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
+     * @return The built {@link GraphQLType}
+     */
+    default GraphQLType buildType(Class<?> aClass, AnnotatedType annotatedType) {
+        return buildType(getTypeName(aClass, annotatedType), aClass, annotatedType);
+    }
+
+    /**
+     * Build a {@link GraphQLType} object from a java type.
+     * @param typeName The name to give the graphql type
+     * @param aClass The java type to build the type name for
+     * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
+     * @return The built {@link GraphQLType}
+     */
+    GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType);
 }

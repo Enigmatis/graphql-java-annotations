@@ -14,12 +14,9 @@
  */
 package graphql.annotations;
 
-import graphql.schema.GraphQLList;
-
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
-import java.util.Collection;
 import java.util.List;
 
 public class BatchedTypeFunction implements TypeFunction {
@@ -30,7 +27,17 @@ public class BatchedTypeFunction implements TypeFunction {
     }
 
     @Override
-    public graphql.schema.GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
+    public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
+        return defaultTypeFunction.getTypeName(aClass, annotatedType);
+    }
+
+    @Override
+    public boolean canBuildType(final Class<?> aClass, final AnnotatedType type) {
+        return defaultTypeFunction.canBuildType(aClass, type);
+    }
+
+    @Override
+    public graphql.schema.GraphQLType buildType(final String typeName, final Class<?> aClass, final AnnotatedType annotatedType) {
         if (!aClass.isAssignableFrom(List.class)) {
             throw new IllegalArgumentException("Batched method should return a List");
         }
@@ -45,10 +52,6 @@ public class BatchedTypeFunction implements TypeFunction {
         } else {
             klass = (Class<?>) arg.getType();
         }
-        return defaultTypeFunction.apply(klass, arg);
-    }
-
-    @Override public Collection<Class<?>> getAcceptedTypes() {
-        return defaultTypeFunction.getAcceptedTypes();
+        return defaultTypeFunction.buildType(typeName, klass, arg);
     }
 }
