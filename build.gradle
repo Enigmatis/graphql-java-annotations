@@ -11,7 +11,7 @@ buildscript {
 }
 plugins {
     id "com.github.hierynomus.license" version "0.12.1"
-    id "com.jfrog.bintray" version "1.6"
+    id "com.jfrog.bintray" version "1.7"
     id 'net.researchgate.release' version '2.3.4'
 }
 
@@ -124,6 +124,11 @@ publishing {
                             name 'Andrew Potter'
                             email 'Andrew.Potter@coxautoinc.com'
                         }
+                        developer {
+                            id 'bbakerman'
+                            name 'Brad Baker'
+                            email 'bbakerman@gmail.com'
+                        }
                     }
                 }
             }
@@ -139,12 +144,15 @@ bintray {
     publications = ['maven']
     publish = true
     pkg {
-        repo = 'graphql-java-graphql-java-annotations'
+        userOrg = 'graphql-java'
+        desc = 'This library offers an annotations-based syntax for GraphQL schema definition.'
+        repo = 'graphql-java-annotations'
         name = 'graphql-java-annotations'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/graphql-java/graphql-java-annotations'
         version {
             name = project.version
+            released  = new Date()
         }
     }
 }
