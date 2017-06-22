@@ -483,7 +483,8 @@ public class GraphQLObjectTest {
 
     @Test
     public void recursiveTypes() {
-        GraphQLObjectType object = GraphQLAnnotations.object(Class1.class);
+        GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
+        GraphQLObjectType object = graphQLAnnotations.getObject(Class1.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
         Class1 class1 = new Class1();
@@ -578,13 +579,18 @@ public class GraphQLObjectTest {
 
     public static class UUIDTypeFunction implements TypeFunction {
         @Override
-        public GraphQLType apply(Class<?> aClass, AnnotatedType annotatedType) {
-            return GraphQLString;
+        public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
+            return aClass == UUID.class;
         }
 
         @Override
-        public Collection<Class<?>> getAcceptedTypes() {
-            return Collections.singletonList(UUID.class);
+        public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
+            return "UUID";
+        }
+
+        @Override
+        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+            return GraphQLString;
         }
     }
 

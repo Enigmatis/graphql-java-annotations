@@ -86,8 +86,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     private final Stack<String> processing = new Stack<>();
 
     public GraphQLAnnotations() {
-        defaultTypeFunction = new DefaultTypeFunction();
+        this(new DefaultTypeFunction());
         ((DefaultTypeFunction) defaultTypeFunction).setAnnotationsProcessor(this);
+    }
+
+    public GraphQLAnnotations(TypeFunction defaultTypeFunction) {
+        this.defaultTypeFunction = defaultTypeFunction;
     }
 
     public static GraphQLAnnotations instance = new GraphQLAnnotations();
@@ -144,7 +148,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 .map(new Function<Class<?>, graphql.schema.GraphQLType>() {
                     @Override
                     public graphql.schema.GraphQLType apply(Class<?> aClass) {
-                        return finalTypeFunction.apply(aClass, null);
+                        return finalTypeFunction.buildType(aClass, null);
                     }
                 })
                 .map(v -> (GraphQLObjectType) v)
@@ -384,7 +388,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             typeFunction = newInstance(annotation.value());
         }
 
-        GraphQLOutputType type = (GraphQLOutputType) typeFunction.apply(field.getType(), field.getAnnotatedType());
+        GraphQLOutputType type = (GraphQLOutputType) typeFunction.buildType(field.getType(), field.getAnnotatedType());
 
         GraphQLOutputType outputType = field.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
 
@@ -533,7 +537,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             outputTypeFunction = typeFunction;
         }
 
-        GraphQLOutputType type = (GraphQLOutputType) outputTypeFunction.apply(method.getReturnType(), annotatedReturnType);
+        GraphQLOutputType type = (GraphQLOutputType) outputTypeFunction.buildType(method.getReturnType(), annotatedReturnType);
         GraphQLOutputType outputType = method.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
 
         boolean isConnection = isConnection(method, method.getReturnType(), type);
@@ -547,7 +551,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
                 map(parameter -> {
                     Class<?> t = parameter.getType();
-                    graphql.schema.GraphQLType graphQLType = finalTypeFunction.apply(t, parameter.getAnnotatedType());
+                    graphql.schema.GraphQLType graphQLType = finalTypeFunction.buildType(t, parameter.getAnnotatedType());
                     if (graphQLType instanceof GraphQLObjectType) {
                         GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "input");
                         graphQLType = inputObject;
@@ -717,7 +721,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         public UnionTypeResolver(Class<?>[] classes) {
             Arrays.stream(classes).
-                    forEach(c -> types.put(c, defaultTypeFunction.apply(c, null)));
+                    forEach(c -> types.put(c, defaultTypeFunction.buildType(c, null)));
         }
 
         @Override

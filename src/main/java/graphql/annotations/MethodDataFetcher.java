@@ -75,7 +75,7 @@ class MethodDataFetcher implements DataFetcher {
                 result.add(environment);
                 continue;
             }
-            graphql.schema.GraphQLType graphQLType = typeFunction.apply(paramType, p.getAnnotatedType());
+            graphql.schema.GraphQLType graphQLType = typeFunction.buildType(paramType, p.getAnnotatedType());
             if (graphQLType instanceof GraphQLObjectType) {
                 Constructor<?> constructor = constructor(paramType, HashMap.class);
                 result.add(constructNewInstance(constructor, envArgs.next()));
