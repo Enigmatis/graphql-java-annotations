@@ -16,46 +16,14 @@ package graphql.annotations;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.relay.Relay;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.DataFetchingEnvironmentImpl;
-import graphql.schema.FieldDataFetcher;
-import graphql.schema.GraphQLArgument;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInputObjectField;
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLInterfaceType;
-import graphql.schema.GraphQLList;
+import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLTypeReference;
-import graphql.schema.GraphQLUnionType;
-import graphql.schema.PropertyDataFetcher;
-import graphql.schema.TypeResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
-import java.util.TreeMap;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -83,6 +51,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     private static final Relay RELAY_TYPES = new Relay();
 
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
+    private Map<Class<?>, List<Class<?>>> extensionsTypeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
 
     public GraphQLAnnotations() {
@@ -345,6 +314,14 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 builder.withInterface((GraphQLInterfaceType) getInterface(iface));
             }
         }
+
+        if (extensionsTypeRegistry.containsKey(object)) {
+            for (Class<?> aClass : extensionsTypeRegistry.get(object)) {
+                GraphQLObjectType extension = getObjectBuilder(aClass).build();
+                builder.fields(extension.getFieldDefinitions());
+            }
+        }
+
         return builder;
     }
 
@@ -671,6 +648,31 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     public void setDefaultTypeFunction(TypeFunction function) {
         defaultTypeFunction = function;
         ((DefaultTypeFunction) defaultTypeFunction).setAnnotationsProcessor(this);
+    }
+
+    public void registerTypeExtension(Class<?> objectClass) {
+        GraphQLTypeExtension typeExtension = objectClass.getAnnotation(GraphQLTypeExtension.class);
+        if (typeExtension == null) {
+            throw new GraphQLAnnotationsException("Class is not annotated with GraphQLTypeExtension", null);
+        } else {
+            Class<?> aClass = typeExtension.value();
+            if (!extensionsTypeRegistry.containsKey(aClass)) {
+                extensionsTypeRegistry.put(aClass, new ArrayList<>());
+            }
+            extensionsTypeRegistry.get(aClass).add(objectClass);
+        }
+    }
+
+    public void unregisterTypeExtension(Class<?> objectClass) {
+        GraphQLTypeExtension typeExtension = objectClass.getAnnotation(GraphQLTypeExtension.class);
+        if (typeExtension == null) {
+            throw new GraphQLAnnotationsException("Class is not annotated with GraphQLTypeExtension", null);
+        } else {
+            Class<?> aClass = typeExtension.value();
+            if (extensionsTypeRegistry.containsKey(aClass)) {
+                extensionsTypeRegistry.get(aClass).remove(objectClass);
+            }
+        }
     }
 
     public void registerType(TypeFunction typeFunction) {
