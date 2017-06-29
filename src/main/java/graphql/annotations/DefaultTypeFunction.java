@@ -306,7 +306,7 @@ public class DefaultTypeFunction implements TypeFunction {
         @Override
         public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
             GraphQLName name = aClass.getAnnotation(GraphQLName.class);
-            return toGraphqlName(name == null ? aClass.getName() : name.value());
+            return toGraphqlName(name == null ? aClass.getSimpleName() : name.value());
         }
 
         @Override
