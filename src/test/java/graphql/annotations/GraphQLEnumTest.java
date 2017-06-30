@@ -17,6 +17,8 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.AnnotatedType;
@@ -30,6 +32,10 @@ import static org.testng.Assert.assertEquals;
 
 public class GraphQLEnumTest {
 
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     public enum Foo {
         ONE,

@@ -15,12 +15,19 @@
 package graphql.annotations;
 
 import graphql.schema.DataFetchingEnvironmentImpl;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MethodDataFetcherTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
+
 
     public class TestException extends Exception {
     }

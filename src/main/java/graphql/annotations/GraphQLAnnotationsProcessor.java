@@ -14,24 +14,11 @@
  */
 package graphql.annotations;
 
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInterfaceType;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLUnionType;
+import graphql.schema.*;
 
 public interface GraphQLAnnotationsProcessor {
     /**
-     * This will examine the class and if its annotated with {@link GraphQLUnion} it will return
-     * a {@link GraphQLUnionType.Builder}, if its annotated with {@link GraphQLTypeResolver} it will return
-     * a {@link GraphQLObjectType} otherwise it will return a {@link GraphQLInterfaceType.Builder}.
-     *
-     * @param iface interface to examine
-     *
-     * @return a GraphQLType that represents that interface
-     *
-     * @throws GraphQLAnnotationsException if the interface cannot be examined
-     * @throws IllegalArgumentException    if <code>iface</code> is not an interface
+     * @deprecated See {@link #getOutputType(Class)}
      */
     graphql.schema.GraphQLType getInterface(Class<?> iface) throws GraphQLAnnotationsException;
 
@@ -60,19 +47,27 @@ public interface GraphQLAnnotationsProcessor {
     GraphQLInterfaceType.Builder getIfaceBuilder(Class<?> iface) throws GraphQLAnnotationsException, IllegalArgumentException;
 
     /**
-     * This will examine the object class and return a {@link GraphQLObjectType} representation
+     * This will examine the object class and return a {@link GraphQLEnumType.Builder} ready for further definition
      *
      * @param object the object class to examine
      *
-     * @return a {@link GraphQLObjectType} that represents that object class
+     * @return a {@link GraphQLEnumType.Builder} that represents that object class
      *
      * @throws GraphQLAnnotationsException if the object class cannot be examined
+     */
+    GraphQLEnumType.Builder getEnumBuilder(Class<?> object) throws GraphQLAnnotationsException;
+
+    /**
+     * @deprecated See {@link #getOutputType(Class)}
      */
     GraphQLObjectType getObject(Class<?> object) throws GraphQLAnnotationsException;
 
     /**
-     * This will examine the object class and return a {@link GraphQLOutputType} representation
-     * which may be a {@link GraphQLObjectType} or a {@link graphql.schema.GraphQLTypeReference}
+     * This will examine the object and will return a {@link GraphQLOutputType} based on the class type and annotations.
+     * - If its annotated with {@link GraphQLUnion} it will return a {@link GraphQLUnionType}
+     * - If its annotated with {@link GraphQLTypeResolver} it will return a {@link GraphQLInterfaceType}
+     * - It it's an Enum it will return a {@link GraphQLEnumType},
+     * otherwise it will return a {@link GraphQLObjectType}.
      *
      * @param object the object class to examine
      *
@@ -80,7 +75,24 @@ public interface GraphQLAnnotationsProcessor {
      *
      * @throws GraphQLAnnotationsException if the object class cannot be examined
      */
+    GraphQLOutputType getOutputType(Class<?> object) throws GraphQLAnnotationsException;
+
+    /**
+     * @deprecated See {@link #getOutputTypeOrRef(Class)}
+     */
     GraphQLOutputType getObjectOrRef(Class<?> object) throws GraphQLAnnotationsException;
+
+    /**
+     * This will examine the object class and return a {@link GraphQLOutputType} representation
+     * which may be a {@link GraphQLOutputType} or a {@link graphql.schema.GraphQLTypeReference}
+     *
+     * @param object the object class to examine
+     *
+     * @return a {@link GraphQLOutputType} that represents that object class
+     *
+     * @throws GraphQLAnnotationsException if the object class cannot be examined
+     */
+    GraphQLOutputType getOutputTypeOrRef(Class<?> object) throws GraphQLAnnotationsException;
 
     /**
      * This will examine the object class and return a {@link GraphQLObjectType.Builder} ready for further definition

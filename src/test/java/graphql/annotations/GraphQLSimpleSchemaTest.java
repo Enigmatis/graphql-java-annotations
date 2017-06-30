@@ -17,12 +17,19 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLObjectType;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 
 public class GraphQLSimpleSchemaTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
+
 
     public static class User {
 

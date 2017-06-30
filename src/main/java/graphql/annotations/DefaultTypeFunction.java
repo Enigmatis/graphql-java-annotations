@@ -15,27 +15,20 @@
 package graphql.annotations;
 
 import graphql.Scalars;
-import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
-import graphql.schema.GraphQLTypeReference;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.*;
 
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import static graphql.annotations.util.NamingKit.toGraphqlName;
-import static graphql.schema.GraphQLEnumType.newEnum;
 
 @Component(property = "type=default")
 public class DefaultTypeFunction implements TypeFunction {
@@ -253,69 +246,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
     }
 
-    private class EnumFunction implements TypeFunction {
-        private final Map<String, GraphQLTypeReference> processing = new ConcurrentHashMap<>();
-        private final Map<String, GraphQLType> types = new ConcurrentHashMap<>();
-
-        @Override
-        public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
-            GraphQLName name = aClass.getAnnotation(GraphQLName.class);
-            return toGraphqlName(name == null ? aClass.getSimpleName() : name.value());
-        }
-
-        @Override
-        public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
-            return Enum.class.isAssignableFrom(aClass);
-        }
-
-        @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
-            if (types.containsKey(typeName)) {
-                return types.get(typeName);
-            } else if (processing.containsKey(typeName)) {
-                return processing.getOrDefault(typeName, new GraphQLTypeReference(typeName));
-            } else {
-
-                processing.put(typeName, new GraphQLTypeReference(typeName));
-
-                //noinspection unchecked
-                Class<? extends Enum> enumClass = (Class<? extends Enum>) aClass;
-                GraphQLEnumType.Builder builder = newEnum();
-                builder.name(typeName);
-
-                GraphQLDescription description = aClass.getAnnotation(GraphQLDescription.class);
-                if (description != null) {
-                    builder.description(description.value());
-                }
-
-                List<Enum> constants = Arrays.asList(enumClass.getEnumConstants());
-
-                Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).forEachOrdered(n -> {
-                    try {
-                        Field field = aClass.getField(n);
-                        GraphQLName fieldName = field.getAnnotation(GraphQLName.class);
-                        GraphQLDescription fieldDescription = field.getAnnotation(GraphQLDescription.class);
-                        Enum constant = constants.stream().filter(c -> c.name().contentEquals(n)).findFirst().get();
-                        String name_ = fieldName == null ? n : fieldName.value();
-                        builder.value(name_, constant, fieldDescription == null ? name_ : fieldDescription.value());
-                    } catch (NoSuchFieldException ignore) {
-                    }
-                });
-
-                final GraphQLEnumType type = builder.build();
-                types.put(typeName, type);
-                //noinspection SuspiciousMethodCalls
-                processing.remove(type);
-                return type;
-            }
-        }
-    }
-
     private class ObjectFunction implements TypeFunction {
-
-        private final Map<String, GraphQLTypeReference> processing = new ConcurrentHashMap<>();
-        private final Map<String, GraphQLType> types = new ConcurrentHashMap<>();
-
         @Override
         public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
             GraphQLName name = aClass.getAnnotation(GraphQLName.class);
@@ -329,22 +260,7 @@ public class DefaultTypeFunction implements TypeFunction {
 
         @Override
         public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
-            if (types.containsKey(typeName)) {
-                return types.get(typeName);
-            } else if (processing.containsKey(typeName)) {
-                return processing.getOrDefault(typeName, new GraphQLTypeReference(typeName));
-            } else {
-                processing.put(typeName, new GraphQLTypeReference(typeName));
-                GraphQLType type;
-                if (aClass.isInterface()) {
-                    type = annotationsProcessor.getInterface(aClass);
-                } else {
-                    type = annotationsProcessor.getObjectOrRef(aClass);
-                }
-                types.put(typeName, type);
-                processing.remove(typeName);
-                return type;
-            }
+            return annotationsProcessor.getOutputTypeOrRef(aClass);
         }
     }
 
@@ -361,8 +277,6 @@ public class DefaultTypeFunction implements TypeFunction {
 
         typeFunctions.add(new IterableFunction());
         typeFunctions.add(new StreamFunction());
-
-        typeFunctions.add(new EnumFunction());
 
         typeFunctions.add(new OptionalFunction());
 
