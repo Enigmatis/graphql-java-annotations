@@ -20,10 +20,7 @@ import graphql.TypeResolutionEnvironment;
 import graphql.schema.*;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
@@ -89,6 +86,30 @@ public class GraphQLInputTest {
         }
     }
 
+    static class Code {
+        public Code(HashMap map) {
+            this.firstField = (String) map.get("firstField");
+            this.secondField = (String) map.get("secondField");
+        }
+
+        @GraphQLField
+        public String firstField;
+        @GraphQLField
+        public String secondField;
+    }
+
+    static class QueryMultipleDefinitions {
+        @GraphQLField
+        public String something(Code code) {
+            return code.firstField + code.secondField;
+        }
+
+        @GraphQLField
+        public String somethingElse(Code code) {
+            return code.firstField + code.secondField;
+        }
+    }
+
     static class Query {
         @GraphQLField
         public TestIface object() {
@@ -119,6 +140,17 @@ public class GraphQLInputTest {
         ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }", new Query());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "testa");
+    }
+
+    @Test
+    public void queryMultipleDefinitions() {
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryMultipleDefinitions.class)).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ something(code: {firstField:\"a\",secondField:\"b\"}) somethingElse(code: {firstField:\"c\",secondField:\"d\"}) }", new QueryMultipleDefinitions());
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, String>) result.getData()).get("something"), "ab");
+        assertEquals(((Map<String, String>) result.getData()).get("somethingElse"), "cd");
     }
 
     @Test
