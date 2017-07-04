@@ -511,7 +511,10 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     private boolean isConnection(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
         return obj.isAnnotationPresent(GraphQLConnection.class) &&
                 type instanceof GraphQLList &&
-                ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType;
+                (((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType ||
+                        ((GraphQLList) type).getWrappedType() instanceof GraphQLInterfaceType ||
+                        ((GraphQLList) type).getWrappedType() instanceof GraphQLUnionType ||
+                        ((GraphQLList) type).getWrappedType() instanceof GraphQLTypeReference);
     }
 
     protected GraphQLFieldDefinition getField(Method method) throws GraphQLAnnotationsException {
@@ -708,7 +711,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         @Override
         public Object get(DataFetchingEnvironment environment) {
             // Exclude arguments
-            DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), new HashMap<>(), environment.getContext(),
+            HashMap<String, Object> arguments = new HashMap<>(environment.getArguments());
+            arguments.keySet().removeAll(Arrays.asList("first", "last", "before", "after"));
+            DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), arguments, environment.getContext(),
                     environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
                     environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet());
             Connection conn = constructNewInstance(constructor, actualDataFetcher.get(env));
