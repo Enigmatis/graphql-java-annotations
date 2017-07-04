@@ -51,7 +51,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
 
-    private Map<String, graphql.schema.GraphQLOutputType> typeRegistry = new HashMap<>();
+    private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
     private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
     private Relay relay = new Relay();
@@ -256,7 +256,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         // all type instances to be unique singletons
         String typeName = getTypeName(object);
 
-        GraphQLOutputType type = typeRegistry.get(typeName);
+        GraphQLOutputType type = (GraphQLOutputType) typeRegistry.get(typeName);
         if (type != null) { // type already exists, do not build a new new one
             return type;
         }
@@ -627,8 +627,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                     Class<?> t = parameter.getType();
                     graphql.schema.GraphQLType graphQLType = finalTypeFunction.buildType(t, parameter.getAnnotatedType());
                     if (graphQLType instanceof GraphQLObjectType) {
-                        GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "input");
+                        GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "");
                         graphQLType = inputObject;
+                        typeRegistry.put(inputObject.getName(), inputObject);
                     }
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
@@ -693,6 +694,18 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     protected static GraphQLFieldDefinition field(Method method) throws InstantiationException, IllegalAccessException {
         return getInstance().getField(method);
 
+    }
+
+    public GraphQLInputObjectType getInputObject(Class<?> object) {
+        String typeName = getTypeName(object);
+        if (typeRegistry.containsKey(typeName)) {
+            return (GraphQLInputObjectType) typeRegistry.get(typeName);
+        } else {
+            graphql.schema.GraphQLType graphQLType = getObject(object);
+            GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "");
+            typeRegistry.put(inputObject.getName(), inputObject);
+            return inputObject;
+        }
     }
 
     @Override
@@ -780,7 +793,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         getInstance().registerType(typeFunction);
     }
 
-    public Map<String, graphql.schema.GraphQLOutputType> getTypeRegistry() {
+    public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {
         return typeRegistry;
     }
 
