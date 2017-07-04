@@ -1,4 +1,5 @@
 import java.text.SimpleDateFormat
+import aQute.bnd.gradle.Bundle
 
 buildscript {
     repositories {
@@ -155,4 +156,9 @@ bintray {
             released  = new Date()
         }
     }
+}
+
+task bundle(type: Bundle) {
+  from sourceSets.main.output
+  bndfile = file('bundle.bnd')
 }

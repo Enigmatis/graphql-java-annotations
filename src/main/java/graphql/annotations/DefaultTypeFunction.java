@@ -22,8 +22,8 @@ import graphql.schema.GraphQLTypeReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
-import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
@@ -41,11 +41,9 @@ import java.util.stream.Stream;
 import static graphql.annotations.util.NamingKit.toGraphqlName;
 import static graphql.schema.GraphQLEnumType.newEnum;
 
-@Component(scope = ServiceScope.SINGLETON, property = "type=default")
+@Component(property = "type=default")
 public class DefaultTypeFunction implements TypeFunction {
 
-    @Reference(target = "(!(type=default))",
-            policyOption = ReferencePolicyOption.GREEDY)
     protected List<TypeFunction> otherFunctions = new ArrayList<>();
 
     private CopyOnWriteArrayList<TypeFunction> typeFunctions;
@@ -353,6 +351,18 @@ public class DefaultTypeFunction implements TypeFunction {
         typeFunctions.add(new OptionalFunction());
 
         typeFunctions.add(new ObjectFunction());
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            service = TypeFunction.class,
+            target = "(!(type=default))")
+    void addFunction(TypeFunction function) {
+        this.otherFunctions.add(function);
+    }
+
+    void removeFunction(TypeFunction function) {
+        this.otherFunctions.remove(function);
     }
 
     @Activate
