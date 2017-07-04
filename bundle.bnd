@@ -1,0 +1,3 @@
+Export-Package: graphql.annotations.*;version="3.0.3"
+Bundle-SymbolicName: graphql.annotations
+-nouses=true
