@@ -51,7 +51,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     private static final Relay RELAY_TYPES = new Relay();
 
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
-    private Map<Class<?>, List<Class<?>>> extensionsTypeRegistry = new HashMap<>();
+    private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
 
     public GraphQLAnnotations() {
@@ -156,6 +156,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 builder.field(getField(method));
             }
         }
+        builder.fields(getExtensionFields(iface));
+
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
         builder.typeResolver(newInstance(typeResolver.value()));
         return builder;
@@ -312,17 +314,24 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         for (Class<?> iface : object.getInterfaces()) {
             if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
                 builder.withInterface((GraphQLInterfaceType) getInterface(iface));
+                builder.fields(getExtensionFields(iface));
             }
         }
 
+        builder.fields(getExtensionFields(object));
+
+        return builder;
+    }
+
+    private List<GraphQLFieldDefinition> getExtensionFields(Class<?> object) {
+        List<GraphQLFieldDefinition> fields = new ArrayList<>();
         if (extensionsTypeRegistry.containsKey(object)) {
             for (Class<?> aClass : extensionsTypeRegistry.get(object)) {
                 GraphQLObjectType extension = getObjectBuilder(aClass).build();
-                builder.fields(extension.getFieldDefinitions());
+                fields.addAll(extension.getFieldDefinitions());
             }
         }
-
-        return builder;
+        return fields;
     }
 
     public static GraphQLObjectType.Builder objectBuilder(Class<?> object) throws GraphQLAnnotationsException {
@@ -657,7 +666,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         } else {
             Class<?> aClass = typeExtension.value();
             if (!extensionsTypeRegistry.containsKey(aClass)) {
-                extensionsTypeRegistry.put(aClass, new ArrayList<>());
+                extensionsTypeRegistry.put(aClass, new HashSet<>());
             }
             extensionsTypeRegistry.get(aClass).add(objectClass);
         }
