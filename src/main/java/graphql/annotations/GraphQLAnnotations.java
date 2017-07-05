@@ -379,7 +379,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         for (Class<?> iface : object.getInterfaces()) {
             if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
-                builder.withInterface((GraphQLInterfaceType) getInterface(iface));
+                String ifaceName = getTypeName(iface);
+                if (processing.contains(ifaceName)) {
+                    builder.withInterface(new GraphQLTypeReference(ifaceName));
+                } else {
+                    builder.withInterface((GraphQLInterfaceType) getInterface(iface));
+                }
                 builder.fields(getExtensionFields(iface, fieldsDefined));
             }
         }
