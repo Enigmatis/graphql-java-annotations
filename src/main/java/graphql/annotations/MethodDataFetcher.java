@@ -14,24 +14,16 @@
  */
 package graphql.annotations;
 
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLObjectType;
+import graphql.schema.*;
+import graphql.schema.GraphQLType;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.*;
+import java.util.*;
 
 import static graphql.annotations.ReflectionKit.constructNewInstance;
 import static graphql.annotations.ReflectionKit.constructor;
 import static graphql.annotations.ReflectionKit.newInstance;
+import static graphql.annotations.util.NamingKit.toGraphqlName;
 
 class MethodDataFetcher implements DataFetcher {
     private final Method method;
@@ -79,14 +71,48 @@ class MethodDataFetcher implements DataFetcher {
                 continue;
             }
             graphql.schema.GraphQLType graphQLType = typeFunction.buildType(paramType, p.getAnnotatedType());
-            if (graphQLType instanceof GraphQLInputObjectType) {
-                Constructor<?> constructor = constructor(paramType, HashMap.class);
-                result.add(constructNewInstance(constructor, envArgs.next()));
-
-            } else {
-                result.add(envArgs.next());
-            }
+            Object arg = envArgs.next();
+            result.add(buildArg(p.getParameterizedType(), graphQLType, arg));
         }
         return result.toArray();
+    }
+
+    private Object buildArg(Type p, GraphQLType graphQLType, Object arg) {
+        if (arg == null) {
+            return null;
+        }
+        if (graphQLType instanceof graphql.schema.GraphQLNonNull) {
+            graphQLType = ((graphql.schema.GraphQLNonNull) graphQLType).getWrappedType();
+        }
+        if (p instanceof Class<?> && graphQLType instanceof GraphQLInputObjectType) {
+            Constructor<?> constructors[] = ((Class) p).getConstructors();
+            for (Constructor<?> constructor : constructors) {
+                Parameter[] parameters = constructor.getParameters();
+                if (parameters.length == 1 && parameters[0].getType().isAssignableFrom(arg.getClass())) {
+                    return constructNewInstance(constructor, arg);
+                } else {
+                    List<Object> objects = new ArrayList<>();
+                    Map map = (Map) arg;
+                    for (Parameter parameter : parameters) {
+                        String name = toGraphqlName(parameter.getAnnotation(GraphQLName.class) != null ? parameter.getAnnotation(GraphQLName.class).value() : parameter.getName());
+                        objects.add(buildArg(parameter.getType(), ((GraphQLInputObjectType)graphQLType).getField(name).getType(),map.get(name)));
+                    }
+                    return constructNewInstance(constructor, objects.toArray(new Object[objects.size()]));
+                }
+            }
+            return null;
+        } else if (p instanceof ParameterizedType && graphQLType instanceof GraphQLList) {
+            List<Object> list = new ArrayList<>();
+            Type subType = ((ParameterizedType)p).getActualTypeArguments()[0];
+            GraphQLType wrappedType = ((GraphQLList) graphQLType).getWrappedType();
+
+            for (Object item : ((List) arg)) {
+                list.add(buildArg(subType, wrappedType, item));
+            }
+
+            return list;
+        } else {
+            return arg;
+        }
     }
 }
