@@ -107,6 +107,17 @@ public interface GraphQLAnnotationsProcessor {
     GraphQLObjectType.Builder getObjectBuilder(Class<?> object) throws GraphQLAnnotationsException;
 
     /**
+     * This will examine the object class and return a {@link GraphQLInputType} representation
+     *
+     * @param object the object class to examine
+     *
+     * @return a {@link GraphQLInputType} that represents that object class
+     *
+     * @throws GraphQLAnnotationsException if the object class cannot be examined
+     */
+    GraphQLInputObjectType getInputObject(Class<?> object) throws GraphQLAnnotationsException;
+
+    /**
      * This will turn a {@link GraphQLObjectType} into a corresponding {@link GraphQLInputObjectType}
      *
      * @param graphQLType the graphql object type

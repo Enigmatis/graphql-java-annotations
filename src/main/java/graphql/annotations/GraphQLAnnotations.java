@@ -630,7 +630,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
                 map(parameter -> {
                     Class<?> t = parameter.getType();
-                    graphql.schema.GraphQLType graphQLType = getInputObject(finalTypeFunction.buildType(t, parameter.getAnnotatedType()), "Input");
+                    graphql.schema.GraphQLType graphQLType = getInputObject(finalTypeFunction.buildType(t, parameter.getAnnotatedType()), "");
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 
@@ -696,11 +696,23 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     }
 
+    public GraphQLInputObjectType getInputObject(Class<?> object) {
+        String typeName = getTypeName(object);
+        if (typeRegistry.containsKey(typeName)) {
+            return (GraphQLInputObjectType) typeRegistry.get(typeName);
+        } else {
+            graphql.schema.GraphQLType graphQLType = getObject(object);
+            GraphQLInputObjectType inputObject = (GraphQLInputObjectType) getInputObject(graphQLType, "");
+            typeRegistry.put(inputObject.getName(), inputObject);
+            return inputObject;
+        }
+    }
+
     @Override
     public GraphQLInputType getInputObject(graphql.schema.GraphQLType graphQLType, String newNamePrefix) {
         if (graphQLType instanceof GraphQLObjectType) {
             GraphQLObjectType object = (GraphQLObjectType) graphQLType;
-            if (typeRegistry.containsKey(newNamePrefix + object.getName())) {
+            if (typeRegistry.containsKey(newNamePrefix + object.getName()) && typeRegistry.get(newNamePrefix + object.getName()) instanceof GraphQLInputType) {
                 return (GraphQLInputType) typeRegistry.get(newNamePrefix + object.getName());
             }
             GraphQLInputObjectType inputObjectType = new GraphQLInputObjectType(newNamePrefix + object.getName(), object.getDescription(),
