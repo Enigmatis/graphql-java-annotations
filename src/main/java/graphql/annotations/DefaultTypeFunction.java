@@ -260,12 +260,7 @@ public class DefaultTypeFunction implements TypeFunction {
 
         @Override
         public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
-            try {
-                return annotationsProcessor.getOutputTypeOrRef(aClass);
-            } catch (ClassCastException e) {
-                // Also try to resolve to input object
-                return annotationsProcessor.getInputObject(aClass);
-            }
+            return annotationsProcessor.getOutputTypeOrRef(aClass);
         }
     }
 

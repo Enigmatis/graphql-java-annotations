@@ -630,12 +630,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
                 map(parameter -> {
                     Class<?> t = parameter.getType();
-                    graphql.schema.GraphQLType graphQLType = finalTypeFunction.buildType(t, parameter.getAnnotatedType());
-                    if (graphQLType instanceof GraphQLObjectType) {
-                        GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "");
-                        graphQLType = inputObject;
-                        typeRegistry.put(inputObject.getName(), inputObject);
-                    }
+                    graphql.schema.GraphQLType graphQLType = getInputObject(finalTypeFunction.buildType(t, parameter.getAnnotatedType()), "Input");
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 
@@ -701,39 +696,37 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     }
 
-    public GraphQLInputObjectType getInputObject(Class<?> object) {
-        String typeName = getTypeName(object);
-        if (typeRegistry.containsKey(typeName)) {
-            return (GraphQLInputObjectType) typeRegistry.get(typeName);
-        } else {
-            graphql.schema.GraphQLType graphQLType = getObject(object);
-            GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "");
-            typeRegistry.put(inputObject.getName(), inputObject);
-            return inputObject;
-        }
-    }
-
     @Override
-    public GraphQLInputObjectType getInputObject(GraphQLObjectType graphQLType, String newNamePrefix) {
-        GraphQLObjectType object = graphQLType;
-        return new GraphQLInputObjectType("" + newNamePrefix + object.getName(), object.getDescription(),
-                object.getFieldDefinitions().stream().
-                        map(field -> {
-                            GraphQLOutputType type = field.getType();
-                            GraphQLInputType inputType;
-                            if (type instanceof GraphQLObjectType) {
-                                inputType = getInputObject((GraphQLObjectType) type, newNamePrefix);
-                            } else {
-                                inputType = (GraphQLInputType) type;
-                            }
-
-                            return new GraphQLInputObjectField(field.getName(), field.getDescription(), inputType, null);
-                        }).
-                        collect(Collectors.toList()));
+    public GraphQLInputType getInputObject(graphql.schema.GraphQLType graphQLType, String newNamePrefix) {
+        if (graphQLType instanceof GraphQLObjectType) {
+            GraphQLObjectType object = (GraphQLObjectType) graphQLType;
+            if (typeRegistry.containsKey(newNamePrefix + object.getName())) {
+                return (GraphQLInputType) typeRegistry.get(newNamePrefix + object.getName());
+            }
+            GraphQLInputObjectType inputObjectType = new GraphQLInputObjectType(newNamePrefix + object.getName(), object.getDescription(),
+                    object.getFieldDefinitions().stream().
+                            map(field -> {
+                                GraphQLOutputType type = field.getType();
+                                GraphQLInputType inputType = getInputObject(type, newNamePrefix);
+                                return new GraphQLInputObjectField(field.getName(), field.getDescription(), inputType, null);
+                            }).
+                            collect(Collectors.toList()));
+            typeRegistry.put(inputObjectType.getName(), inputObjectType);
+            return inputObjectType;
+        } else if (graphQLType instanceof GraphQLList) {
+            return new GraphQLList(getInputObject(((GraphQLList)graphQLType).getWrappedType(), newNamePrefix));
+        } else if (graphQLType instanceof GraphQLNonNull) {
+            return new GraphQLNonNull(getInputObject(((GraphQLNonNull)graphQLType).getWrappedType(), newNamePrefix));
+        } else if (graphQLType instanceof GraphQLTypeReference) {
+            return new GraphQLTypeReference(newNamePrefix + ((GraphQLTypeReference)graphQLType).getName());
+        } else if (graphQLType instanceof GraphQLInputType){
+            return (GraphQLInputType) graphQLType;
+        }
+        throw new IllegalArgumentException("Cannot convert type to input : "+graphQLType);
     }
 
     public static GraphQLInputObjectType inputObject(GraphQLObjectType graphQLType, String newNamePrefix) {
-        return getInstance().getInputObject(graphQLType, newNamePrefix);
+        return (GraphQLInputObjectType) getInstance().getInputObject(graphQLType, newNamePrefix);
     }
 
     protected GraphQLArgument getArgument(Parameter parameter, graphql.schema.GraphQLType t) throws
