@@ -631,6 +631,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                             GraphQLInputType inputType;
                             if (type instanceof GraphQLObjectType) {
                                 inputType = getInputObject((GraphQLObjectType) type, newNamePrefix);
+							} else if (type instanceof GraphQLList && ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType) {
+								inputType = GraphQLList.list(getInputObject((GraphQLObjectType)((GraphQLList) type).getWrappedType(), newNamePrefix));
                             } else {
                                 inputType = (GraphQLInputType) type;
                             }
