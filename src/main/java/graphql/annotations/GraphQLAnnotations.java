@@ -710,7 +710,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         @Override
         public Object get(DataFetchingEnvironment environment) {
-            // Exclude arguments
+            // Create a list of arguments with connection specific arguments excluded
             HashMap<String, Object> arguments = new HashMap<>(environment.getArguments());
             arguments.keySet().removeAll(Arrays.asList("first", "last", "before", "after"));
             DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), arguments, environment.getContext(),
