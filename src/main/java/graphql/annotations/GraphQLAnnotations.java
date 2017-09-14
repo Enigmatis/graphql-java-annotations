@@ -82,6 +82,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private static final Relay RELAY_TYPES = new Relay();
 
+    private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
+
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
 
@@ -510,11 +512,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private boolean isConnection(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
         return obj.isAnnotationPresent(GraphQLConnection.class) &&
-                type instanceof GraphQLList &&
-                (((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType ||
-                        ((GraphQLList) type).getWrappedType() instanceof GraphQLInterfaceType ||
-                        ((GraphQLList) type).getWrappedType() instanceof GraphQLUnionType ||
-                        ((GraphQLList) type).getWrappedType() instanceof GraphQLTypeReference);
+                type instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(((GraphQLList) type).getWrappedType()));
     }
 
     protected GraphQLFieldDefinition getField(Method method) throws GraphQLAnnotationsException {
