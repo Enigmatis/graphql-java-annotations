@@ -63,7 +63,7 @@ public class GraphQLSimpleSchemaTest {
     @Test
     public void detachedCall() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectType queryObject = graphQLAnnotations.object(Query.class);
+        GraphQLObjectType queryObject = graphQLAnnotations.getObject(Query.class);
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
@@ -74,7 +74,7 @@ public class GraphQLSimpleSchemaTest {
     @Test
     public void staticCall() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectType queryObject = graphQLAnnotations.object(Query.class);
+        GraphQLObjectType queryObject = graphQLAnnotations.getObject(Query.class);
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser2{ name } }");
