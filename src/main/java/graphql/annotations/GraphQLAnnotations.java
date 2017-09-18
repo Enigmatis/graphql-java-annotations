@@ -327,8 +327,18 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         List<GraphQLFieldDefinition> fields = new ArrayList<>();
         if (extensionsTypeRegistry.containsKey(object)) {
             for (Class<?> aClass : extensionsTypeRegistry.get(object)) {
-                GraphQLObjectType extension = getObjectBuilder(aClass).build();
-                fields.addAll(extension.getFieldDefinitions());
+                for (Method method : getOrderedMethods(aClass)) {
+                    if (method.isBridge() || method.isSynthetic()) {
+                        continue;
+                    }
+                    if (breadthFirstSearch(method)) {
+                        GraphQLFieldDefinition field = getField(method);
+                        if (field.getDataFetcher() instanceof MethodDataFetcher) {
+                            ((MethodDataFetcher) field.getDataFetcher()).setExtension(true);
+                        }
+                        fields.add(field);
+                    }
+                }
             }
         }
         return fields;

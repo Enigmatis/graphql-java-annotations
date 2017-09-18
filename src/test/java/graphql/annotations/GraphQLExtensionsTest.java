@@ -45,10 +45,17 @@ public class GraphQLExtensionsTest {
 
     @GraphQLTypeExtension(GraphQLExtensionsTest.TestObject.class)
     private static class TestObjectExtension {
-        @GraphQLField
-        public static String field2() {
-            return "test2";
+        private TestObject obj;
+
+        public TestObjectExtension(TestObject obj) {
+            this.obj = obj;
         }
+
+        @GraphQLField
+        public String field2() {
+            return obj.field() + " test2";
+        }
+
     }
 
     @Test
@@ -65,7 +72,6 @@ public class GraphQLExtensionsTest {
         assertEquals(fields.get(0).getName(), "field");
         assertEquals(fields.get(1).getName(), "field2");
         assertEquals(fields.get(1).getType(), GraphQLString);
-
     }
 
     @Test
@@ -80,7 +86,7 @@ public class GraphQLExtensionsTest {
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field}", new GraphQLExtensionsTest.TestObject());
         assertEquals(((Map<String, Object>) result.getData()).get("field"), "test");
         ExecutionResult result2 = GraphQL.newGraphQL(schema).build().execute("{field2}", new GraphQLExtensionsTest.TestObject());
-        assertEquals(((Map<String, Object>) result2.getData()).get("field2"), "test2");
+        assertEquals(((Map<String, Object>) result2.getData()).get("field2"), "test test2");
     }
 
 }
