@@ -16,9 +16,7 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
+import graphql.schema.*;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -56,6 +54,16 @@ public class GraphQLExtensionsTest {
             return obj.field() + " test2";
         }
 
+        @GraphQLDataFetcher(TestDataFetcher.class)
+        @GraphQLField
+        private String field3;
+    }
+
+    public static class TestDataFetcher implements DataFetcher {
+        @Override
+        public Object get(DataFetchingEnvironment environment) {
+            return ((TestObject)environment.getSource()).field() + " test3";
+        }
     }
 
     @Test
@@ -65,13 +73,15 @@ public class GraphQLExtensionsTest {
         GraphQLAnnotations.getInstance().unregisterTypeExtension(TestObjectExtension.class);
 
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
-        assertEquals(fields.size(), 2);
+        assertEquals(fields.size(), 3);
 
         fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
 
         assertEquals(fields.get(0).getName(), "field");
         assertEquals(fields.get(1).getName(), "field2");
         assertEquals(fields.get(1).getType(), GraphQLString);
+        assertEquals(fields.get(2).getName(), "field3");
+        assertEquals(fields.get(2).getType(), GraphQLString);
     }
 
     @Test
@@ -87,6 +97,8 @@ public class GraphQLExtensionsTest {
         assertEquals(((Map<String, Object>) result.getData()).get("field"), "test");
         ExecutionResult result2 = GraphQL.newGraphQL(schema).build().execute("{field2}", new GraphQLExtensionsTest.TestObject());
         assertEquals(((Map<String, Object>) result2.getData()).get("field2"), "test test2");
+        ExecutionResult result3 = GraphQL.newGraphQL(schema).build().execute("{field3}", new GraphQLExtensionsTest.TestObject());
+        assertEquals(((Map<String, Object>) result3.getData()).get("field3"), "test test3");
     }
 
 }

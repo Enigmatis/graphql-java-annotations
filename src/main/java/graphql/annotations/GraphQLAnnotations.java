@@ -339,6 +339,15 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                         fields.add(field);
                     }
                 }
+                for (Field field : getAllFields(aClass).values()) {
+                    if (Modifier.isStatic(field.getModifiers())) {
+                        continue;
+                    }
+                    if (parentalSearch(field)) {
+                        fields.add(getField(field));
+                    }
+                }
+
             }
         }
         return fields;
