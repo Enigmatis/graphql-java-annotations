@@ -35,7 +35,6 @@ import static graphql.annotations.ReflectionKit.newInstance;
 class MethodDataFetcher implements DataFetcher {
     private final Method method;
     private final TypeFunction typeFunction;
-    private boolean extension = false;
 
     public MethodDataFetcher(Method method) {
         this(method, new DefaultTypeFunction());
@@ -55,7 +54,7 @@ class MethodDataFetcher implements DataFetcher {
                 obj = null;
             } else if (method.getAnnotation(GraphQLInvokeDetached.class) != null) {
                 obj = newInstance(method.getDeclaringClass());
-            } else if (extension) {
+            } else if (!method.getDeclaringClass().isInstance(environment.getSource())) {
                 obj = newInstance(method.getDeclaringClass(), environment.getSource());
             } else {
                 obj = environment.getSource();
@@ -88,9 +87,5 @@ class MethodDataFetcher implements DataFetcher {
             }
         }
         return result.toArray();
-    }
-
-    public void setExtension(boolean extension) {
-        this.extension = extension;
     }
 }

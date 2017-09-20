@@ -332,11 +332,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                         continue;
                     }
                     if (breadthFirstSearch(method)) {
-                        GraphQLFieldDefinition field = getField(method);
-                        if (field.getDataFetcher() instanceof MethodDataFetcher) {
-                            ((MethodDataFetcher) field.getDataFetcher()).setExtension(true);
-                        }
-                        fields.add(field);
+                        fields.add(getField(method));
                     }
                 }
                 for (Field field : getAllFields(aClass).values()) {
@@ -347,7 +343,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                         fields.add(getField(field));
                     }
                 }
-
             }
         }
         return fields;
@@ -439,16 +434,16 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             if (outputType == GraphQLBoolean || (outputType instanceof GraphQLNonNull && ((GraphQLNonNull) outputType).getWrappedType() == GraphQLBoolean)) {
                 if (checkIfPrefixGetterExists(field.getDeclaringClass(), "is", field.getName()) ||
                         checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
-                    actualDataFetcher = new PropertyDataFetcher(field.getName());
+                    actualDataFetcher = new ExtensionDataFetcherWrapper(field.getDeclaringClass(), new PropertyDataFetcher(field.getName()));
                 }
             } else if (checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
-                actualDataFetcher = new PropertyDataFetcher(field.getName());
+                actualDataFetcher = new ExtensionDataFetcherWrapper(field.getDeclaringClass(), new PropertyDataFetcher(field.getName()));
             } else if (hasFluentGetter) {
                 actualDataFetcher = new MethodDataFetcher(fluentMethod, typeFunction);
             }
 
             if (actualDataFetcher == null) {
-                actualDataFetcher = new FieldDataFetcher(field.getName());
+                actualDataFetcher = new ExtensionDataFetcherWrapper(field.getDeclaringClass(), new FieldDataFetcher(field.getName()));
             }
         }
 

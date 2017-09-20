@@ -32,7 +32,7 @@ public class GraphQLExtensionsTest {
 
     @GraphQLDescription("TestObject object")
     @GraphQLName("TestObject")
-    private static class TestObject {
+    public static class TestObject {
         @GraphQLField
         public
         String field() {
@@ -42,11 +42,12 @@ public class GraphQLExtensionsTest {
     }
 
     @GraphQLTypeExtension(GraphQLExtensionsTest.TestObject.class)
-    private static class TestObjectExtension {
+    public static class TestObjectExtension {
         private TestObject obj;
 
         public TestObjectExtension(TestObject obj) {
             this.obj = obj;
+            this.field4 = obj.field() + " test4";
         }
 
         @GraphQLField
@@ -57,6 +58,16 @@ public class GraphQLExtensionsTest {
         @GraphQLDataFetcher(TestDataFetcher.class)
         @GraphQLField
         private String field3;
+
+        @GraphQLField
+        public String field4;
+
+        @GraphQLField
+        public String field5;
+
+        public String getField5() {
+            return obj.field() + " test5";
+        }
     }
 
     public static class TestDataFetcher implements DataFetcher {
@@ -73,7 +84,7 @@ public class GraphQLExtensionsTest {
         GraphQLAnnotations.getInstance().unregisterTypeExtension(TestObjectExtension.class);
 
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
-        assertEquals(fields.size(), 3);
+        assertEquals(fields.size(), 5);
 
         fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
 
@@ -93,12 +104,13 @@ public class GraphQLExtensionsTest {
         GraphQLSchema schema = newSchema().query(object).build();
         GraphQLSchema schemaInherited = newSchema().query(object).build();
 
-        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field}", new GraphQLExtensionsTest.TestObject());
-        assertEquals(((Map<String, Object>) result.getData()).get("field"), "test");
-        ExecutionResult result2 = GraphQL.newGraphQL(schema).build().execute("{field2}", new GraphQLExtensionsTest.TestObject());
-        assertEquals(((Map<String, Object>) result2.getData()).get("field2"), "test test2");
-        ExecutionResult result3 = GraphQL.newGraphQL(schema).build().execute("{field3}", new GraphQLExtensionsTest.TestObject());
-        assertEquals(((Map<String, Object>) result3.getData()).get("field3"), "test test3");
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field field2 field3 field4 field5}", new GraphQLExtensionsTest.TestObject());
+        Map<String, Object> data = (Map<String, Object>) result.getData();
+        assertEquals(data.get("field"), "test");
+        assertEquals(data.get("field2"), "test test2");
+        assertEquals(data.get("field3"), "test test3");
+        assertEquals(data.get("field4"), "test test4");
+        assertEquals(data.get("field5"), "test test5");
     }
 
 }
