@@ -82,6 +82,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private static final Relay RELAY_TYPES = new Relay();
 
+    private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
+
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
 
@@ -510,8 +512,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private boolean isConnection(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
         return obj.isAnnotationPresent(GraphQLConnection.class) &&
-                type instanceof GraphQLList &&
-                ((GraphQLList) type).getWrappedType() instanceof GraphQLObjectType;
+                type instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(((GraphQLList) type).getWrappedType()));
     }
 
     protected GraphQLFieldDefinition getField(Method method) throws GraphQLAnnotationsException {
@@ -707,8 +708,10 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         @Override
         public Object get(DataFetchingEnvironment environment) {
-            // Exclude arguments
-            DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), new HashMap<>(), environment.getContext(),
+            // Create a list of arguments with connection specific arguments excluded
+            HashMap<String, Object> arguments = new HashMap<>(environment.getArguments());
+            arguments.keySet().removeAll(Arrays.asList("first", "last", "before", "after"));
+            DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), arguments, environment.getContext(),
                     environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
                     environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet());
             Connection conn = constructNewInstance(constructor, actualDataFetcher.get(env));

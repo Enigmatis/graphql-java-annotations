@@ -88,6 +88,14 @@ public class GraphQLConnectionTest {
             Obj[] a = new Obj[objs.size()];
             return Stream.of(objs.toArray(a));
         }
+
+        @GraphQLField
+        @GraphQLConnection(name = "objStreamWithParam")
+        public Stream<Obj> getObjStreamWithParam(@GraphQLName("filter") String filter) {
+            return this.objs.stream().filter( obj -> obj.val.startsWith(filter));
+        }
+
+
     }
 
     @Test
@@ -126,6 +134,27 @@ public class GraphQLConnectionTest {
         assertTrue(result.getErrors().isEmpty());
 
         testResult("objStream", result);
+    }
+
+    @Test
+    public void methodListWithParam() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ objStreamWithParam(first: 2, filter:\"hel\") { edges { cursor node { id, val } } } }",
+                new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"), new Obj("4", "hello world"), new Obj("5", "hello again"))));
+
+        assertTrue(result.getErrors().isEmpty());
+
+        Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
+        List<Map<String, Map<String, Object>>> edges = data.get("objStreamWithParam").get("edges");
+
+        assertEquals(edges.size(), 2);
+        assertEquals(edges.get(0).get("node").get("id"), "2");
+        assertEquals(edges.get(0).get("node").get("val"), "hello");
+        assertEquals(edges.get(1).get("node").get("id"), "4");
+        assertEquals(edges.get(1).get("node").get("val"), "hello world");
     }
 
 
