@@ -843,8 +843,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             HashMap<String, Object> arguments = new HashMap<>(environment.getArguments());
             arguments.keySet().removeAll(Arrays.asList("first", "last", "before", "after"));
             DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), arguments, environment.getContext(),
-                    environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
-                    environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet());
+                    environment.getRoot(), environment.getFieldDefinition(), environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
+                    environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet(), environment.getFieldTypeInfo());
             Object data = actualDataFetcher.get(env);
             if (data != null) {
                 Connection conn = constructNewInstance(constructor, data);
