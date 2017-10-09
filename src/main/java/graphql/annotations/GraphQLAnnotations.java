@@ -659,7 +659,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             relayFieldDefinition = relay.mutationWithClientMutationId(title, method.getName(),
                     args.stream().
                             map(t -> newInputObjectField().name(t.getName()).type(t.getType()).description(t.getDescription()).build()).
-                            collect(Collectors.toList()), fieldDefinitions, null);
+                            collect(Collectors.toList()), fieldDefinitions, new StaticDataFetcher(null));
             builder.argument(relayFieldDefinition.getArguments());
             builder.type(relayFieldDefinition.getType());
         } else {
