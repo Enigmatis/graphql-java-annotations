@@ -95,7 +95,7 @@ class MethodDataFetcher implements DataFetcher {
                     Map map = (Map) arg;
                     for (Parameter parameter : parameters) {
                         String name = toGraphqlName(parameter.getAnnotation(GraphQLName.class) != null ? parameter.getAnnotation(GraphQLName.class).value() : parameter.getName());
-                        objects.add(buildArg(parameter.getType(), ((GraphQLInputObjectType)graphQLType).getField(name).getType(),map.get(name)));
+                        objects.add(buildArg(parameter.getParameterizedType(), ((GraphQLInputObjectType)graphQLType).getField(name).getType(),map.get(name)));
                     }
                     return constructNewInstance(constructor, objects.toArray(new Object[objects.size()]));
                 }

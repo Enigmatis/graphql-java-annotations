@@ -546,18 +546,41 @@ public class GraphQLObjectTest {
         @GraphQLField
         public int b;
 
-        public TestInputArgument(HashMap<String, Object> args) {
-            a = (String) args.get("a");
-            b = (int) args.get("b");
+        public TestInputArgument(String a, int b) {
+            this.a = a;
+            this.b = b;
         }
     }
+
+    private static class TestComplexInputArgument {
+
+        public Collection<TestInputArgument> inputs;
+
+        public TestComplexInputArgument(Collection<TestInputArgument> inputs) {
+            this.inputs = inputs;
+        }
+
+        @GraphQLField
+        public Collection<TestInputArgument> getInputs() {
+            return inputs;
+        }
+
+    }
+
+
 
     private static class TestObjectInput {
         @GraphQLField
         public String test(int other, TestInputArgument arg) {
             return arg.a;
         }
+
+        @GraphQLField
+        public String test2(int other, TestComplexInputArgument arg) {
+            return arg.inputs.iterator().next().a;
+        }
     }
+
 
     @Test
     public void inputObjectArgument() {
@@ -571,6 +594,20 @@ public class GraphQLObjectTest {
         assertTrue(result.getErrors().isEmpty());
         Map<String, Object> v = (Map<String, Object>) result.getData();
         assertEquals(v.get("test"), "ok");
+    }
+
+    @Test
+    public void complexInputObjectArgument() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
+        GraphQLArgument argument = object.getFieldDefinition("test2").getArgument("arg");
+        assertTrue(argument.getType() instanceof GraphQLInputObjectType);
+        assertEquals(argument.getName(), "arg");
+
+        GraphQLSchema schema = newSchema().query(object).build();
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{ test2(arg: {inputs:[{ a:\"ok\", b:2 }]}, other:0) }", new TestObjectInput());
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> v = (Map<String, Object>) result.getData();
+        assertEquals(v.get("test2"), "ok");
     }
 
     @Test
