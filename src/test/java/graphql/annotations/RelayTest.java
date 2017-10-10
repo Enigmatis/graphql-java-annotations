@@ -69,7 +69,7 @@ public class RelayTest {
             return new Result(0);
         }
         @GraphQLField @GraphQLRelayMutation
-        public Result doSomethingElse(@GraphQLDescription("A") int a, int b) {
+        public Result doSomethingElse(@GraphQLName("a") @GraphQLDescription("A") int a, @GraphQLName("b") int b) {
             return new Result(a - b);
         }
         @GraphQLField @GraphQLRelayMutation
