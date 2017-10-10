@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,24 +16,8 @@ package graphql.annotations;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.relay.Relay;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.DataFetchingEnvironmentImpl;
-import graphql.schema.FieldDataFetcher;
-import graphql.schema.GraphQLArgument;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInputObjectField;
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLInterfaceType;
-import graphql.schema.GraphQLList;
+import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLTypeReference;
-import graphql.schema.GraphQLUnionType;
-import graphql.schema.PropertyDataFetcher;
-import graphql.schema.TypeResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -459,7 +443,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private DataFetcher constructDataFetcher(String fieldName, GraphQLDataFetcher annotatedDataFetcher) {
         final String[] args;
-        if ( annotatedDataFetcher.firstArgIsTargetName() ) {
+        if (annotatedDataFetcher.firstArgIsTargetName()) {
             args = Stream.concat(Stream.of(fieldName), stream(annotatedDataFetcher.args())).toArray(String[]::new);
         } else {
             args = annotatedDataFetcher.args();
@@ -554,8 +538,14 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                     graphql.schema.GraphQLType graphQLType = finalTypeFunction.buildType(t, parameter.getAnnotatedType());
                     if (graphQLType instanceof GraphQLObjectType) {
                         GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "input");
+                        inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
                         graphQLType = inputObject;
+                    } else if (graphQLType instanceof GraphQLList && !(((GraphQLList) graphQLType).getWrappedType() instanceof GraphQLScalarType)) {
+                        GraphQLInputObjectType inputObject = getInputObject((GraphQLList) graphQLType, "input");
+                        inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
+                        graphQLType = new GraphQLList(inputObject);
                     }
+
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 
@@ -616,9 +606,23 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return new GraphQLFieldDefinitionWrapper(builder.build());
     }
 
+    private graphql.schema.GraphQLType getOrPutInRegistry(graphql.schema.GraphQLType graphQLType) {
+        graphql.schema.GraphQLType typeFromRegistry = typeRegistry.get(graphQLType.getName());
+        if (typeFromRegistry!=null)
+            return typeFromRegistry;
+        else
+            typeRegistry.put(graphQLType.getName(), graphQLType);
+        return graphQLType;
+    }
+
     protected static GraphQLFieldDefinition field(Method method) throws InstantiationException, IllegalAccessException {
         return getInstance().getField(method);
 
+    }
+
+    public GraphQLInputObjectType getInputObject(GraphQLList graphQLType, String newNamePrefix) {
+        GraphQLObjectType object = (GraphQLObjectType) graphQLType.getWrappedType();
+        return getInputObject(object, newNamePrefix);
     }
 
     @Override
@@ -631,7 +635,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                             GraphQLInputType inputType;
                             if (type instanceof GraphQLObjectType) {
                                 inputType = getInputObject((GraphQLObjectType) type, newNamePrefix);
-                            } else {
+                            }
+                            else {
                                 inputType = (GraphQLInputType) type;
                             }
 
