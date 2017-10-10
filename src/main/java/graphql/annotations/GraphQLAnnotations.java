@@ -540,7 +540,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                         GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "input");
                         inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
                         graphQLType = inputObject;
-                    } else if (graphQLType instanceof GraphQLList && !(((GraphQLList) graphQLType).getWrappedType() instanceof GraphQLScalarType)) {
+                    } else if (graphQLType instanceof GraphQLList && (((GraphQLList) graphQLType).getWrappedType() instanceof GraphQLObjectType)) {
                         GraphQLInputObjectType inputObject = getInputObject((GraphQLList) graphQLType, "input");
                         inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
                         graphQLType = new GraphQLList(inputObject);
