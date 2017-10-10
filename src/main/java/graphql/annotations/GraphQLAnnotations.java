@@ -540,10 +540,20 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                         GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "input");
                         inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
                         graphQLType = inputObject;
-                    } else if (graphQLType instanceof GraphQLList && (((GraphQLList) graphQLType).getWrappedType() instanceof GraphQLObjectType)) {
-                        GraphQLInputObjectType inputObject = getInputObject((GraphQLList) graphQLType, "input");
-                        inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
-                        graphQLType = new GraphQLList(inputObject);
+                    } else if (graphQLType instanceof GraphQLList) {
+                        Stack<graphql.schema.GraphQLType> typesStack= new Stack<>();
+                        typesStack = getWrappedTypesStack(graphQLType, typesStack);
+                        graphql.schema.GraphQLType wrappedType = typesStack.pop();
+                        if (wrappedType instanceof GraphQLObjectType){
+                            GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType)wrappedType, "input");
+                            inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
+                            graphQLType = inputObject;
+                            while (!typesStack.isEmpty()){
+                                graphQLType = new GraphQLList(graphQLType);
+                                typesStack.pop();
+                            }
+
+                        }
                     }
 
                     return getArgument(parameter, graphQLType);
@@ -606,6 +616,17 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return new GraphQLFieldDefinitionWrapper(builder.build());
     }
 
+    private Stack<graphql.schema.GraphQLType> getWrappedTypesStack(graphql.schema.GraphQLType graphQLType, Stack<graphql.schema.GraphQLType> stack){
+        stack.push(graphQLType);
+        if (graphQLType instanceof GraphQLList)
+        {
+            return getWrappedTypesStack(((GraphQLList) graphQLType).getWrappedType(), stack);
+        }
+        else{
+            return stack;
+        }
+    }
+
     private graphql.schema.GraphQLType getOrPutInRegistry(graphql.schema.GraphQLType graphQLType) {
         graphql.schema.GraphQLType typeFromRegistry = typeRegistry.get(graphQLType.getName());
         if (typeFromRegistry!=null)
@@ -618,11 +639,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     protected static GraphQLFieldDefinition field(Method method) throws InstantiationException, IllegalAccessException {
         return getInstance().getField(method);
 
-    }
-
-    public GraphQLInputObjectType getInputObject(GraphQLList graphQLType, String newNamePrefix) {
-        GraphQLObjectType object = (GraphQLObjectType) graphQLType.getWrappedType();
-        return getInputObject(object, newNamePrefix);
     }
 
     @Override
