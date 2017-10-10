@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -193,7 +193,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
      * breadthFirst parental ascent looking for closest method declaration with explicit annotation
      *
      * @param method The method to match
-     *
      * @return The closest GraphQLField annotation
      */
     private boolean breadthFirstSearch(Method method) {
@@ -235,7 +234,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
      * direct parental ascent looking for closest declaration with explicit annotation
      *
      * @param field The field to find
-     *
      * @return The closest GraphQLField annotation
      */
     private boolean parentalSearch(Field field) {
@@ -541,19 +539,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                         inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
                         graphQLType = inputObject;
                     } else if (graphQLType instanceof GraphQLList) {
-                        Stack<graphql.schema.GraphQLType> typesStack = new Stack<>();
-                        typesStack = getWrappedTypesStack(graphQLType, typesStack);
-                        graphql.schema.GraphQLType wrappedType = typesStack.pop();
-                        if (wrappedType instanceof GraphQLObjectType) {
-                            GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) wrappedType, "input");
-                            inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
-                            graphQLType = inputObject;
-                            while (!typesStack.isEmpty()) {
-                                graphQLType = new GraphQLList(graphQLType);
-                                typesStack.pop();
-                            }
-
-                        }
+                        graphQLType = handleGraphQLList(graphQLType);
                     }
 
                     return getArgument(parameter, graphQLType);
@@ -616,6 +602,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return new GraphQLFieldDefinitionWrapper(builder.build());
     }
 
+
     private Stack<graphql.schema.GraphQLType> getWrappedTypesStack(graphql.schema.GraphQLType graphQLType, Stack<graphql.schema.GraphQLType> stack) {
         stack.push(graphQLType);
         if (graphQLType instanceof GraphQLList) {
@@ -650,6 +637,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                             GraphQLInputType inputType;
                             if (type instanceof GraphQLObjectType) {
                                 inputType = getInputObject((GraphQLObjectType) type, newNamePrefix);
+                            } else if (type instanceof GraphQLList) {
+                                inputType = handleGraphQLList(type);
                             } else {
                                 inputType = (GraphQLInputType) type;
                             }
@@ -657,6 +646,26 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                             return new GraphQLInputObjectField(field.getName(), field.getDescription(), inputType, null);
                         }).
                         collect(Collectors.toList()));
+    }
+
+    private GraphQLInputType handleGraphQLList(graphql.schema.GraphQLType type) {
+        GraphQLInputType inputType;
+        Stack<graphql.schema.GraphQLType> typesStack = new Stack<>();
+        typesStack = getWrappedTypesStack(type, typesStack);
+        graphql.schema.GraphQLType wrappedType = typesStack.pop();
+        if (wrappedType instanceof GraphQLObjectType) {
+            GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) wrappedType, "input");
+            inputObject = (GraphQLInputObjectType) getOrPutInRegistry(inputObject);
+            inputType = inputObject;
+            while (!typesStack.isEmpty()) {
+                inputType = new GraphQLList(inputType);
+                typesStack.pop();
+            }
+
+        } else {
+            inputType = (GraphQLInputType) type;
+        }
+        return inputType;
     }
 
     public static GraphQLInputObjectType inputObject(GraphQLObjectType graphQLType, String newNamePrefix) {
