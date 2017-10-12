@@ -80,12 +80,11 @@ import static java.util.Objects.nonNull;
 @Component
 public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
-    private static final Relay RELAY_TYPES = new Relay();
-
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
 
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
+    private Relay relay = new Relay();
 
     public GraphQLAnnotations() {
         this(new DefaultTypeFunction());
@@ -100,6 +99,10 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     public static GraphQLAnnotations getInstance() {
         return instance;
+    }
+
+    public void setRelay(Relay relay) {
+        this.relay = relay;
     }
 
     @Override
@@ -502,9 +505,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 assert wrappedType instanceof GraphQLObjectType;
                 String annValue = field.getAnnotation(GraphQLConnection.class).name();
                 String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
-                GraphQLObjectType edgeType = RELAY_TYPES.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
-                outputType = RELAY_TYPES.connectionType(connectionName, edgeType, Collections.emptyList());
-                builder.argument(RELAY_TYPES.getConnectionFieldArguments());
+                GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
+                outputType = relay.connectionType(connectionName, edgeType, Collections.emptyList());
+                builder.argument(relay.getConnectionFieldArguments());
             }
         }
         return outputType;
@@ -571,7 +574,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             List<GraphQLFieldDefinition> fieldDefinitions = outputType instanceof GraphQLObjectType ?
                     ((GraphQLObjectType) outputType).getFieldDefinitions() :
                     ((GraphQLInterfaceType) outputType).getFieldDefinitions();
-            relay = RELAY_TYPES.mutationWithClientMutationId(title, method.getName(),
+            relay = GraphQLAnnotations.this.relay.mutationWithClientMutationId(title, method.getName(),
                     args.stream().
                             map(t -> newInputObjectField().name(t.getName()).type(t.getType()).description(t.getDescription()).build()).
                             collect(Collectors.toList()), fieldDefinitions, null);

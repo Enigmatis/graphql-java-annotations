@@ -16,7 +16,10 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.util.CustomRelay;
+import graphql.relay.Relay;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.Test;
@@ -111,6 +114,25 @@ public class GraphQLConnectionTest {
 
         testResult("objs", result);
 
+    }
+
+    @Test
+    public void customRelayMethodList() {
+        try {
+            GraphQLAnnotations.getInstance().setRelay(new CustomRelay());
+            GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
+            GraphQLSchema schema = newSchema().query(object).build();
+
+            graphql.schema.GraphQLObjectType f = (GraphQLObjectType) schema.getType("ObjConnection");
+            assertTrue(f.getFieldDefinitions().size() == 4);
+            assertTrue(f.getFieldDefinition("nodes").getType() instanceof GraphQLList);
+            assertEquals(((GraphQLList)f.getFieldDefinition("nodes").getType()).getWrappedType().getName(), "Obj");
+
+            GraphQLObjectType pageInfo = (GraphQLObjectType) schema.getType("PageInfo");
+            assertTrue(pageInfo.getFieldDefinition("additionalInfo") != null);
+        } finally {
+            GraphQLAnnotations.getInstance().setRelay(new Relay());
+        }
     }
 
     public void testResult(String name, ExecutionResult result) {
