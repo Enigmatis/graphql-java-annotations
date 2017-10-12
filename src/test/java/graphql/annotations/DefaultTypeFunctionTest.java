@@ -14,7 +14,6 @@
  */
 package graphql.annotations;
 
-import com.sun.corba.se.impl.orbutil.graph.Graph;
 import graphql.schema.*;
 import graphql.schema.GraphQLType;
 import org.testng.annotations.Test;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static graphql.Scalars.*;
+import static graphql.Scalars.GraphQLID;
 import static org.testng.Assert.*;
 
 public class DefaultTypeFunctionTest {
@@ -66,39 +66,80 @@ public class DefaultTypeFunctionTest {
     }
 
     @Test
-    public void id() throws NoSuchMethodException, NoSuchFieldException {
-        DefaultTypeFunction instace = testedDefaultTypeFunction();
+    public void buildType_stringMethodAnnotatedWithGraphQLID_returnsGraphQLID() throws NoSuchMethodException, NoSuchFieldException {
+        // Arrange
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
         Method idStringMethod = DefaultTypeFunctionTest.class.getMethod("idStringMethod");
-        Method idIntegerMethod = DefaultTypeFunctionTest.class.getMethod("idIntegerMethod");
-        Method idIntMethod = DefaultTypeFunctionTest.class.getMethod("idIntMethod");
-        Field idStringField = DefaultTypeFunctionTest.class.getField("idStringField");
-        Field idIntegerField = DefaultTypeFunctionTest.class.getField("idIntegerField");
-        Field idIntField = DefaultTypeFunctionTest.class.getField("idIntField");
 
-        assertEquals(instace.buildType(idStringMethod.getReturnType(), idStringMethod.getAnnotatedReturnType()), GraphQLID);
-        assertEquals(instace.buildType(idIntegerMethod.getReturnType(), idIntegerMethod.getAnnotatedReturnType()), GraphQLID);
-        assertEquals(instace.buildType(idIntMethod.getReturnType(), idIntMethod.getAnnotatedReturnType()), GraphQLID);
-
-        assertEquals(instace.buildType(idStringField.getType(), idStringField.getAnnotatedType()), GraphQLID);
-        assertEquals(instace.buildType(idIntegerField.getType(), idIntegerField.getAnnotatedType()), GraphQLID);
-        assertEquals(instace.buildType(idIntField.getType(), idIntField.getAnnotatedType()), GraphQLID);
+        // Act+Assert
+        assertEquals(instance.buildType(idStringMethod.getReturnType(), idStringMethod.getAnnotatedReturnType()), GraphQLID);
     }
 
     @Test
-    public void string() {
+    public void buildType_integerMethodAnnotatedWithGraphQLID_returnsGraphQLID() throws NoSuchMethodException {
+        // Arrange
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        Method idIntegerMethod = DefaultTypeFunctionTest.class.getMethod("idIntegerMethod");
+
+        // Act+Assert
+        assertEquals(instance.buildType(idIntegerMethod.getReturnType(), idIntegerMethod.getAnnotatedReturnType()), GraphQLID);
+    }
+
+    @Test
+    public void buildType_intMethodAnnotatedWithGraphQLID_returnsGraphQLID() throws NoSuchMethodException {
+        // Arrange
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        Method idIntMethod = DefaultTypeFunctionTest.class.getMethod("idIntMethod");
+
+        // Act+Assert
+        assertEquals(instance.buildType(idIntMethod.getReturnType(), idIntMethod.getAnnotatedReturnType()), GraphQLID);
+    }
+
+    @Test
+    public void buildType_stringFieldAnnotatedWithGraphQLID_returnsGraphQLID() throws NoSuchFieldException {
+        // Arrange
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        Field idStringField = DefaultTypeFunctionTest.class.getField("idStringField");
+
+        // Act+Assert
+        assertEquals(instance.buildType(idStringField.getType(), idStringField.getAnnotatedType()), GraphQLID);
+    }
+
+    @Test
+    public void buildType_integerFieldAnnotatedWithGraphQLID_returnsGraphQLID() throws NoSuchFieldException {
+        // Arrange
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        Field idIntegerField = DefaultTypeFunctionTest.class.getField("idIntegerField");
+
+        // Act+Assert
+        assertEquals(instance.buildType(idIntegerField.getType(), idIntegerField.getAnnotatedType()), GraphQLID);
+    }
+
+    @Test
+    public void buildType_intFieldAnnotatedWithGraphQLID_returnsGraphQLID() throws NoSuchFieldException {
+        // Arrange
+        DefaultTypeFunction instance = testedDefaultTypeFunction();
+        Field idIntField = DefaultTypeFunctionTest.class.getField("idIntField");
+
+        // Act+Assert
+        assertEquals(instance.buildType(idIntField.getType(), idIntField.getAnnotatedType()), GraphQLID);
+    }
+
+    @Test
+    public void buildType_stringType_returnsGraphQLString() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.buildType(String.class, null), GraphQLString);
     }
 
     @Test
-    public void bool() {
+    public void buildType_booleanType_returnsGraphQLBoolean() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.buildType(boolean.class, null), GraphQLBoolean);
         assertEquals(instance.buildType(Boolean.class, null), GraphQLBoolean);
     }
 
     @Test
-    public void float_() {
+    public void buildType_floatType_returnsGraphQLFloat() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.buildType(float.class, null), GraphQLFloat);
         assertEquals(instance.buildType(Float.class, null), GraphQLFloat);
@@ -107,14 +148,14 @@ public class DefaultTypeFunctionTest {
     }
 
     @Test
-    public void integer() {
+    public void buildType_integerType_returnsGraphQLInt() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.buildType(int.class, null), GraphQLInt);
         assertEquals(instance.buildType(Integer.class, null), GraphQLInt);
     }
 
     @Test
-    public void long_() {
+    public void buildType_longType_returnsGraphQLLong() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         assertEquals(instance.buildType(long.class, null), GraphQLLong);
         assertEquals(instance.buildType(Long.class, null), GraphQLLong);
@@ -157,7 +198,7 @@ public class DefaultTypeFunctionTest {
     }
 
     @Test
-    public void list() throws NoSuchMethodException {
+    public void buildType_listType_returnsCorrectGraphQLType() throws NoSuchMethodException {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.buildType(getClass().getMethod("listMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
         assertIsGraphListOfListOfString(type);
@@ -165,28 +206,28 @@ public class DefaultTypeFunctionTest {
 
 
     @Test
-    public void iterable() throws NoSuchMethodException {
+    public void buildType_iterableType_returnsCorrectGraphQLType() throws NoSuchMethodException {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.buildType(getClass().getMethod("iterableMethod").getReturnType(), getClass().getMethod("iterableMethod").getAnnotatedReturnType());
         assertIsGraphListOfListOfString(type);
     }
 
     @Test
-    public void collection() throws NoSuchMethodException {
+    public void buildType_collectionType_returnsCorrectGraphQLType() throws NoSuchMethodException {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.buildType(getClass().getMethod("collectionMethod").getReturnType(), getClass().getMethod("collectionMethod").getAnnotatedReturnType());
         assertIsGraphListOfListOfString(type);
     }
 
     @Test
-    public void set() throws NoSuchMethodException {
+    public void buildType_setType_returnsCorrectGraphQLType() throws NoSuchMethodException {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.buildType(getClass().getMethod("setMethod").getReturnType(), getClass().getMethod("setMethod").getAnnotatedReturnType());
         assertIsGraphListOfListOfString(type);
     }
 
     @Test
-    public void stream() throws NoSuchMethodException {
+    public void buildType_streamType_returnsCorrectGraphQLType() throws NoSuchMethodException {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
         graphql.schema.GraphQLType type = instance.buildType(getClass().getMethod("streamMethod").getReturnType(), getClass().getMethod("listMethod").getAnnotatedReturnType());
         assertIsGraphListOfListOfString(type);
