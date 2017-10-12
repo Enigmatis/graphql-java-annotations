@@ -104,6 +104,19 @@ public class GraphQLConnectionTest {
             return this.objs.stream().filter( obj -> obj.val.startsWith(filter));
         }
 
+        @GraphQLField
+        @GraphQLConnection(name = "nonNullObjs")
+        @GraphQLNonNull
+        public List<Obj> getNonNullObjs() {
+            return this.objs;
+        }
+
+        @GraphQLField
+        @GraphQLConnection(name = "null")
+        public List<Obj> getNull() {
+            return null;
+        }
+
 
     }
 
@@ -162,6 +175,36 @@ public class GraphQLConnectionTest {
         assertTrue(result.getErrors().isEmpty());
 
         testResult("objStream", result);
+    }
+
+    @Test
+    public void methodNonNull() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ nonNullObjs(first: 1) { edges { cursor node { id, val } } } }",
+                new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
+
+        assertTrue(result.getErrors().isEmpty());
+
+        testResult("nonNullObjs", result);
+    }
+
+    @Test
+    public void methodNull() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ null(first: 1) { edges { cursor node { id, val } } } }",
+                new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
+
+        assertTrue(result.getErrors().isEmpty());
+
+        Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
+
+        assertEquals(data.get("null"), null);
     }
 
     @Test

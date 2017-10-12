@@ -470,12 +470,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             typeFunction = newInstance(annotation.value());
         }
 
-        GraphQLOutputType type = (GraphQLOutputType) typeFunction.buildType(field.getType(), field.getAnnotatedType());
+        GraphQLOutputType outputType = (GraphQLOutputType) typeFunction.buildType(field.getType(), field.getAnnotatedType());
+        outputType = field.getAnnotation(NotNull.class) == null ? outputType : new GraphQLNonNull(outputType);
 
-        GraphQLOutputType outputType = field.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
-
-        boolean isConnection = isConnection(field, field.getType(), type);
-        outputType = getGraphQLConnection(isConnection, field, type, outputType, builder);
+        boolean isConnection = isConnection(field, outputType);
+        if (isConnection) {
+            outputType = getGraphQLConnection(field, outputType, builder);
+        }
 
         builder.type(outputType);
 
@@ -575,24 +576,35 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return true;
     }
 
-    private GraphQLOutputType getGraphQLConnection(boolean isConnection, AccessibleObject field, GraphQLOutputType type, GraphQLOutputType outputType, GraphQLFieldDefinition.Builder builder) {
-        if (isConnection) {
-            if (type instanceof GraphQLList) {
-                graphql.schema.GraphQLType wrappedType = ((GraphQLList) type).getWrappedType();
-                assert wrappedType instanceof GraphQLObjectType;
-                String annValue = field.getAnnotation(GraphQLConnection.class).name();
-                String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
-                GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
-                outputType = relay.connectionType(connectionName, edgeType, Collections.emptyList());
-                builder.argument(relay.getConnectionFieldArguments());
-            }
+    private GraphQLOutputType getGraphQLConnection(AccessibleObject field, GraphQLOutputType type, GraphQLFieldDefinition.Builder builder) {
+        boolean isNonNull = (type instanceof GraphQLNonNull);
+        if (isNonNull) {
+            type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
         }
-        return outputType;
+
+        if (type instanceof GraphQLList) {
+            graphql.schema.GraphQLType wrappedType = ((GraphQLList) type).getWrappedType();
+            assert wrappedType instanceof GraphQLObjectType;
+            String annValue = field.getAnnotation(GraphQLConnection.class).name();
+            String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
+            GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
+            type = relay.connectionType(connectionName, edgeType, Collections.emptyList());
+            builder.argument(relay.getConnectionFieldArguments());
+        }
+
+        if (isNonNull) {
+            type = new GraphQLNonNull(type);
+        }
+        return type;
     }
 
-    private boolean isConnection(AccessibleObject obj, Class<?> klass, GraphQLOutputType type) {
+    private boolean isConnection(AccessibleObject obj, GraphQLOutputType type) {
+        if (type instanceof GraphQLNonNull) {
+            type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
+        }
+        final GraphQLOutputType wrappedType = type;
         return obj.isAnnotationPresent(GraphQLConnection.class) &&
-                type instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(((GraphQLList) type).getWrappedType()));
+                wrappedType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(((GraphQLList) wrappedType).getWrappedType()));
     }
 
     protected GraphQLFieldDefinition getField(Method method) throws GraphQLAnnotationsException {
@@ -618,11 +630,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             outputTypeFunction = typeFunction;
         }
 
-        GraphQLOutputType type = (GraphQLOutputType) outputTypeFunction.buildType(method.getReturnType(), annotatedReturnType);
-        GraphQLOutputType outputType = method.getAnnotation(NotNull.class) == null ? type : new GraphQLNonNull(type);
+        GraphQLOutputType outputType = (GraphQLOutputType) outputTypeFunction.buildType(method.getReturnType(), annotatedReturnType);
+        outputType = method.getAnnotation(NotNull.class) == null ? outputType : new GraphQLNonNull(outputType);
 
-        boolean isConnection = isConnection(method, method.getReturnType(), type);
-        outputType = getGraphQLConnection(isConnection, method, type, outputType, builder);
+        boolean isConnection = isConnection(method, outputType);
+        if (isConnection) {
+            outputType = getGraphQLConnection(method, outputType, builder);
+        }
 
         builder.type(outputType);
 
@@ -837,8 +851,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), arguments, environment.getContext(),
                     environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
                     environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet());
-            Connection conn = constructNewInstance(constructor, actualDataFetcher.get(env));
-            return conn.get(environment);
+            Object data = actualDataFetcher.get(env);
+            if (data != null) {
+                Connection conn = constructNewInstance(constructor, data);
+                return conn.get(environment);
+            }
+            return null;
         }
     }
 
