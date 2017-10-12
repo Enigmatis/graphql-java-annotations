@@ -17,6 +17,7 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.*;
+import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -26,7 +27,7 @@ import java.util.Map;
 
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLSchema.newSchema;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 public class GraphQLExtensionsTest {
 
@@ -67,6 +68,20 @@ public class GraphQLExtensionsTest {
 
         public String getField5() {
             return obj.field() + " test5";
+        }
+    }
+
+    @GraphQLTypeExtension(GraphQLExtensionsTest.TestObject.class)
+    public static class TestObjectExtensionInvalid {
+        private TestObject obj;
+
+        public TestObjectExtensionInvalid(TestObject obj) {
+            this.obj = obj;
+        }
+
+        @GraphQLField
+        public String getField() {
+            return "invalid";
         }
     }
 
@@ -113,4 +128,11 @@ public class GraphQLExtensionsTest {
         assertEquals(data.get("field5"), "test test5");
     }
 
+    @Test
+    public void testDuplicateField() {
+        GraphQLAnnotations.getInstance().registerTypeExtension(TestObjectExtensionInvalid.class);
+        GraphQLAnnotationsException e = expectThrows(GraphQLAnnotationsException.class, () -> GraphQLAnnotations.object(TestObject.class));
+        assertTrue(e.getMessage().startsWith("Duplicate field"));
+        GraphQLAnnotations.getInstance().unregisterTypeExtension(TestObjectExtensionInvalid.class);
+    }
 }

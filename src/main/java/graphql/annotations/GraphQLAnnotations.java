@@ -149,14 +149,17 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (description != null) {
             builder.description(description.value());
         }
+        List<String> definedFields = new ArrayList<>();
         for (Method method : getOrderedMethods(iface)) {
             boolean valid = !Modifier.isStatic(method.getModifiers()) &&
                     method.getAnnotation(GraphQLField.class) != null;
             if (valid) {
-                builder.field(getField(method));
+                GraphQLFieldDefinition gqlField = getField(method);
+                definedFields.add(gqlField.getName());
+                builder.field(gqlField);
             }
         }
-        builder.fields(getExtensionFields(iface));
+        builder.fields(getExtensionFields(iface, definedFields));
 
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
         builder.typeResolver(newInstance(typeResolver.value()));
@@ -292,13 +295,15 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (description != null) {
             builder.description(description.value());
         }
-
+        List<String> fieldsDefined = new ArrayList<>();
         for (Method method : getOrderedMethods(object)) {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
             if (breadthFirstSearch(method)) {
-                builder.field(getField(method));
+                GraphQLFieldDefinition gqlField = getField(method);
+                fieldsDefined.add(gqlField.getName());
+                builder.field(gqlField);
             }
         }
 
@@ -307,23 +312,25 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 continue;
             }
             if (parentalSearch(field)) {
-                builder.field(getField(field));
+                GraphQLFieldDefinition gqlField = getField(field);
+                fieldsDefined.add(gqlField.getName());
+                builder.field(gqlField);
             }
         }
 
         for (Class<?> iface : object.getInterfaces()) {
             if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
                 builder.withInterface((GraphQLInterfaceType) getInterface(iface));
-                builder.fields(getExtensionFields(iface));
+                builder.fields(getExtensionFields(iface, fieldsDefined));
             }
         }
 
-        builder.fields(getExtensionFields(object));
+        builder.fields(getExtensionFields(object, fieldsDefined));
 
         return builder;
     }
 
-    private List<GraphQLFieldDefinition> getExtensionFields(Class<?> object) {
+    private List<GraphQLFieldDefinition> getExtensionFields(Class<?> object, List<String> fieldsDefined) {
         List<GraphQLFieldDefinition> fields = new ArrayList<>();
         if (extensionsTypeRegistry.containsKey(object)) {
             for (Class<?> aClass : extensionsTypeRegistry.get(object)) {
@@ -332,7 +339,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                         continue;
                     }
                     if (breadthFirstSearch(method)) {
-                        fields.add(getField(method));
+                        addExtensionField(getField(method), fields, fieldsDefined);
                     }
                 }
                 for (Field field : getAllFields(aClass).values()) {
@@ -340,12 +347,21 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                         continue;
                     }
                     if (parentalSearch(field)) {
-                        fields.add(getField(field));
+                        addExtensionField(getField(field), fields, fieldsDefined);
                     }
                 }
             }
         }
         return fields;
+    }
+
+    private void addExtensionField(GraphQLFieldDefinition gqlField, List<GraphQLFieldDefinition> fields, List<String> fieldsDefined) {
+        if (!fieldsDefined.contains(gqlField.getName())) {
+            fieldsDefined.add(gqlField.getName());
+            fields.add(gqlField);
+        } else {
+            throw new GraphQLAnnotationsException("Duplicate field found in extension : " + gqlField.getName(), null);
+        }
     }
 
     public static GraphQLObjectType.Builder objectBuilder(Class<?> object) throws GraphQLAnnotationsException {
@@ -459,7 +475,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private DataFetcher constructDataFetcher(String fieldName, GraphQLDataFetcher annotatedDataFetcher) {
         final String[] args;
-        if ( annotatedDataFetcher.firstArgIsTargetName() ) {
+        if (annotatedDataFetcher.firstArgIsTargetName()) {
             args = Stream.concat(Stream.of(fieldName), stream(annotatedDataFetcher.args())).toArray(String[]::new);
         } else {
             args = annotatedDataFetcher.args();
