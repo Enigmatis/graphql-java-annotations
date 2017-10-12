@@ -22,19 +22,19 @@ import java.util.Map;
 
 import static graphql.annotations.ReflectionKit.newInstance;
 
-public class ExtensionDataFetcherWrapper implements DataFetcher {
+public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T>{
 
     private final Class declaringClass;
-    private final DataFetcher dataFetcher;
+    private final DataFetcher<T> dataFetcher;
 
-    public ExtensionDataFetcherWrapper(Class declaringClass, DataFetcher dataFetcher) {
+    public ExtensionDataFetcherWrapper(Class declaringClass, DataFetcher<T> dataFetcher) {
         this.declaringClass = declaringClass;
         this.dataFetcher = dataFetcher;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object get(DataFetchingEnvironment environment) {
+    public T get(DataFetchingEnvironment environment) {
         Object source = environment.getSource();
         if (source != null && (!declaringClass.isInstance(source)) && !(source instanceof Map)) {
             environment = new DataFetchingEnvironmentImpl(newInstance(declaringClass, source), environment.getArguments(),
