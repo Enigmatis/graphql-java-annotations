@@ -52,13 +52,15 @@ class MethodDataFetcher implements DataFetcher {
 
             if (Modifier.isStatic(method.getModifiers())) {
                 obj = null;
-            } else if (method.getAnnotation(GraphQLInvokeDetached.class) == null) {
+            } else if (method.getAnnotation(GraphQLInvokeDetached.class) != null) {
+                obj = newInstance(method.getDeclaringClass());
+            } else if (!method.getDeclaringClass().isInstance(environment.getSource())) {
+                obj = newInstance(method.getDeclaringClass(), environment.getSource());
+            } else {
                 obj = environment.getSource();
                 if (obj == null) {
                     return null;
                 }
-            } else {
-                obj = newInstance(method.getDeclaringClass());
             }
             return method.invoke(obj, invocationArgs(environment));
         } catch (IllegalAccessException | InvocationTargetException e) {

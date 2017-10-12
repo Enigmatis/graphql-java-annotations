@@ -16,46 +16,14 @@ package graphql.annotations;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.relay.Relay;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.DataFetchingEnvironmentImpl;
-import graphql.schema.FieldDataFetcher;
-import graphql.schema.GraphQLArgument;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInputObjectField;
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLInterfaceType;
-import graphql.schema.GraphQLList;
+import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLTypeReference;
-import graphql.schema.GraphQLUnionType;
-import graphql.schema.PropertyDataFetcher;
-import graphql.schema.TypeResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
-import java.util.TreeMap;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,6 +53,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
 
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
+    private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
 
     public GraphQLAnnotations() {
@@ -182,13 +151,18 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (description != null) {
             builder.description(description.value());
         }
+        List<String> definedFields = new ArrayList<>();
         for (Method method : getOrderedMethods(iface)) {
             boolean valid = !Modifier.isStatic(method.getModifiers()) &&
                     method.getAnnotation(GraphQLField.class) != null;
             if (valid) {
-                builder.field(getField(method));
+                GraphQLFieldDefinition gqlField = getField(method);
+                definedFields.add(gqlField.getName());
+                builder.field(gqlField);
             }
         }
+        builder.fields(getExtensionFields(iface, definedFields));
+
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
         builder.typeResolver(newInstance(typeResolver.value()));
         return builder;
@@ -323,13 +297,15 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (description != null) {
             builder.description(description.value());
         }
-
+        List<String> fieldsDefined = new ArrayList<>();
         for (Method method : getOrderedMethods(object)) {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
             if (breadthFirstSearch(method)) {
-                builder.field(getField(method));
+                GraphQLFieldDefinition gqlField = getField(method);
+                fieldsDefined.add(gqlField.getName());
+                builder.field(gqlField);
             }
         }
 
@@ -338,16 +314,56 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 continue;
             }
             if (parentalSearch(field)) {
-                builder.field(getField(field));
+                GraphQLFieldDefinition gqlField = getField(field);
+                fieldsDefined.add(gqlField.getName());
+                builder.field(gqlField);
             }
         }
 
         for (Class<?> iface : object.getInterfaces()) {
             if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
                 builder.withInterface((GraphQLInterfaceType) getInterface(iface));
+                builder.fields(getExtensionFields(iface, fieldsDefined));
             }
         }
+
+        builder.fields(getExtensionFields(object, fieldsDefined));
+
         return builder;
+    }
+
+    private List<GraphQLFieldDefinition> getExtensionFields(Class<?> object, List<String> fieldsDefined) {
+        List<GraphQLFieldDefinition> fields = new ArrayList<>();
+        if (extensionsTypeRegistry.containsKey(object)) {
+            for (Class<?> aClass : extensionsTypeRegistry.get(object)) {
+                for (Method method : getOrderedMethods(aClass)) {
+                    if (method.isBridge() || method.isSynthetic()) {
+                        continue;
+                    }
+                    if (breadthFirstSearch(method)) {
+                        addExtensionField(getField(method), fields, fieldsDefined);
+                    }
+                }
+                for (Field field : getAllFields(aClass).values()) {
+                    if (Modifier.isStatic(field.getModifiers())) {
+                        continue;
+                    }
+                    if (parentalSearch(field)) {
+                        addExtensionField(getField(field), fields, fieldsDefined);
+                    }
+                }
+            }
+        }
+        return fields;
+    }
+
+    private void addExtensionField(GraphQLFieldDefinition gqlField, List<GraphQLFieldDefinition> fields, List<String> fieldsDefined) {
+        if (!fieldsDefined.contains(gqlField.getName())) {
+            fieldsDefined.add(gqlField.getName());
+            fields.add(gqlField);
+        } else {
+            throw new GraphQLAnnotationsException("Duplicate field found in extension : " + gqlField.getName(), null);
+        }
     }
 
     public static GraphQLObjectType.Builder objectBuilder(Class<?> object) throws GraphQLAnnotationsException {
@@ -436,16 +452,16 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             if (outputType == GraphQLBoolean || (outputType instanceof GraphQLNonNull && ((GraphQLNonNull) outputType).getWrappedType() == GraphQLBoolean)) {
                 if (checkIfPrefixGetterExists(field.getDeclaringClass(), "is", field.getName()) ||
                         checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
-                    actualDataFetcher = new PropertyDataFetcher(field.getName());
+                    actualDataFetcher = new ExtensionDataFetcherWrapper(field.getDeclaringClass(), new PropertyDataFetcher(field.getName()));
                 }
             } else if (checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
-                actualDataFetcher = new PropertyDataFetcher(field.getName());
+                actualDataFetcher = new ExtensionDataFetcherWrapper(field.getDeclaringClass(), new PropertyDataFetcher(field.getName()));
             } else if (hasFluentGetter) {
                 actualDataFetcher = new MethodDataFetcher(fluentMethod, typeFunction);
             }
 
             if (actualDataFetcher == null) {
-                actualDataFetcher = new FieldDataFetcher(field.getName());
+                actualDataFetcher = new ExtensionDataFetcherWrapper(field.getDeclaringClass(), new FieldDataFetcher(field.getName()));
             }
         }
 
@@ -461,7 +477,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private DataFetcher constructDataFetcher(String fieldName, GraphQLDataFetcher annotatedDataFetcher) {
         final String[] args;
-        if ( annotatedDataFetcher.firstArgIsTargetName() ) {
+        if (annotatedDataFetcher.firstArgIsTargetName()) {
             args = Stream.concat(Stream.of(fieldName), stream(annotatedDataFetcher.args())).toArray(String[]::new);
         } else {
             args = annotatedDataFetcher.args();
@@ -672,6 +688,31 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     public void setDefaultTypeFunction(TypeFunction function) {
         defaultTypeFunction = function;
         ((DefaultTypeFunction) defaultTypeFunction).setAnnotationsProcessor(this);
+    }
+
+    public void registerTypeExtension(Class<?> objectClass) {
+        GraphQLTypeExtension typeExtension = objectClass.getAnnotation(GraphQLTypeExtension.class);
+        if (typeExtension == null) {
+            throw new GraphQLAnnotationsException("Class is not annotated with GraphQLTypeExtension", null);
+        } else {
+            Class<?> aClass = typeExtension.value();
+            if (!extensionsTypeRegistry.containsKey(aClass)) {
+                extensionsTypeRegistry.put(aClass, new HashSet<>());
+            }
+            extensionsTypeRegistry.get(aClass).add(objectClass);
+        }
+    }
+
+    public void unregisterTypeExtension(Class<?> objectClass) {
+        GraphQLTypeExtension typeExtension = objectClass.getAnnotation(GraphQLTypeExtension.class);
+        if (typeExtension == null) {
+            throw new GraphQLAnnotationsException("Class is not annotated with GraphQLTypeExtension", null);
+        } else {
+            Class<?> aClass = typeExtension.value();
+            if (extensionsTypeRegistry.containsKey(aClass)) {
+                extensionsTypeRegistry.get(aClass).remove(objectClass);
+            }
+        }
     }
 
     public void registerType(TypeFunction typeFunction) {

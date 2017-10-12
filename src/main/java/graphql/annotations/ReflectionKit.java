@@ -47,4 +47,16 @@ class ReflectionKit {
         }
     }
 
+    static <T> T newInstance(Class<T> clazz, Object parameter) {
+        if (parameter != null) {
+            for (Constructor<T> constructor : (Constructor<T>[]) clazz.getConstructors()) {
+                if (constructor.getParameterCount() == 1 && constructor.getParameters()[0].getType().isAssignableFrom(parameter.getClass())) {
+                    return constructNewInstance(constructor, parameter);
+                }
+            }
+        }
+        return null;
+    }
+
+
 }
