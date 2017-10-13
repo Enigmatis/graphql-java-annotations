@@ -65,7 +65,7 @@ public class DefaultTypeFunction implements TypeFunction {
         public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
             return annotatedType != null
                     && (aClass == Integer.class || aClass == int.class || aClass == String.class)
-                    && (annotatedType.getAnnotation(GraphQLID.class) != null);
+                    && annotatedType.isAnnotationPresent(GraphQLID.class);
         }
 
         @Override
