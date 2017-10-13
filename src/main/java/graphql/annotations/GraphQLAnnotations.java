@@ -582,15 +582,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
         }
 
-        if (type instanceof GraphQLList) {
-            graphql.schema.GraphQLType wrappedType = ((GraphQLList) type).getWrappedType();
-            assert wrappedType instanceof GraphQLObjectType;
-            String annValue = field.getAnnotation(GraphQLConnection.class).name();
-            String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
-            GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
-            type = relay.connectionType(connectionName, edgeType, Collections.emptyList());
-            builder.argument(relay.getConnectionFieldArguments());
-        }
+        graphql.schema.GraphQLType wrappedType = ((GraphQLList) type).getWrappedType();
+        assert wrappedType instanceof GraphQLObjectType;
+        String annValue = field.getAnnotation(GraphQLConnection.class).name();
+        String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
+        GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
+        type = relay.connectionType(connectionName, edgeType, Collections.emptyList());
+        builder.argument(relay.getConnectionFieldArguments());
 
         if (isNonNull) {
             type = new GraphQLNonNull(type);
