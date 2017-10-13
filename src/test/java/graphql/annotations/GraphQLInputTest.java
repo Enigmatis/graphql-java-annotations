@@ -79,6 +79,13 @@ public class GraphQLInputTest {
         }
     }
 
+    static class TestObjectList {
+        @GraphQLField
+        public String value(List<List<List<InputObject>>> input) {
+            return input.get(0).get(0).get(0).key + "a";
+        }
+    }
+
     static class TestObjectRec {
         @GraphQLField
         public String value(RecursiveInputObject input) {
@@ -124,6 +131,13 @@ public class GraphQLInputTest {
         };
     }
 
+    static class QueryList {
+        @GraphQLField
+        public TestObjectList object() {
+            return new TestObjectList();
+        };
+    }
+
     static class QueryIface {
         @GraphQLField
         public TestObject iface() {
@@ -165,6 +179,15 @@ public class GraphQLInputTest {
         result = graphQL.execute("{ object { value(input:{rec:{key:\"test\"}}) } }", new QueryRecursion());
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "rectesta");
+    }
+
+    @Test
+    public void queryWithList() {
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryList.class)).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ object { value(input:[[[{key:\"test\"}]]]) } }", new QueryList());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "testa");
     }
 
     @Test
