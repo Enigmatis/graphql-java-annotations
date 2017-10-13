@@ -33,11 +33,7 @@ import org.testng.annotations.Test;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.AnnotatedType;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static graphql.Scalars.GraphQLString;
