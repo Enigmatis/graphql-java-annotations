@@ -600,9 +600,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (type instanceof GraphQLNonNull) {
             type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
         }
-        final GraphQLOutputType wrappedType = type;
+        final GraphQLOutputType actualType = type;
         return obj.isAnnotationPresent(GraphQLConnection.class) &&
-                wrappedType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(((GraphQLList) wrappedType).getWrappedType()));
+                actualType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(((GraphQLList) actualType).getWrappedType()));
     }
 
     protected GraphQLFieldDefinition getField(Method method) throws GraphQLAnnotationsException {
