@@ -41,13 +41,26 @@ public class GraphQLInputTest {
         }
     }
 
+    static class SubInputObject {
+        public SubInputObject(String subKey) {
+            this.subKey = subKey;
+        }
+
+        @GraphQLField
+        private String subKey;
+    }
+
     static class InputObject {
-        public InputObject(HashMap map) {
-            key = (String) map.get("key");
+        public InputObject(String key, List<SubInputObject> complex) {
+            this.key = key;
+            this.complex = complex;
         }
 
         @GraphQLField
         private String key;
+
+        @GraphQLField
+        private List<SubInputObject> complex;
     }
 
     static class RecursiveInputObject {
@@ -82,7 +95,8 @@ public class GraphQLInputTest {
     static class TestObjectList {
         @GraphQLField
         public String value(List<List<List<InputObject>>> input) {
-            return input.get(0).get(0).get(0).key + "a";
+            InputObject inputObject = input.get(0).get(0).get(0);
+            return inputObject.key + "-" + inputObject.complex.get(0).subKey;
         }
     }
 
@@ -186,8 +200,8 @@ public class GraphQLInputTest {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryList.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ object { value(input:[[[{key:\"test\"}]]]) } }", new QueryList());
-        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "testa");
+        ExecutionResult result = graphQL.execute("{ object { value(input:[[[{key:\"test\", complex:[{subKey:\"subtest\"},{subKey:\"subtest2\"}]}]]]) } }", new QueryList());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "test-subtest");
     }
 
     @Test
