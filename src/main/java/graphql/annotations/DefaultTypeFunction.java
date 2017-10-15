@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,11 +29,7 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
@@ -57,6 +53,25 @@ public class DefaultTypeFunction implements TypeFunction {
 
     void setAnnotationsProcessor(GraphQLAnnotationsProcessor annotationsProcessor) {
         this.annotationsProcessor = annotationsProcessor;
+    }
+
+    private class IDFunction implements TypeFunction {
+        @Override
+        public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
+            return Scalars.GraphQLID.getName();
+        }
+
+        @Override
+        public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
+            return annotatedType != null
+                    && (aClass == Integer.class || aClass == int.class || aClass == String.class)
+                    && annotatedType.isAnnotationPresent(GraphQLID.class);
+        }
+
+        @Override
+        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+            return Scalars.GraphQLID;
+        }
     }
 
     private class StringFunction implements TypeFunction {
@@ -336,6 +351,7 @@ public class DefaultTypeFunction implements TypeFunction {
     public DefaultTypeFunction() {
         typeFunctions = new CopyOnWriteArrayList<>();
 
+        typeFunctions.add(new IDFunction());
         typeFunctions.add(new StringFunction());
         typeFunctions.add(new BooleanFunction());
         typeFunctions.add(new FloatFunction());
