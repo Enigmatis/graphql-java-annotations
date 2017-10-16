@@ -113,6 +113,77 @@ field.
 
 You can specify a custom data fetcher for a field with `@GraphQLDataFetcher`
 
+## Type extensions
+
+Having one single class declaring all fields in a graphQL object type is not always possible, or can lead to huge classes. 
+Modularizing the schema by defining fields in different classes allows you to split it in smaller chunks of codes. 
+In IDL, this is usually written by using the `extend` keyword on top of a type definition. So you have a type defined like this :
+
+```
+type Human {
+    id: ID!
+    name: String!
+}
+```
+
+It would be possible to extend it later on by using the following syntax :
+
+```
+extend type Human {
+    homePlanet: String
+}
+```
+
+### Defining extensions in annotations
+
+This is possible when using annotations by registering "extensions" classes, corresponding to `extend` clauses, before creating the objects with the GraphQLAnnotationsProcessor.
+Extension classes are simple classes, using the same annotations, with an additional `@GraphQLTypeExtension` on the class itself. The annotation value is required and will be the class that it actually extends.
+
+So the previous schema could be defined by the following classes : 
+  
+```
+@GraphQLName("Human")
+public class Human {
+    @GraphQLField
+    public String name() { }
+}
+```
+
+```
+@GraphQLTypeExtension(Human.class)
+public class HumanExtension {
+    @GraphQLField
+    public String homePlanet() { }
+}
+```
+
+Classes marked as "extensions" will actually not define a new type, but rather set new fields on the class it extends when it will be created. 
+All GraphQL annotations can be used on extension classes.
+
+Extensions are registered in GraqhQLAnnotationProcessor by using `registerTypeExtension`. Note that extensions must be registered before the type itself is requested with `getObject()`.
+
+### Data fetching with extensions
+
+As opposed to standard annotated classes mapped to GraphQL types, no instance of the extensions are created by default. 
+In DataFetcher, the source object will still be an instance of the extended class.
+It is however possible to provide a constructor taking the extended class as parameter. This constructor will be used to create an instance of the extension class when a field with the default DataFetcher (without `@DataFetcher`) will be queried. 
+If no such constructor is provided, the field must either be declared as `static` or marked as `@GraphQLInvokeDetached`. Original source object can be found in the `DataFetchingEnvironment`.
+
+```
+@GraphQLTypeExtension(Human.class)
+public class HumanExtension {
+    
+    public HumanExtension(Human human) {
+        this.human = human;   
+    }
+    
+    @GraphQLField
+    public String homePlanet() { 
+        // get value somehow from human object
+    }
+}
+```
+
 ## Type Inference
 
 By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum, List) will be inferred from Java types. Also, it will respect `@javax.validation.constraints.NotNull` annotation with respect to value's nullability, as well as `@GraphQLNonNull`
