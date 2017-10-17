@@ -160,7 +160,18 @@ public class HumanExtension {
 Classes marked as "extensions" will actually not define a new type, but rather set new fields on the class it extends when it will be created. 
 All GraphQL annotations can be used on extension classes.
 
-Extensions are registered in GraqhQLAnnotationProcessor by using `registerTypeExtension`. Note that extensions must be registered before the type itself is requested with `getObject()`.
+Extensions are registered in GraqhQLAnnotationProcessor by using `registerTypeExtension`. Note that extensions must be registered before the type itself is requested with `getObject()` :
+
+```
+GraphQLAnnotationsProcessor processor = GraphQLAnnotations.getInstance(); 
+
+// Register extensions
+processor.registerTypeExtension(HumanExtension.class);
+
+// Create type
+GraphQLObjectType type = processor.getObject(Human.class);
+
+```
 
 ### Data fetching with extensions
 
