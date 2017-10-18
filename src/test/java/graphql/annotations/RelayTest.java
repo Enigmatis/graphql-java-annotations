@@ -44,7 +44,7 @@ public class RelayTest {
         int getI();
     }
 
-    public static class Result implements IResult{
+    public static class Result implements IResult {
         private final int i;
 
         public Result(int i) {
@@ -57,22 +57,28 @@ public class RelayTest {
     }
 
     public static class WrongReturnType {
-        @GraphQLField @GraphQLRelayMutation
+        @GraphQLField
+        @GraphQLRelayMutation
         public int doSomething() {
             return 0;
         }
     }
 
     public static class TestObject {
-        @GraphQLField @GraphQLRelayMutation
+        @GraphQLField
+        @GraphQLRelayMutation
         public Result doSomething() {
             return new Result(0);
         }
-        @GraphQLField @GraphQLRelayMutation
-        public Result doSomethingElse(@GraphQLDescription("A") int a, int b) {
+
+        @GraphQLField
+        @GraphQLRelayMutation
+        public Result doSomethingElse(@GraphQLName("a") @GraphQLDescription("A") int a, @GraphQLName("b") int b) {
             return new Result(a - b);
         }
-        @GraphQLField @GraphQLRelayMutation
+
+        @GraphQLField
+        @GraphQLRelayMutation
         public IResult doSomethingI() {
             return new Result(0);
         }

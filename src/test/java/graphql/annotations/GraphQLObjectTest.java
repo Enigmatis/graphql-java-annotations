@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,12 +71,12 @@ public class GraphQLObjectTest {
         }
 
         @GraphQLField
-        public String fieldWithArgs(@NotNull String a, @GraphQLDefaultValue(DefaultAValue.class) @GraphQLDescription("b") String b) {
+        public String fieldWithArgs(@GraphQLName("a") @NotNull String a, @GraphQLName("b") @GraphQLDefaultValue(DefaultAValue.class) @GraphQLDescription("b") String b) {
             return b;
         }
 
         @GraphQLField
-        public String fieldWithArgsAndEnvironment(DataFetchingEnvironment env, String a, String b) {
+        public String fieldWithArgsAndEnvironment(DataFetchingEnvironment env,@GraphQLName("a") String a, @GraphQLName("b") String b) {
             return a;
         }
 
@@ -548,7 +548,7 @@ public class GraphQLObjectTest {
 
     private static class TestObjectInput {
         @GraphQLField
-        public String test(int other, TestInputArgument arg) {
+        public String test(@GraphQLName("other") int other, @GraphQLName("arg") TestInputArgument arg) {
             return arg.a;
         }
     }
