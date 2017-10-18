@@ -471,7 +471,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
 
         GraphQLOutputType outputType = (GraphQLOutputType) typeFunction.buildType(field.getType(), field.getAnnotatedType());
-        outputType = field.getAnnotation(NotNull.class) == null ? outputType : new GraphQLNonNull(outputType);
+        outputType = field.isAnnotationPresent(NotNull.class) ? new GraphQLNonNull(outputType) : outputType;
 
         boolean isConnection = isConnection(field, outputType);
         if (isConnection) {
@@ -577,22 +577,22 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     private GraphQLOutputType getGraphQLConnection(AccessibleObject field, GraphQLOutputType type, GraphQLFieldDefinition.Builder builder) {
-        boolean isNonNull = (type instanceof GraphQLNonNull);
-        if (isNonNull) {
+        if (type instanceof GraphQLNonNull) {
             type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
+            return new GraphQLNonNull(internalGetGraphQLConnection(field, type, builder));
+        } else {
+            return internalGetGraphQLConnection(field, type, builder);
         }
+    }
 
+    private GraphQLOutputType internalGetGraphQLConnection(AccessibleObject field, GraphQLOutputType type, GraphQLFieldDefinition.Builder builder) {
         graphql.schema.GraphQLType wrappedType = ((GraphQLList) type).getWrappedType();
         assert wrappedType instanceof GraphQLObjectType;
-        String annValue = field.getAnnotation(GraphQLConnection.class).name();
-        String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
+        String connectionName = field.getAnnotation(GraphQLConnection.class).name();
+        connectionName = connectionName.isEmpty() ? wrappedType.getName() : connectionName;
         GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
         type = relay.connectionType(connectionName, edgeType, Collections.emptyList());
         builder.argument(relay.getConnectionFieldArguments());
-
-        if (isNonNull) {
-            type = new GraphQLNonNull(type);
-        }
         return type;
     }
 
