@@ -16,6 +16,8 @@ package graphql.annotations;
 
 import graphql.schema.*;
 import graphql.schema.GraphQLType;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
@@ -29,6 +31,11 @@ import static graphql.Scalars.GraphQLID;
 import static org.testng.Assert.*;
 
 public class DefaultTypeFunctionTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     private enum A {
         @GraphQLName("someA") @GraphQLDescription("a") A, B

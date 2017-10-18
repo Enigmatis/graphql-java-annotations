@@ -20,6 +20,7 @@ import graphql.TypeResolutionEnvironment;
 import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLType;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -29,6 +30,11 @@ import static org.testng.Assert.*;
 
 @SuppressWarnings("unchecked")
 public class RelayTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     public static class ResultTypeResolver implements TypeResolver {
 

@@ -37,7 +37,7 @@ public class BatchedTypeFunction implements TypeFunction {
     }
 
     @Override
-    public graphql.schema.GraphQLType buildType(String typeName, final Class<?> aClass, final AnnotatedType annotatedType) {
+    public graphql.schema.GraphQLType buildType(final boolean inputType, final Class<?> aClass, final AnnotatedType annotatedType) {
         if (!aClass.isAssignableFrom(List.class)) {
             throw new IllegalArgumentException("Batched method should return a List");
         }
@@ -52,7 +52,6 @@ public class BatchedTypeFunction implements TypeFunction {
         } else {
             klass = (Class<?>) arg.getType();
         }
-        typeName = klass.getSimpleName();
-        return defaultTypeFunction.buildType(typeName, klass, arg);
+        return defaultTypeFunction.buildType(inputType, klass, arg);
     }
 }

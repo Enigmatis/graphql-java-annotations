@@ -20,6 +20,8 @@ import graphql.GraphQL;
 import graphql.execution.batched.BatchedExecutionStrategy;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -33,6 +35,12 @@ import static org.testng.Assert.assertTrue;
 
 @SuppressWarnings("unchecked")
 public class GraphQLBatchedTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
+
     private static class SimpleBatchedField {
         @GraphQLField
         @GraphQLBatched

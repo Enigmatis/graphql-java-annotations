@@ -33,6 +33,7 @@ import static graphql.annotations.ReflectionKit.constructNewInstance;
 import static graphql.annotations.ReflectionKit.newInstance;
 import static graphql.annotations.util.NamingKit.toGraphqlName;
 import static graphql.schema.GraphQLArgument.newArgument;
+import static graphql.schema.GraphQLEnumType.newEnum;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInterfaceType.newInterface;
@@ -49,6 +50,8 @@ import static java.util.Objects.nonNull;
 public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
+
+    private static final String DEFAULT_INPUT_PREFIX = "Input";
 
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
     private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry = new HashMap<>();
@@ -75,21 +78,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     @Override
-    public graphql.schema.GraphQLType getInterface(Class<?> iface) throws GraphQLAnnotationsException {
-        String typeName = getTypeName(iface);
-        graphql.schema.GraphQLType type = typeRegistry.get(typeName);
-        if (type != null) { // type already exists, do not build a new new one
-            return type;
-        }
-        if (iface.getAnnotation(GraphQLUnion.class) != null) {
-            type = getUnionBuilder(iface).build();
-        } else if (!iface.isAnnotationPresent(GraphQLTypeResolver.class)) {
-            type = getObject(iface);
-        } else {
-            type = getIfaceBuilder(iface).build();
-        }
-        typeRegistry.put(typeName, type);
-        return type;
+    public graphql.schema.GraphQLOutputType getInterface(Class<?> iface) throws GraphQLAnnotationsException {
+        return getOutputType(iface);
     }
 
     public static graphql.schema.GraphQLType iface(Class<?> iface) throws GraphQLAnnotationsException {
@@ -252,26 +242,92 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     @Override
     public GraphQLObjectType getObject(Class<?> object) throws GraphQLAnnotationsException {
+        GraphQLOutputType type = getOutputType(object);
+        if (type instanceof GraphQLObjectType) {
+            return (GraphQLObjectType) type;
+        } else {
+            throw new IllegalArgumentException("Object resolve to a "+type.getClass().getSimpleName());
+        }
+    }
+
+    @Override
+    public GraphQLOutputType getOutputType(Class<?> object) throws GraphQLAnnotationsException {
         // because the TypeFunction can call back to this processor and
         // Java classes can be circular, we need to protect against
         // building the same type twice because graphql-java 3.x requires
         // all type instances to be unique singletons
         String typeName = getTypeName(object);
+
+        GraphQLOutputType type = (GraphQLOutputType) typeRegistry.get(typeName);
+        if (type != null) { // type already exists, do not build a new new one
+            return type;
+        }
+
         processing.push(typeName);
+        if (object.getAnnotation(GraphQLUnion.class) != null) {
+            type = getUnionBuilder(object).build();
+        } else if (object.isAnnotationPresent(GraphQLTypeResolver.class)) {
+            type = getIfaceBuilder(object).build();
+        } else if (Enum.class.isAssignableFrom(object)) {
+            type = getEnumBuilder(object).build();
+        } else {
+            type = new GraphQLObjectTypeWrapper(object, getObjectBuilder(object).build());
+        }
 
-        GraphQLObjectType.Builder builder = getObjectBuilder(object);
-
+        typeRegistry.put(typeName, type);
         processing.pop();
-        return new GraphQLObjectTypeWrapper(object, builder.build());
+
+        return type;
+    }
+
+    public static GraphQLOutputType outputType(Class<?> object) {
+        return getInstance().getOutputType(object);
+    }
+
+    public GraphQLEnumType.Builder getEnumBuilder(Class<?> aClass) {
+        String typeName = getTypeName(aClass);
+        //noinspection unchecked
+        Class<? extends Enum> enumClass = (Class<? extends Enum>) aClass;
+        GraphQLEnumType.Builder builder = newEnum();
+        builder.name(typeName);
+
+        GraphQLDescription description = aClass.getAnnotation(GraphQLDescription.class);
+        if (description != null) {
+            builder.description(description.value());
+        }
+
+        List<Enum> constants = Arrays.asList(enumClass.getEnumConstants());
+
+        Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).forEachOrdered(n -> {
+            try {
+                Field field = aClass.getField(n);
+                GraphQLName fieldName = field.getAnnotation(GraphQLName.class);
+                GraphQLDescription fieldDescription = field.getAnnotation(GraphQLDescription.class);
+                Enum constant = constants.stream().filter(c -> c.name().contentEquals(n)).findFirst().get();
+                String name_ = fieldName == null ? n : fieldName.value();
+                builder.value(name_, constant, fieldDescription == null ? name_ : fieldDescription.value());
+            } catch (NoSuchFieldException ignore) {
+            }
+        });
+        return builder;
+    }
+
+    public static  GraphQLEnumType.Builder enumBuilder(Class<?> object) throws GraphQLAnnotationsException {
+        return getInstance().getEnumBuilder(object);
+    }
+
+    public GraphQLOutputType getObjectOrRef(Class<?> object) throws GraphQLAnnotationsException {
+        return getOutputTypeOrRef(object);
     }
 
     @Override
-    public GraphQLOutputType getObjectOrRef(Class<?> object) throws GraphQLAnnotationsException {
+    public GraphQLOutputType getOutputTypeOrRef(Class<?> object) throws GraphQLAnnotationsException {
         String typeName = getTypeName(object);
         if (processing.contains(typeName)) {
             return new GraphQLTypeReference(typeName);
         }
-        return getObject(object);
+
+        return getOutputType(object);
     }
 
     public static GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
@@ -325,7 +381,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         for (Class<?> iface : object.getInterfaces()) {
             if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
-                builder.withInterface((GraphQLInterfaceType) getInterface(iface));
+                String ifaceName = getTypeName(iface);
+                if (processing.contains(ifaceName)) {
+                    builder.withInterface(new GraphQLTypeReference(ifaceName));
+                } else {
+                    builder.withInterface((GraphQLInterfaceType) getInterface(iface));
+                }
                 builder.fields(getExtensionFields(iface, fieldsDefined));
             }
         }
@@ -571,11 +632,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
                 map(parameter -> {
                     Class<?> t = parameter.getType();
-                    graphql.schema.GraphQLType graphQLType = finalTypeFunction.buildType(t, parameter.getAnnotatedType());
-                    if (graphQLType instanceof GraphQLObjectType) {
-                        GraphQLInputObjectType inputObject = getInputObject((GraphQLObjectType) graphQLType, "input");
-                        graphQLType = inputObject;
-                    }
+                    graphql.schema.GraphQLType graphQLType = getInputObject(finalTypeFunction.buildType(t, parameter.getAnnotatedType()), DEFAULT_INPUT_PREFIX);
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 
@@ -641,27 +698,49 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     }
 
-    @Override
-    public GraphQLInputObjectType getInputObject(GraphQLObjectType graphQLType, String newNamePrefix) {
-        GraphQLObjectType object = graphQLType;
-        return new GraphQLInputObjectType("" + newNamePrefix + object.getName(), object.getDescription(),
-                object.getFieldDefinitions().stream().
-                        map(field -> {
-                            GraphQLOutputType type = field.getType();
-                            GraphQLInputType inputType;
-                            if (type instanceof GraphQLObjectType) {
-                                inputType = getInputObject((GraphQLObjectType) type, newNamePrefix);
-                            } else {
-                                inputType = (GraphQLInputType) type;
-                            }
+    public GraphQLInputObjectType getInputObject(Class<?> object) {
+        String typeName = DEFAULT_INPUT_PREFIX + getTypeName(object);
+        if (typeRegistry.containsKey(typeName)) {
+            return (GraphQLInputObjectType) typeRegistry.get(typeName);
+        } else {
+            graphql.schema.GraphQLType graphQLType = getObject(object);
+            GraphQLInputObjectType inputObject = (GraphQLInputObjectType) getInputObject(graphQLType, DEFAULT_INPUT_PREFIX);
+            typeRegistry.put(inputObject.getName(), inputObject);
+            return inputObject;
+        }
+    }
 
-                            return new GraphQLInputObjectField(field.getName(), field.getDescription(), inputType, null);
-                        }).
-                        collect(Collectors.toList()));
+    @Override
+    public GraphQLInputType getInputObject(graphql.schema.GraphQLType graphQLType, String newNamePrefix) {
+        if (graphQLType instanceof GraphQLObjectType) {
+            GraphQLObjectType object = (GraphQLObjectType) graphQLType;
+            if (typeRegistry.containsKey(newNamePrefix + object.getName()) && typeRegistry.get(newNamePrefix + object.getName()) instanceof GraphQLInputType) {
+                return (GraphQLInputType) typeRegistry.get(newNamePrefix + object.getName());
+            }
+            GraphQLInputObjectType inputObjectType = new GraphQLInputObjectType(newNamePrefix + object.getName(), object.getDescription(),
+                    object.getFieldDefinitions().stream().
+                            map(field -> {
+                                GraphQLOutputType type = field.getType();
+                                GraphQLInputType inputType = getInputObject(type, newNamePrefix);
+                                return new GraphQLInputObjectField(field.getName(), field.getDescription(), inputType, null);
+                            }).
+                            collect(Collectors.toList()));
+            typeRegistry.put(inputObjectType.getName(), inputObjectType);
+            return inputObjectType;
+        } else if (graphQLType instanceof GraphQLList) {
+            return new GraphQLList(getInputObject(((GraphQLList)graphQLType).getWrappedType(), newNamePrefix));
+        } else if (graphQLType instanceof GraphQLNonNull) {
+            return new GraphQLNonNull(getInputObject(((GraphQLNonNull)graphQLType).getWrappedType(), newNamePrefix));
+        } else if (graphQLType instanceof GraphQLTypeReference) {
+            return new GraphQLTypeReference(newNamePrefix + ((GraphQLTypeReference)graphQLType).getName());
+        } else if (graphQLType instanceof GraphQLInputType){
+            return (GraphQLInputType) graphQLType;
+        }
+        throw new IllegalArgumentException("Cannot convert type to input : "+graphQLType);
     }
 
     public static GraphQLInputObjectType inputObject(GraphQLObjectType graphQLType, String newNamePrefix) {
-        return getInstance().getInputObject(graphQLType, newNamePrefix);
+        return (GraphQLInputObjectType) getInstance().getInputObject(graphQLType, newNamePrefix);
     }
 
     protected GraphQLArgument getArgument(Parameter parameter, graphql.schema.GraphQLType t) throws

@@ -43,21 +43,21 @@ public interface TypeFunction {
 
     /**
      * Build a {@link GraphQLType} object from a java type.
-     * This is a convenience method for calling {@link #buildType(String, Class, AnnotatedType)} without a type name.
+     * This is a convenience method for calling {@link #buildType(boolean, Class, AnnotatedType)} without a type name.
      * @param aClass The java type to build the type name for
      * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
      * @return The built {@link GraphQLType}
      */
     default GraphQLType buildType(Class<?> aClass, AnnotatedType annotatedType) {
-        return buildType(getTypeName(aClass, annotatedType), aClass, annotatedType);
+        return buildType(false, aClass, annotatedType);
     }
 
     /**
      * Build a {@link GraphQLType} object from a java type.
-     * @param typeName The name to give the graphql type
+     * @param input is InputType
      * @param aClass The java type to build the type name for
      * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
      * @return The built {@link GraphQLType}
      */
-    GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType);
+    GraphQLType buildType(boolean input, Class<?> aClass, AnnotatedType annotatedType);
 }

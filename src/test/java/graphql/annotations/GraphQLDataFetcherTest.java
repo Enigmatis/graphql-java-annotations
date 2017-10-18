@@ -21,6 +21,7 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.PropertyDataFetcher;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -31,6 +32,11 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class GraphQLDataFetcherTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     @Test
     public void shouldUsePreferredConstructor() {
