@@ -21,7 +21,6 @@ import graphql.schema.GraphQLNonNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import javax.validation.constraints.NotNull;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
@@ -471,7 +470,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
 
         GraphQLOutputType outputType = (GraphQLOutputType) typeFunction.buildType(field.getType(), field.getAnnotatedType());
-        outputType = field.isAnnotationPresent(NotNull.class) ? new GraphQLNonNull(outputType) : outputType;
 
         boolean isConnection = isConnection(field, outputType);
         if (isConnection) {
@@ -629,7 +627,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
 
         GraphQLOutputType outputType = (GraphQLOutputType) outputTypeFunction.buildType(method.getReturnType(), annotatedReturnType);
-        outputType = method.getAnnotation(NotNull.class) == null ? outputType : new GraphQLNonNull(outputType);
 
         boolean isConnection = isConnection(method, outputType);
         if (isConnection) {
@@ -644,7 +641,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
                 map(parameter -> {
                     Class<?> t = parameter.getType();
-                    graphql.schema.GraphQLType graphQLType = getInputObject(finalTypeFunction.buildType(t, parameter.getAnnotatedType()), DEFAULT_INPUT_PREFIX);
+                    graphql.schema.GraphQLInputType graphQLType = getInputObject(finalTypeFunction.buildType(t, parameter.getAnnotatedType()), DEFAULT_INPUT_PREFIX);
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 
@@ -755,10 +752,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return (GraphQLInputObjectType) getInstance().getInputObject(graphQLType, newNamePrefix);
     }
 
-    protected GraphQLArgument getArgument(Parameter parameter, graphql.schema.GraphQLType t) throws
+    protected GraphQLArgument getArgument(Parameter parameter, graphql.schema.GraphQLInputType t) throws
             GraphQLAnnotationsException {
-        GraphQLArgument.Builder builder = newArgument();
-        builder.type(parameter.getAnnotation(NotNull.class) == null ? (GraphQLInputType) t : new graphql.schema.GraphQLNonNull(t));
+        GraphQLArgument.Builder builder = newArgument().type(t);
         GraphQLDescription description = parameter.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());
