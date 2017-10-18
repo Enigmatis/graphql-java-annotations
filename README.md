@@ -220,11 +220,19 @@ GraphQLAnnotations.register(new UUIDTypeFunction())
 
 You can also specify custom type function for any field with `@GraphQLType` annotation.
 
-## Relay Mutations
+## Relay support
+
+### Mutations
 
 You can use `@GraphQLRelayMutation` annotation to make mutation adhere to
 Relay [specification for mutations](https://facebook.github.io/relay/graphql/mutations.htm)
 
-## Relay Connection
+### Connection
 
 You can use `@GraphQLConnection` annotation to make a field iterable in adherence to Relay [Connection specification](https://facebook.github.io/relay/graphql/connections.htm).
+
+### Customizing Relay schema
+
+By default, GraphQLAnnotations will use the `graphql.relay.Relay` class to create the Relay specific schema types (Mutations, Connections, Edges, PageInfo, ...).
+It is possible to set a custom implementation of the Relay class with `GraphQLAnnotations.setRelay` method. The class should inherit from `graphql.relay.Relay` and 
+can redefine methods that create Relay types.

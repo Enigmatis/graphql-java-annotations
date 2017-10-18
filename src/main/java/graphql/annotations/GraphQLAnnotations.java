@@ -48,13 +48,12 @@ import static java.util.Objects.nonNull;
 @Component
 public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
-    private static final Relay RELAY_TYPES = new Relay();
-
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
 
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
     private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
+    private Relay relay = new Relay();
 
     public GraphQLAnnotations() {
         this(new DefaultTypeFunction());
@@ -69,6 +68,10 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     public static GraphQLAnnotations getInstance() {
         return instance;
+    }
+
+    public void setRelay(Relay relay) {
+        this.relay = relay;
     }
 
     @Override
@@ -518,9 +521,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 assert wrappedType instanceof GraphQLObjectType;
                 String annValue = field.getAnnotation(GraphQLConnection.class).name();
                 String connectionName = annValue.isEmpty() ? wrappedType.getName() : annValue;
-                GraphQLObjectType edgeType = RELAY_TYPES.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
-                outputType = RELAY_TYPES.connectionType(connectionName, edgeType, Collections.emptyList());
-                builder.argument(RELAY_TYPES.getConnectionFieldArguments());
+                GraphQLObjectType edgeType = relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList());
+                outputType = relay.connectionType(connectionName, edgeType, Collections.emptyList());
+                builder.argument(relay.getConnectionFieldArguments());
             }
         }
         return outputType;
@@ -576,7 +579,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 
-        GraphQLFieldDefinition relay = null;
+        GraphQLFieldDefinition relayFieldDefinition = null;
         if (method.isAnnotationPresent(GraphQLRelayMutation.class)) {
             if (!(outputType instanceof GraphQLObjectType || outputType instanceof GraphQLInterfaceType)) {
                 throw new RuntimeException("outputType should be an object or an interface");
@@ -587,12 +590,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             List<GraphQLFieldDefinition> fieldDefinitions = outputType instanceof GraphQLObjectType ?
                     ((GraphQLObjectType) outputType).getFieldDefinitions() :
                     ((GraphQLInterfaceType) outputType).getFieldDefinitions();
-            relay = RELAY_TYPES.mutationWithClientMutationId(title, method.getName(),
+            relayFieldDefinition = relay.mutationWithClientMutationId(title, method.getName(),
                     args.stream().
                             map(t -> newInputObjectField().name(t.getName()).type(t.getType()).description(t.getDescription()).build()).
                             collect(Collectors.toList()), fieldDefinitions, null);
-            builder.argument(relay.getArguments());
-            builder.type(relay.getType());
+            builder.argument(relayFieldDefinition.getArguments());
+            builder.type(relayFieldDefinition.getType());
         } else {
             builder.argument(args);
         }
@@ -620,8 +623,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             actualDataFetcher = constructDataFetcher(method.getName(), dataFetcher);
         }
 
-        if (method.isAnnotationPresent(GraphQLRelayMutation.class) && relay != null) {
-            actualDataFetcher = new RelayMutationMethodDataFetcher(method, args, relay.getArgument("input").getType(), relay.getType());
+        if (method.isAnnotationPresent(GraphQLRelayMutation.class) && relayFieldDefinition != null) {
+            actualDataFetcher = new RelayMutationMethodDataFetcher(method, args, relayFieldDefinition.getArgument("input").getType(), relayFieldDefinition.getType());
         }
 
         if (isConnection) {
