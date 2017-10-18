@@ -102,4 +102,20 @@ public interface GraphQLAnnotationsProcessor {
      * @return a {@link GraphQLInputObjectType}
      */
     GraphQLInputObjectType getInputObject(GraphQLObjectType graphQLType, String newNamePrefix);
+
+    /**
+     * Register a new type extension class. This extension will be used when the extended object will be created.
+     * The class must have a {@link GraphQLTypeExtension} annotation.
+     *
+     * @param objectClass The extension class to register
+     */
+    void registerTypeExtension(Class<?> objectClass);
+
+    /**
+     * Unregister a type extension class.
+     *
+     * @param objectClass The extension class to unregister
+     */
+    void unregisterTypeExtension(Class<?> objectClass);
+
 }
