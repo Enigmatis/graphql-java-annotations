@@ -19,7 +19,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.TYPE, ElementType.TYPE_USE, ElementType.METHOD, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.TYPE_USE, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GraphQLNonNull {
 }

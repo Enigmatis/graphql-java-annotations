@@ -328,8 +328,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         GraphQLType result = typeFunction.buildType(inputType, aClass, annotatedType);
-        if (aClass.getAnnotation(GraphQLNonNull.class) != null ||
-                (annotatedType != null && annotatedType.getAnnotation(GraphQLNonNull.class) != null)) {
+        if (annotatedType != null && annotatedType.isAnnotationPresent(GraphQLNonNull.class)) {
             result = new graphql.schema.GraphQLNonNull(result);
         }
         return result;

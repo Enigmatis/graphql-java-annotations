@@ -31,7 +31,6 @@ import graphql.schema.GraphQLType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.validation.constraints.NotNull;
 import java.lang.reflect.AnnotatedType;
 import java.util.*;
 import java.util.function.Supplier;
@@ -67,13 +66,13 @@ public class GraphQLObjectTest {
         @GraphQLName("field0")
         @GraphQLDescription("field")
         public
-        @NotNull
+        @GraphQLNonNull
         String field() {
             return "test";
         }
 
         @GraphQLField
-        public String fieldWithArgs(@NotNull String a, @GraphQLDefaultValue(DefaultAValue.class) @GraphQLDescription("b") String b) {
+        public String fieldWithArgs(@GraphQLNonNull String a, @GraphQLDefaultValue(DefaultAValue.class) @GraphQLDescription("b") String b) {
             return b;
         }
 
