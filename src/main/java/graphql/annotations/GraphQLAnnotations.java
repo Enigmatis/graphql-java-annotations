@@ -51,6 +51,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
 
+    private static final String DEFAULT_INPUT_PREFIX = "Input";
+
     private Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
     private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry = new HashMap<>();
     private final Stack<String> processing = new Stack<>();
@@ -630,7 +632,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
                 map(parameter -> {
                     Class<?> t = parameter.getType();
-                    graphql.schema.GraphQLType graphQLType = getInputObject(finalTypeFunction.buildType(t, parameter.getAnnotatedType()), "");
+                    graphql.schema.GraphQLType graphQLType = getInputObject(finalTypeFunction.buildType(t, parameter.getAnnotatedType()), DEFAULT_INPUT_PREFIX);
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 
@@ -697,12 +699,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     public GraphQLInputObjectType getInputObject(Class<?> object) {
-        String typeName = getTypeName(object);
+        String typeName = DEFAULT_INPUT_PREFIX + getTypeName(object);
         if (typeRegistry.containsKey(typeName)) {
             return (GraphQLInputObjectType) typeRegistry.get(typeName);
         } else {
             graphql.schema.GraphQLType graphQLType = getObject(object);
-            GraphQLInputObjectType inputObject = (GraphQLInputObjectType) getInputObject(graphQLType, "");
+            GraphQLInputObjectType inputObject = (GraphQLInputObjectType) getInputObject(graphQLType, DEFAULT_INPUT_PREFIX);
             typeRegistry.put(inputObject.getName(), inputObject);
             return inputObject;
         }

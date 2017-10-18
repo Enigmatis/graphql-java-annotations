@@ -80,7 +80,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLString;
         }
     }
@@ -98,7 +98,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLBoolean;
         }
     }
@@ -116,7 +116,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLFloat;
         }
     }
@@ -134,7 +134,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLInt;
         }
     }
@@ -152,7 +152,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             return Scalars.GraphQLLong;
         }
     }
@@ -168,7 +168,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             if (!(annotatedType instanceof AnnotatedParameterizedType)) {
                 throw new IllegalArgumentException("List type parameter should be specified");
             }
@@ -180,7 +180,7 @@ public class DefaultTypeFunction implements TypeFunction {
             } else {
                 klass = (Class<?>) arg.getType();
             }
-            return new GraphQLList(DefaultTypeFunction.this.buildType(klass, arg));
+            return new GraphQLList(DefaultTypeFunction.this.buildType(inputType, klass, arg));
         }
     }
 
@@ -192,7 +192,7 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             if (!(annotatedType instanceof AnnotatedParameterizedType)) {
                 throw new IllegalArgumentException("Stream type parameter should be specified");
             }
@@ -204,7 +204,7 @@ public class DefaultTypeFunction implements TypeFunction {
             } else {
                 klass = (Class<?>) arg.getType();
             }
-            return new GraphQLList(DefaultTypeFunction.this.buildType(klass, arg));
+            return new GraphQLList(DefaultTypeFunction.this.buildType(inputType, klass, arg));
         }
     }
 
@@ -222,9 +222,9 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             AnnotatedType arg = getAnnotatedType(annotatedType);
-            return DefaultTypeFunction.this.buildType(typeName, getClass(annotatedType), arg);
+            return DefaultTypeFunction.this.buildType(inputType, getClass(annotatedType), arg);
         }
 
         private AnnotatedType getAnnotatedType(AnnotatedType annotatedType) {
@@ -259,12 +259,11 @@ public class DefaultTypeFunction implements TypeFunction {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
-            try {
-                return annotationsProcessor.getOutputTypeOrRef(aClass);
-            } catch (ClassCastException e) {
-                // Also try to resolve to input object
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
+            if (inputType) {
                 return annotationsProcessor.getInputObject(aClass);
+            } else {
+                return annotationsProcessor.getOutputTypeOrRef(aClass);
             }
         }
     }
@@ -322,13 +321,13 @@ public class DefaultTypeFunction implements TypeFunction {
     }
 
     @Override
-    public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+    public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
         TypeFunction typeFunction = getTypeFunction(aClass, annotatedType);
         if (typeFunction == null) {
             throw new IllegalArgumentException("unsupported type");
         }
 
-        GraphQLType result = typeFunction.buildType(typeName, aClass, annotatedType);
+        GraphQLType result = typeFunction.buildType(inputType, aClass, annotatedType);
         if (aClass.getAnnotation(GraphQLNonNull.class) != null ||
                 (annotatedType != null && annotatedType.getAnnotation(GraphQLNonNull.class) != null)) {
             result = new graphql.schema.GraphQLNonNull(result);

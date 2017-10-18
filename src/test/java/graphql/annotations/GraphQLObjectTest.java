@@ -625,7 +625,7 @@ public class GraphQLObjectTest {
         }
 
         @Override
-        public GraphQLType buildType(String typeName, Class<?> aClass, AnnotatedType annotatedType) {
+        public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             return GraphQLString;
         }
     }
