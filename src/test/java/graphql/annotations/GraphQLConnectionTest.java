@@ -26,6 +26,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -55,12 +56,30 @@ public class GraphQLConnectionTest {
         }
     }
 
+    public static class DuplicateTest {
+        @GraphQLField
+        public TestListField field1;
+
+        @GraphQLField
+        public TestListField2 field2;
+    }
+
     public static class TestListField {
         @GraphQLField
         @GraphQLConnection
         public List<Obj> objs;
 
         public TestListField(List<Obj> objs) {
+            this.objs = objs;
+        }
+    }
+
+    public static class TestListField2 {
+        @GraphQLField
+        @GraphQLConnection
+        public List<Obj> objs;
+
+        public TestListField2(List<Obj> objs) {
             this.objs = objs;
         }
     }
@@ -268,6 +287,13 @@ public class GraphQLConnectionTest {
         Map<String, Object> objs = (Map<String, Object>) (data.get("objs"));
         List edges = (List) objs.get("edges");
         assertEquals(edges.size(), 0);
+    }
+
+    @Test
+    public void duplicateConnection() {
+        GraphQLObjectType object = GraphQLAnnotations.object(DuplicateTest.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+        System.out.println("ok");
     }
 
 }
