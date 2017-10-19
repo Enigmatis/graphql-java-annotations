@@ -15,35 +15,24 @@
 package graphql.annotations;
 
 import graphql.ExecutionResult;
-import graphql.execution.ExecutionContext;
-import graphql.execution.ExecutionParameters;
-import graphql.execution.SimpleExecutionStrategy;
-import graphql.execution.TypeInfo;
-import graphql.language.Argument;
-import graphql.language.Field;
-import graphql.language.ObjectValue;
-import graphql.language.StringValue;
-import graphql.language.VariableReference;
+import graphql.execution.*;
+import graphql.language.*;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLType;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-import static graphql.execution.ExecutionParameters.newParameters;
-import static graphql.execution.TypeInfoWorkaround.newTypeInfo;
-
-public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
+public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
 
     private static final String CLIENT_MUTATION_ID = "clientMutationId";
 
     @Override
-    protected ExecutionResult resolveField(ExecutionContext executionContext, ExecutionParameters parameters, List<Field> fields) {
-        GraphQLObjectType parentType = (GraphQLObjectType) parameters.typeInfo().type();
-        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, fields.get(0));
+    protected CompletableFuture<ExecutionResult> resolveField(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
+        GraphQLObjectType parentType = (GraphQLObjectType) parameters.typeInfo().getType();
+        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, parameters.field().get(0));
         if (fieldDef == null) return null;
 
         if (fieldDef.getName().contentEquals(CLIENT_MUTATION_ID)) {
@@ -63,45 +52,48 @@ public class EnhancedExecutionStrategy extends SimpleExecutionStrategy {
                 clientMutationId = clientMutationIdVal.getValue();
             }
 
-            TypeInfo fieldTypeInfo = newTypeInfo(fieldDef.getType(), parameters.typeInfo());
-            ExecutionParameters newParameters = newParameters()
+            ExecutionTypeInfo fieldTypeInfo = ExecutionTypeInfo.newTypeInfo().type(fieldDef.getType()).parentInfo(parameters.typeInfo()).build();
+            ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
                     .arguments(parameters.arguments())
                     .fields(parameters.fields())
+                    .nonNullFieldValidator(parameters.nonNullFieldValidator())
                     .typeInfo(fieldTypeInfo)
                     .source(clientMutationId)
                     .build();
 
 
-            return completeValue(executionContext, newParameters, fields);
+            return completeValue(executionContext, newParameters);
         } else {
-            return super.resolveField(executionContext, parameters, fields);
+            return super.resolveField(executionContext, parameters);
         }
     }
 
     @Override
-    protected ExecutionResult completeValue(ExecutionContext executionContext, ExecutionParameters parameters, List<Field> fields) {
-        GraphQLType fieldType = parameters.typeInfo().type();
+    protected CompletableFuture<ExecutionResult> completeValue(ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws NonNullableFieldWasNullException {
+        graphql.schema.GraphQLType fieldType = parameters.typeInfo().getType();
         Object result = parameters.source();
         if (result instanceof Enum && fieldType instanceof GraphQLEnumType) {
             Object value = ((GraphQLEnumType) fieldType).getCoercing().parseValue(((Enum) result).name());
-            return super.completeValue(executionContext, withSource(parameters, value), fields);
+            return super.completeValue(executionContext, withSource(parameters, value));
         }
         if (result instanceof Optional) {
             Object value = ((Optional<?>) result).orElse(null);
-            return completeValue(executionContext, withSource(parameters, value), fields);
+            return completeValue(executionContext, withSource(parameters, value));
         }
-        return super.completeValue(executionContext, parameters, fields);
+        return super.completeValue(executionContext, parameters);
     }
 
     /*
       Creates a new parameters with the specified object as its source
      */
-    private ExecutionParameters withSource(ExecutionParameters parameters, Object source) {
-        return newParameters()
+    private ExecutionStrategyParameters withSource(ExecutionStrategyParameters parameters, Object source) {
+        return ExecutionStrategyParameters.newParameters()
                 .arguments(parameters.arguments())
                 .fields(parameters.fields())
+                .nonNullFieldValidator(parameters.nonNullFieldValidator())
                 .typeInfo(parameters.typeInfo())
                 .source(source)
                 .build();
     }
+
 }

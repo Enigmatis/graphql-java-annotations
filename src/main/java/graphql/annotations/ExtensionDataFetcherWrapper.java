@@ -37,9 +37,9 @@ public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T>{
     public T get(DataFetchingEnvironment environment) {
         Object source = environment.getSource();
         if (source != null && (!declaringClass.isInstance(source)) && !(source instanceof Map)) {
-            environment = new DataFetchingEnvironmentImpl(newInstance(declaringClass, source), environment.getArguments(),
-                    environment.getContext(), environment.getFields(), environment.getFieldType(), environment.getParentType(),
-                    environment.getGraphQLSchema(), environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet());
+            environment = new DataFetchingEnvironmentImpl(newInstance(declaringClass, source), environment.getArguments(), environment.getContext(),
+                    environment.getRoot(), environment.getFieldDefinition(), environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
+                    environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet(), environment.getFieldTypeInfo());
         }
 
         return dataFetcher.get(environment);

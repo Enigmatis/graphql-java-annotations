@@ -659,7 +659,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             relayFieldDefinition = relay.mutationWithClientMutationId(title, method.getName(),
                     args.stream().
                             map(t -> newInputObjectField().name(t.getName()).type(t.getType()).description(t.getDescription()).build()).
-                            collect(Collectors.toList()), fieldDefinitions, null);
+                            collect(Collectors.toList()), fieldDefinitions, new StaticDataFetcher(null));
             builder.argument(relayFieldDefinition.getArguments());
             builder.type(relayFieldDefinition.getType());
         } else {
@@ -843,8 +843,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             HashMap<String, Object> arguments = new HashMap<>(environment.getArguments());
             arguments.keySet().removeAll(Arrays.asList("first", "last", "before", "after"));
             DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), arguments, environment.getContext(),
-                    environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
-                    environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet());
+                    environment.getRoot(), environment.getFieldDefinition(), environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
+                    environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet(), environment.getFieldTypeInfo());
             Object data = actualDataFetcher.get(env);
             if (data != null) {
                 Connection conn = constructNewInstance(constructor, data);

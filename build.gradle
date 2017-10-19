@@ -68,7 +68,7 @@ gradle.projectsEvaluated {
 
 dependencies {
     compile 'javax.validation:validation-api:1.1.0.Final'
-    compile 'com.graphql-java:graphql-java:3.0.0'
+    compile 'com.graphql-java:graphql-java:4.2'
 
     // OSGi
     compileOnly 'org.osgi:org.osgi.core:6.0.0'
