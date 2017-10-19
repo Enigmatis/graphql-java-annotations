@@ -270,7 +270,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         } else if (Enum.class.isAssignableFrom(object)) {
             type = getEnumBuilder(object).build();
         } else {
-            type = new GraphQLObjectTypeWrapper(object, getObjectBuilder(object).build());
+            type = getObjectBuilder(object).build();
         }
 
         typeRegistry.put(typeName, type);
