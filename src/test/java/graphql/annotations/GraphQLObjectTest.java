@@ -28,6 +28,9 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.SchemaPrinter;
+import graphql.schema.idl.TypeDefinitionRegistry;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -154,8 +157,17 @@ public class GraphQLObjectTest {
     @Test
     public void objectClass() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
-        assertTrue(object instanceof GraphQLObjectTypeWrapper);
-        assertEquals(((GraphQLObjectTypeWrapper) object).getObjectClass(), TestObject.class);
+        assertTrue(object instanceof GraphQLObjectType);
+    }
+
+    @Test
+    public void testSchema() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
+        String schema = new SchemaPrinter().print(object);
+        assertTrue(schema.contains("type TestObject {"));
+        TypeDefinitionRegistry reg = new SchemaParser().parse(schema);
+        assertTrue(reg.getType("TestObject").isPresent());
+        assertEquals(new SchemaParser().parse(schema).getType("TestObject").get().getChildren().size(), 8);
     }
 
     @Test
