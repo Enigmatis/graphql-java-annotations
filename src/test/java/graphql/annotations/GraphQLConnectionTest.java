@@ -34,6 +34,7 @@ import static graphql.annotations.util.RelayKit.EMPTY_CONNECTION;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 @SuppressWarnings("unchecked")
 public class GraphQLConnectionTest {
@@ -55,12 +56,30 @@ public class GraphQLConnectionTest {
         }
     }
 
+    public static class DuplicateTest {
+        @GraphQLField
+        public TestListField field1;
+
+        @GraphQLField
+        public TestListField2 field2;
+    }
+
     public static class TestListField {
         @GraphQLField
         @GraphQLConnection
         public List<Obj> objs;
 
         public TestListField(List<Obj> objs) {
+            this.objs = objs;
+        }
+    }
+
+    public static class TestListField2 {
+        @GraphQLField
+        @GraphQLConnection
+        public List<Obj> objs;
+
+        public TestListField2(List<Obj> objs) {
             this.objs = objs;
         }
     }
@@ -268,6 +287,16 @@ public class GraphQLConnectionTest {
         Map<String, Object> objs = (Map<String, Object>) (data.get("objs"));
         List edges = (List) objs.get("edges");
         assertEquals(edges.size(), 0);
+    }
+
+    @Test
+    public void duplicateConnection() {
+        try {
+            GraphQLObjectType object = GraphQLAnnotations.object(DuplicateTest.class);
+            GraphQLSchema schema = newSchema().query(object).build();
+        } catch (GraphQLAnnotationsException e) {
+            fail("Schema cannot be created",e);
+        }
     }
 
 }
