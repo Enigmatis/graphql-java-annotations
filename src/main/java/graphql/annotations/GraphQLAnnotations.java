@@ -588,11 +588,11 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         GraphQLOutputType wrappedType = (GraphQLOutputType) listType.getWrappedType();
         String connectionName = field.getAnnotation(GraphQLConnection.class).name();
         connectionName = connectionName.isEmpty() ? wrappedType.getName() : connectionName;
-        GraphQLObjectType edgeType = ensureTypeUniqueness(relay.edgeType(connectionName, wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList()));
-        return ensureTypeUniqueness(relay.connectionType(connectionName, edgeType, Collections.emptyList()));
+        GraphQLObjectType edgeType = getActualType(relay.edgeType(connectionName, wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList()));
+        return getActualType(relay.connectionType(connectionName, edgeType, Collections.emptyList()));
     }
 
-    private GraphQLObjectType ensureTypeUniqueness(GraphQLObjectType type) {
+    private GraphQLObjectType getActualType(GraphQLObjectType type) {
         if (typeRegistry.containsKey(type.getName())) {
             type = (GraphQLObjectType) typeRegistry.get(type.getName());
         } else {
