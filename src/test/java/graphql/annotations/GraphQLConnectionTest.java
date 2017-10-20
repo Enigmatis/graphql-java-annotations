@@ -26,7 +26,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -35,6 +34,7 @@ import static graphql.annotations.util.RelayKit.EMPTY_CONNECTION;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 @SuppressWarnings("unchecked")
 public class GraphQLConnectionTest {
@@ -291,9 +291,12 @@ public class GraphQLConnectionTest {
 
     @Test
     public void duplicateConnection() {
-        GraphQLObjectType object = GraphQLAnnotations.object(DuplicateTest.class);
-        GraphQLSchema schema = newSchema().query(object).build();
-        System.out.println("ok");
+        try {
+            GraphQLObjectType object = GraphQLAnnotations.object(DuplicateTest.class);
+            GraphQLSchema schema = newSchema().query(object).build();
+        } catch (GraphQLAnnotationsException e) {
+            fail("Schema cannot be created",e);
+        }
     }
 
 }

@@ -473,7 +473,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         boolean isConnection = isConnection(field, outputType);
         if (isConnection) {
-            outputType = getGraphQLConnection(field, outputType, builder);
+            outputType = getGraphQLConnection(field, outputType);
+            builder.argument(relay.getConnectionFieldArguments());
         }
 
         builder.type(outputType);
@@ -574,24 +575,21 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return true;
     }
 
-    private GraphQLOutputType getGraphQLConnection(AccessibleObject field, GraphQLOutputType type, GraphQLFieldDefinition.Builder builder) {
+    private GraphQLOutputType getGraphQLConnection(AccessibleObject field, GraphQLOutputType type) {
         if (type instanceof GraphQLNonNull) {
-            type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
-            return new GraphQLNonNull(internalGetGraphQLConnection(field, type, builder));
+            GraphQLList listType = (GraphQLList) ((GraphQLNonNull) type).getWrappedType();
+            return new GraphQLNonNull(internalGetGraphQLConnection(field, listType));
         } else {
-            return internalGetGraphQLConnection(field, type, builder);
+            return internalGetGraphQLConnection(field, (GraphQLList) type);
         }
     }
 
-    private GraphQLOutputType internalGetGraphQLConnection(AccessibleObject field, GraphQLOutputType type, GraphQLFieldDefinition.Builder builder) {
-        graphql.schema.GraphQLType wrappedType = ((GraphQLList) type).getWrappedType();
-        assert wrappedType instanceof GraphQLObjectType;
+    private GraphQLOutputType internalGetGraphQLConnection(AccessibleObject field, GraphQLList listType) {
+        GraphQLOutputType wrappedType = (GraphQLOutputType) listType.getWrappedType();
         String connectionName = field.getAnnotation(GraphQLConnection.class).name();
         connectionName = connectionName.isEmpty() ? wrappedType.getName() : connectionName;
-        GraphQLObjectType edgeType = ensureTypeUniqueness(relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList()));
-        type = ensureTypeUniqueness(relay.connectionType(connectionName, edgeType, Collections.emptyList()));
-        builder.argument(relay.getConnectionFieldArguments());
-        return type;
+        GraphQLObjectType edgeType = ensureTypeUniqueness(relay.edgeType(connectionName, wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList()));
+        return ensureTypeUniqueness(relay.connectionType(connectionName, edgeType, Collections.emptyList()));
     }
 
     private GraphQLObjectType ensureTypeUniqueness(GraphQLObjectType type) {
@@ -639,7 +637,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         boolean isConnection = isConnection(method, outputType);
         if (isConnection) {
-            outputType = getGraphQLConnection(method, outputType, builder);
+            outputType = getGraphQLConnection(method, outputType);
+            builder.argument(relay.getConnectionFieldArguments());
         }
 
         builder.type(outputType);
