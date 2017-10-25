@@ -226,7 +226,7 @@ public class GraphQLConnectionTest {
 
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
 
-        assertEquals(data.get("nullObj"), null);
+        assertEquals(data.get("nullObj").get("edges").size(), 0);
     }
 
     @Test
