@@ -229,7 +229,11 @@ Relay [specification for mutations](https://facebook.github.io/relay/graphql/mut
 
 ### Connection
 
-You can use `@GraphQLConnection` annotation to make a field iterable in adherence to Relay [Connection specification](https://facebook.github.io/relay/graphql/connections.htm).
+You can use `@GraphQLConnection` annotation to make a field iterable in adherence to Relay [Connection specification](https://facebook.github.io/relay/graphql/connections.htm).\
+The default connection makes you fetch ALL the data, and then builds the connections object (ie edges and nodes).\
+If you want to fetch only the relevant data each time (with the "first","last","before" and "after" arguments)
+you should annotate you field with `@GraphQLConnection(connection = EnhancedConnectionFetcher.class)`,
+and make the associated data fetcher implements `PaginationDataFetcher`
 
 ### Customizing Relay schema
 
