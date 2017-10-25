@@ -84,7 +84,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-            groupId 'com.graphql-java'
+            groupId 'io.github.graphql-java'
             artifactId project.name
             version project.version
 
@@ -144,7 +144,6 @@ bintray {
     publications = ['maven']
     publish = true
     pkg {
-        userOrg = 'graphql-java'
         desc = 'This library offers an annotations-based syntax for GraphQL schema definition.'
         repo = 'graphql-java-annotations'
         name = 'graphql-java-annotations'
