@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
  * A package level helper in calling reflective methods and turning them into
  * GraphQLAnnotationsException runtime exceptions
  */
-class ReflectionKit {
+public class ReflectionKit {
     static <T> T newInstance(Class<T> clazz) throws GraphQLAnnotationsException {
         try {
             return clazz.newInstance();
@@ -30,7 +30,7 @@ class ReflectionKit {
         }
     }
 
-    static <T> T constructNewInstance(Constructor<T> constructor, Object... args) throws GraphQLAnnotationsException {
+    public static <T> T constructNewInstance(Constructor<T> constructor, Object... args) throws GraphQLAnnotationsException {
         try {
             return constructor.newInstance(args);
 

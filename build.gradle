@@ -38,12 +38,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-idea {
-    project {
-        languageLevel = '1.8'
-        vcs = 'Git'
-    }
-}
 
 release {
     tagTemplate = 'v${version}'
@@ -77,6 +71,8 @@ dependencies {
     compileOnly 'biz.aQute.bnd:biz.aQute.bndlib:3.2.0'
 
     testCompile 'org.testng:testng:6.9.10'
+    testCompile 'org.powermock:powermock-module-testng:1.7.1'
+    testCompile 'org.powermock:powermock-api-mockito2:1.7.1'
 }
 
 test.useTestNG()

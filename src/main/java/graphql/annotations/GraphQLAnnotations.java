@@ -15,6 +15,8 @@
 package graphql.annotations;
 
 import graphql.TypeResolutionEnvironment;
+import graphql.annotations.connection.ConnectionDataFetcher;
+import graphql.annotations.connection.GraphQLConnection;
 import graphql.relay.Relay;
 import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
@@ -823,43 +825,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {
         return typeRegistry;
-    }
-
-    private static class ConnectionDataFetcher implements DataFetcher {
-        private final Class<? extends Connection> connection;
-        private final DataFetcher actualDataFetcher;
-        private final Constructor<Connection> constructor;
-
-        public ConnectionDataFetcher(Class<? extends Connection> connection, DataFetcher actualDataFetcher) {
-            this.connection = connection;
-            Optional<Constructor<Connection>> constructor =
-                    Arrays.asList(connection.getConstructors()).stream().
-                            filter(c -> c.getParameterCount() == 1).
-                            map(c -> (Constructor<Connection>) c).
-                            findFirst();
-            if (constructor.isPresent()) {
-                this.constructor = constructor.get();
-            } else {
-                throw new IllegalArgumentException(connection + " doesn't have a single argument constructor");
-            }
-            this.actualDataFetcher = actualDataFetcher;
-        }
-
-        @Override
-        public Object get(DataFetchingEnvironment environment) {
-            // Create a list of arguments with connection specific arguments excluded
-            HashMap<String, Object> arguments = new HashMap<>(environment.getArguments());
-            arguments.keySet().removeAll(Arrays.asList("first", "last", "before", "after"));
-            DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), arguments, environment.getContext(),
-                    environment.getRoot(), environment.getFieldDefinition(), environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
-                    environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet(), environment.getFieldTypeInfo());
-            Object data = actualDataFetcher.get(env);
-            if (data != null) {
-                Connection conn = constructNewInstance(constructor, data);
-                return conn.get(environment);
-            }
-            return null;
-        }
     }
 
     private class UnionTypeResolver implements TypeResolver {

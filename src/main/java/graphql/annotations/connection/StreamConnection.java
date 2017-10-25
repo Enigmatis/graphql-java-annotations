@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.connection;
 
 import graphql.annotations.util.Base64;
 import graphql.relay.ConnectionCursor;
@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import static graphql.annotations.util.RelayKit.EMPTY_CONNECTION;
 
-public class StreamConnection implements DataFetcher, Connection {
+public class StreamConnection implements DataFetcher, ConnectionFetcher {
 
     private final Stream<?> stream;
     private static final String DUMMY_CURSOR_PREFIX = "stream-cursor";

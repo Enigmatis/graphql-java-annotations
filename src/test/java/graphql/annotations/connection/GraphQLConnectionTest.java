@@ -12,10 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.connection;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.*;
+import graphql.annotations.connection.ConnectionFetcher;
+import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.util.CustomRelay;
 import graphql.relay.Relay;
 import graphql.schema.DataFetchingEnvironment;
@@ -248,7 +251,7 @@ public class GraphQLConnectionTest {
     }
 
 
-    public static class CustomConnection implements Connection {
+    public static class CustomConnection implements ConnectionFetcher {
 
         public CustomConnection(Object o) {
         }
