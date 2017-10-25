@@ -12,37 +12,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.typeFunctions;
+
+import graphql.annotations.ProcessingElementsContainer;
+import graphql.annotations.TypeFunction;
+import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLType;
 
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
-import java.util.List;
+import java.util.stream.Stream;
 
-public class BatchedTypeFunction implements TypeFunction {
-    private TypeFunction defaultTypeFunction;
+class StreamFunction implements TypeFunction {
 
-    public BatchedTypeFunction(TypeFunction defaultTypeFunction) {
-        this.defaultTypeFunction = defaultTypeFunction;
+    private DefaultTypeFunction defaultTypeFunction;
+
+    public StreamFunction(DefaultTypeFunction defaultTypeFunction){
+        this.defaultTypeFunction=defaultTypeFunction;
     }
 
     @Override
-    public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
-        return defaultTypeFunction.getTypeName(aClass, annotatedType);
+    public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
+        return Stream.class.isAssignableFrom(aClass);
     }
 
-    @Override
-    public boolean canBuildType(final Class<?> aClass, final AnnotatedType type) {
-        return defaultTypeFunction.canBuildType(aClass, type);
-    }
 
     @Override
-    public graphql.schema.GraphQLType buildType(final boolean inputType, final Class<?> aClass, final AnnotatedType annotatedType) {
-        if (!aClass.isAssignableFrom(List.class)) {
-            throw new IllegalArgumentException("Batched method should return a List");
-        }
+    public GraphQLType buildType(boolean input, Class<?> aClass, AnnotatedType annotatedType, ProcessingElementsContainer container) {
         if (!(annotatedType instanceof AnnotatedParameterizedType)) {
-            throw new IllegalArgumentException("Batched should return parameterized type");
+            throw new IllegalArgumentException("Stream type parameter should be specified");
         }
         AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
         AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
@@ -52,6 +51,6 @@ public class BatchedTypeFunction implements TypeFunction {
         } else {
             klass = (Class<?>) arg.getType();
         }
-        return defaultTypeFunction.buildType(inputType, klass, arg);
+        return new GraphQLList(defaultTypeFunction.buildType(input, klass, arg,container));
     }
 }
