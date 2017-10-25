@@ -20,6 +20,14 @@ import graphql.schema.DataFetchingEnvironment;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Use this class in {@link GraphQLConnection} to do a real pagination,
+ * i.e you fetch each time the relevant data, you make the cursors and
+ * you decide if there are previous or next pages
+ *
+ * Note: If you are using the connection, the relevant dataFetcher must implements {@link PaginationDataFetcher}
+ * @param <T> the entity type that is paginated
+ */
 public class EnhancedConnectionFetcher<T> implements ConnectionFetcher<Connection<T>> {
 
     private PaginationDataFetcher<T> paginationDataFetcher;
