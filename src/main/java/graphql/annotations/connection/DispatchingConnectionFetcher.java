@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.connection;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -20,10 +20,10 @@ import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class DispatchingConnection implements DataFetcher, Connection {
-    private final DataFetcher connection;
+public class DispatchingConnectionFetcher<T> implements ConnectionFetcher<T> {
+    private final DataFetcher<T> connection;
 
-    public DispatchingConnection(Object o) {
+    public DispatchingConnectionFetcher(Object o) {
         if (o instanceof List) {
             connection = new ListConnection((List<?>) o);
         } else if (o instanceof Stream) {
@@ -34,7 +34,7 @@ public class DispatchingConnection implements DataFetcher, Connection {
     }
 
     @Override
-    public Object get(DataFetchingEnvironment environment) {
+    public T get(DataFetchingEnvironment environment) {
         return connection.get(environment);
     }
 }

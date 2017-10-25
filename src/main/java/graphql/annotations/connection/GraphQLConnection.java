@@ -12,7 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.connection;
+
+import graphql.annotations.GraphQLField;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -34,7 +36,7 @@ public @interface GraphQLConnection {
      * this property to allow for more efficient fetching procedures (limiting database queries, etc.)
      * @return a connection class
      */
-    Class<? extends Connection> connection() default DispatchingConnection.class;
+    Class<? extends ConnectionFetcher> connection() default DispatchingConnectionFetcher.class;
 
     /**
      * By default, wrapped type's name is used for naming TypeConnection, but can be overridden

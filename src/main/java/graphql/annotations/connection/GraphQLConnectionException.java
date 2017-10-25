@@ -12,9 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.connection;
 
-import graphql.schema.DataFetcher;
+class GraphQLConnectionException extends RuntimeException {
 
-public interface Connection<T> extends DataFetcher<T> {
+    GraphQLConnectionException(String error) {
+        super(error);
+    }
 }

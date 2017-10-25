@@ -12,14 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.connection;
 
-import graphql.relay.SimpleListConnection;
+import graphql.schema.DataFetcher;
 
-import java.util.List;
-
-public class ListConnection<T> extends SimpleListConnection<T> {
-    public ListConnection(List<T> data) {
-        super(data);
-    }
+public interface ConnectionFetcher<T> extends DataFetcher<T> {
 }
