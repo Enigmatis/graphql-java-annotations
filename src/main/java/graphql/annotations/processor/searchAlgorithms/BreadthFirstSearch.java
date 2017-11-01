@@ -14,6 +14,7 @@
  */
 package graphql.annotations.processor.searchAlgorithms;
 
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 
 import java.lang.reflect.Member;

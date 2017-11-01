@@ -23,7 +23,7 @@ import graphql.annotations.processor.typeBuilders.InterfaceBuilder;
 import graphql.annotations.processor.typeBuilders.ObjectBuilder;
 import graphql.annotations.processor.typeBuilders.UnionBuilder;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
-import graphql.annotations.processor.searchAlgorithms.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.schema.GraphQLOutputType;
 

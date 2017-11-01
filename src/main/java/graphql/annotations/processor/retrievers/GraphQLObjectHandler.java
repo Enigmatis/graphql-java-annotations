@@ -16,7 +16,7 @@ package graphql.annotations.processor.retrievers;
 
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.processor.searchAlgorithms.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 

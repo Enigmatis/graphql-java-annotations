@@ -26,7 +26,7 @@ import graphql.annotations.dataFetchers.connection.ConnectionDataFetcher;
 import graphql.annotations.dataFetchers.ExtensionDataFetcherWrapper;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
-import graphql.annotations.processor.searchAlgorithms.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.typeFunctions.BatchedTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;

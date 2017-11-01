@@ -20,7 +20,7 @@ import graphql.annotations.annotations.GraphQLTypeResolver;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
-import graphql.annotations.processor.searchAlgorithms.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
