@@ -15,9 +15,6 @@
 package typeFunctions;
 
 import graphql.annotations.*;
-import graphql.annotations.graphQLProcessors.GraphQLInputProcessor;
-import graphql.annotations.graphQLProcessors.GraphQLOutputProcessor;
-import graphql.annotations.typeFunctions.DefaultTypeFunction;
 import graphql.schema.*;
 import graphql.schema.GraphQLType;
 import org.testng.annotations.BeforeMethod;
