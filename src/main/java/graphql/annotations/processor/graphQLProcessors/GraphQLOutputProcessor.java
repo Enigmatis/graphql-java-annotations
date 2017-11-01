@@ -37,6 +37,18 @@ public class GraphQLOutputProcessor {
         this(new GraphQLObjectInfoRetriever(), new GraphQLOutputObjectRetriever());
     }
 
+    /**
+     * This will examine the object class and return a {@link GraphQLOutputType} representation
+     * which may be a {@link GraphQLOutputType} or a {@link graphql.schema.GraphQLTypeReference}
+     *
+     * @param object the object class to examine
+     * @param container a class that hold several members that are required in order to build schema
+
+     * @return a {@link GraphQLOutputType} that represents that object class
+     *
+     * @throws GraphQLAnnotationsException if the object class cannot be examined
+     */
+
     public GraphQLOutputType getOutputTypeOrRef(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         String typeName = graphQLObjectInfoRetriever.getTypeName(object);
         if (container.getProcessing().contains(typeName)) {

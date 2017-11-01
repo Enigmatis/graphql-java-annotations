@@ -40,6 +40,14 @@ public class UnionBuilder {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
     }
 
+    /**
+     * This will examine the class and return a {@link GraphQLUnionType.Builder} ready for further definition
+     * @param container a class that hold several members that are required in order to build schema
+     * @param iface interface to examine
+     * @return a {@link GraphQLUnionType.Builder}
+     * @throws GraphQLAnnotationsException if the class cannot be examined
+     */
+
     public GraphQLUnionType.Builder getUnionBuilder(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException, IllegalArgumentException {
         if (!iface.isInterface()) {
             throw new IllegalArgumentException(iface + " is not an interface");
@@ -65,7 +73,7 @@ public class UnionBuilder {
                 .map(new Function<Class<?>, graphql.schema.GraphQLType>() {
                     @Override
                     public graphql.schema.GraphQLType apply(Class<?> aClass) {
-                        return finalTypeFunction.buildType(aClass, null,container);
+                        return finalTypeFunction.buildType(aClass, null, container);
                     }
                 })
                 .map(v -> (GraphQLObjectType) v)

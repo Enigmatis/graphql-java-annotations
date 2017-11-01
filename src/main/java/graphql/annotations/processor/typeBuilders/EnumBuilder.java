@@ -33,6 +33,13 @@ public class EnumBuilder {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
     }
 
+    /**
+     * This will examine the object class and return a {@link GraphQLEnumType.Builder} ready for further definition
+     *
+     * @param aClass the object class to examine
+     * @return a {@link GraphQLEnumType.Builder} that represents that object class
+     */
+
     public GraphQLEnumType.Builder getEnumBuilder(Class<?> aClass) {
         String typeName = graphQLObjectInfoRetriever.getTypeName(aClass);
         //noinspection unchecked
