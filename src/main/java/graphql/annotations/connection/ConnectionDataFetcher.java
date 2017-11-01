@@ -14,32 +14,34 @@
  */
 package graphql.annotations.connection;
 
+import graphql.annotations.ExtensionDataFetcherWrapper;
 import graphql.relay.Connection;
-import graphql.relay.DefaultConnection;
-import graphql.relay.DefaultPageInfo;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.FieldDataFetcher;
+import graphql.schema.PropertyDataFetcher;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static graphql.annotations.ReflectionKit.constructNewInstance;
 
 public class ConnectionDataFetcher<T> implements DataFetcher<Connection<T>> {
     private final Class<? extends ConnectionFetcher<T>> connection;
-    private final DataFetcher<T> actualDataFetcher;
-    private final Constructor<ConnectionFetcher> constructor;
+    private final DataFetcher<PaginatedData<T>> actualDataFetcher;
+    private final Constructor<ConnectionFetcher<T>> constructor;
+    private final List<Class<?>> blackListOfDataFetchers = Arrays.asList(PropertyDataFetcher.class, FieldDataFetcher.class);
 
     public ConnectionDataFetcher(Class<? extends ConnectionFetcher<T>> connection, DataFetcher<T> actualDataFetcher) {
+        validateDataFetcher(actualDataFetcher);
         this.connection = connection;
-        this.actualDataFetcher = actualDataFetcher;
-        ValidateDataFetcher();
-        Optional<Constructor<ConnectionFetcher>> constructor =
-                Arrays.asList(this.connection.getConstructors()).stream().
+        this.actualDataFetcher = (DataFetcher<PaginatedData<T>>) actualDataFetcher;
+        Optional<Constructor<ConnectionFetcher<T>>> constructor =
+                Arrays.stream(this.connection.getConstructors()).
                         filter(c -> c.getParameterCount() == 1).
-                        map(c -> (Constructor<ConnectionFetcher>) c).
+                        map(c -> (Constructor<ConnectionFetcher<T>>) c).
                         findFirst();
         if (constructor.isPresent()) {
             this.constructor = constructor.get();
@@ -48,27 +50,20 @@ public class ConnectionDataFetcher<T> implements DataFetcher<Connection<T>> {
         }
     }
 
-    private void ValidateDataFetcher() {
-        if(connection.isAssignableFrom(EnhancedConnectionFetcher.class)) {
-            if(!(actualDataFetcher instanceof PaginationDataFetcher)) {
-                throw new GraphQLConnectionException(actualDataFetcher.getClass().getSimpleName() + " must extends PaginationDataFetcher");
-            }
+    private void validateDataFetcher(DataFetcher<?> dataFetcher) {
+        if( dataFetcher instanceof ExtensionDataFetcherWrapper) {
+            dataFetcher = ((ExtensionDataFetcherWrapper) dataFetcher).getUnwrappedDataFetcher();
+        }
+        final DataFetcher<?> finalDataFetcher = dataFetcher;
+        if(blackListOfDataFetchers.stream().anyMatch(aClass -> aClass.isInstance(finalDataFetcher))) {
+            throw new GraphQLConnectionException("Please don't use @GraphQLConnection on a field, because " +
+                    "neither PropertyDataFetcher nor FieldDataFetcher know how to handle connection");
         }
     }
 
     @Override
     public Connection<T> get(DataFetchingEnvironment environment) {
-        if(connection.isAssignableFrom(EnhancedConnectionFetcher.class)) {
-            ConnectionFetcher<Connection<T>> conn = constructNewInstance(constructor, actualDataFetcher);
-            return conn.get(environment);
-        }
-        else {
-            T data = actualDataFetcher.get(environment);
-            if (data != null) {
-                ConnectionFetcher<Connection<T>> conn = constructNewInstance(constructor, data);
-                return conn.get(environment);
-            }
-            return new DefaultConnection<>(Collections.emptyList(), new DefaultPageInfo(null, null, false, false));
-        }
+        ConnectionFetcher<T> conn = constructNewInstance(constructor, actualDataFetcher);
+        return conn.get(environment);
     }
 }
