@@ -56,7 +56,7 @@ public class ConnectionDataFetcher<T> implements DataFetcher<Connection<T>> {
         }
         final DataFetcher<?> finalDataFetcher = dataFetcher;
         if(blackListOfDataFetchers.stream().anyMatch(aClass -> aClass.isInstance(finalDataFetcher))) {
-            throw new GraphQLConnectionException("Please don't use @GraphQLConnection on a field, because " +
+            throw new GraphQLConnectionException("Please don't use @GraphQLConnection on a field without @GraphQLDataFetcher, because " +
                     "neither PropertyDataFetcher nor FieldDataFetcher know how to handle connection");
         }
     }
