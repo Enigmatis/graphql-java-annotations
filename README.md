@@ -233,7 +233,7 @@ You can use `@GraphQLConnection` annotation to make a field iterable in adherenc
 If a field is annotated with the annotation, the associated dataFetcher must return an instance of `PaginatedData`.\
 The `PaginatedData` class holds the result of the conneciton:
 1. The data of the page
-2. Whether or not has next page and previous page
+2. Whether or not there is a next page and a previous page
 3. A method that returns for each entity the encoded cursor of the entity (it returns string)
 
 NOTE: because `PropertyDataFetcher` and `FieldDataFetcher` can't handle connection, this annotation cant be used on a field that doesn't have a dataFetcher
