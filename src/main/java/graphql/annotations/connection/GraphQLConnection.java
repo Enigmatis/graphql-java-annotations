@@ -36,7 +36,7 @@ public @interface GraphQLConnection {
      * this property to allow for more efficient fetching procedures (limiting database queries, etc.)
      * @return a connection class
      */
-    Class<? extends ConnectionFetcher> connection() default DispatchingConnectionFetcher.class;
+    Class<? extends ConnectionFetcher> connection() default EnhancedConnectionFetcher.class;
 
     /**
      * By default, wrapped type's name is used for naming TypeConnection, but can be overridden
