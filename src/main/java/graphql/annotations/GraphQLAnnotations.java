@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@ package graphql.annotations;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.annotations.connection.ConnectionDataFetcher;
+import graphql.annotations.connection.ConnectionTypeValidator;
 import graphql.annotations.connection.GraphQLConnection;
 import graphql.relay.Relay;
 import graphql.schema.*;
@@ -179,7 +180,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
      * breadthFirst parental ascent looking for closest method declaration with explicit annotation
      *
      * @param method The method to match
-     *
      * @return The closest GraphQLField annotation
      */
     private boolean breadthFirstSearch(Method method) {
@@ -221,7 +221,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
      * direct parental ascent looking for closest declaration with explicit annotation
      *
      * @param field The field to find
-     *
      * @return The closest GraphQLField annotation
      */
     private boolean parentalSearch(Field field) {
@@ -247,7 +246,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         if (type instanceof GraphQLObjectType) {
             return (GraphQLObjectType) type;
         } else {
-            throw new IllegalArgumentException("Object resolve to a "+type.getClass().getSimpleName());
+            throw new IllegalArgumentException("Object resolve to a " + type.getClass().getSimpleName());
         }
     }
 
@@ -313,7 +312,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return builder;
     }
 
-    public static  GraphQLEnumType.Builder enumBuilder(Class<?> object) throws GraphQLAnnotationsException {
+    public static GraphQLEnumType.Builder enumBuilder(Class<?> object) throws GraphQLAnnotationsException {
         return getInstance().getEnumBuilder(object);
     }
 
@@ -604,12 +603,22 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     private boolean isConnection(AccessibleObject obj, GraphQLOutputType type) {
+        ConnectionTypeValidator validator = new ConnectionTypeValidator();
         if (type instanceof GraphQLNonNull) {
             type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
         }
         final GraphQLOutputType actualType = type;
-        return obj.isAnnotationPresent(GraphQLConnection.class) &&
-                actualType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(((GraphQLList) actualType).getWrappedType()));
+
+        boolean isValidGraphQLTypeForConnection = obj.isAnnotationPresent(GraphQLConnection.class) &&
+                actualType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass ->
+                aClass.isInstance(((GraphQLList) actualType).getWrappedType()));
+
+        if(isValidGraphQLTypeForConnection) {
+            validator.validate(obj);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     protected GraphQLFieldDefinition getField(Method method) throws GraphQLAnnotationsException {
@@ -747,15 +756,15 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             typeRegistry.put(inputObjectType.getName(), inputObjectType);
             return inputObjectType;
         } else if (graphQLType instanceof GraphQLList) {
-            return new GraphQLList(getInputObject(((GraphQLList)graphQLType).getWrappedType(), newNamePrefix));
+            return new GraphQLList(getInputObject(((GraphQLList) graphQLType).getWrappedType(), newNamePrefix));
         } else if (graphQLType instanceof GraphQLNonNull) {
-            return new GraphQLNonNull(getInputObject(((GraphQLNonNull)graphQLType).getWrappedType(), newNamePrefix));
+            return new GraphQLNonNull(getInputObject(((GraphQLNonNull) graphQLType).getWrappedType(), newNamePrefix));
         } else if (graphQLType instanceof GraphQLTypeReference) {
-            return new GraphQLTypeReference(newNamePrefix + ((GraphQLTypeReference)graphQLType).getName());
-        } else if (graphQLType instanceof GraphQLInputType){
+            return new GraphQLTypeReference(newNamePrefix + ((GraphQLTypeReference) graphQLType).getName());
+        } else if (graphQLType instanceof GraphQLInputType) {
             return (GraphQLInputType) graphQLType;
         }
-        throw new IllegalArgumentException("Cannot convert type to input : "+graphQLType);
+        throw new IllegalArgumentException("Cannot convert type to input : " + graphQLType);
     }
 
     public static GraphQLInputObjectType inputObject(GraphQLObjectType graphQLType, String newNamePrefix) {
