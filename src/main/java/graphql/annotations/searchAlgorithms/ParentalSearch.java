@@ -28,7 +28,7 @@ public class ParentalSearch implements SearchAlgorithm {
     }
 
     @Override
-    public boolean search(Member member) throws CannotCastMemberException {
+    public boolean isFound(Member member) throws CannotCastMemberException {
         Field field=CastToField(member);
         Boolean gqf = graphQLObjectInfoRetriever.isGraphQLField(field);
         if (gqf != null) {

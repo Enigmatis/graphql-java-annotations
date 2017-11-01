@@ -31,7 +31,7 @@ public class BreadthFirstSearch implements SearchAlgorithm {
     }
 
     @Override
-    public boolean search(Member member) throws CannotCastMemberException {
+    public boolean isFound(Member member) throws CannotCastMemberException {
         Method method=CastToMethod(member);
         final List<Class<?>> queue = new LinkedList<>();
         final String methodName = method.getName();
@@ -54,11 +54,11 @@ public class BreadthFirstSearch implements SearchAlgorithm {
                 return gqf;
             }
 
-            // add interfaces to places to search
+            // add interfaces to places to isFound
             for (Class<?> iface : cls.getInterfaces()) {
                 queue.add(iface);
             }
-            // add parent class to places to search
+            // add parent class to places to isFound
             Class<?> nxt = cls.getSuperclass();
             if (nxt != null) {
                 queue.add(nxt);

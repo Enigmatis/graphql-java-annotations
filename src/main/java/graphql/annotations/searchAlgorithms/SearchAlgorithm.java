@@ -17,5 +17,5 @@ package graphql.annotations.searchAlgorithms;
 import java.lang.reflect.Member;
 
 public interface SearchAlgorithm {
-    boolean search(Member member) throws CannotCastMemberException;
+    boolean isFound(Member member) throws CannotCastMemberException;
 }

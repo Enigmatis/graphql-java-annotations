@@ -63,7 +63,7 @@ public class ObjectBuilder {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
-            if (breadthFirstSearch.search(method)) {
+            if (breadthFirstSearch.isFound(method)) {
                 GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method,container);
                 fieldsDefined.add(gqlField.getName());
                 builder.field(gqlField);
@@ -74,7 +74,7 @@ public class ObjectBuilder {
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
-            if (parentalSearch.search(field)) {
+            if (parentalSearch.isFound(field)) {
                 GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field,container);
                 fieldsDefined.add(gqlField.getName());
                 builder.field(gqlField);

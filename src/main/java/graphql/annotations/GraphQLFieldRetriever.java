@@ -69,7 +69,7 @@ public class GraphQLFieldRetriever {
                     if (method.isBridge() || method.isSynthetic()) {
                         continue;
                     }
-                    if (breadthFirstSearch.search(method)) {
+                    if (breadthFirstSearch.isFound(method)) {
                         addExtensionField(getField(method,container), fields, fieldsDefined);
                     }
                 }
@@ -77,7 +77,7 @@ public class GraphQLFieldRetriever {
                     if (Modifier.isStatic(field.getModifiers())) {
                         continue;
                     }
-                    if (parentalSearch.search(field)) {
+                    if (parentalSearch.isFound(field)) {
                         addExtensionField(getField(field,container), fields, fieldsDefined);
                     }
                 }
