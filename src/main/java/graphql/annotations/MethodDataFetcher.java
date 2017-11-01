@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,10 +32,9 @@ class MethodDataFetcher implements DataFetcher {
     private final TypeFunction typeFunction;
 
 
-
-    public MethodDataFetcher(Method method,TypeFunction typeFunction, ProcessingElementsContainer container) {
+    public MethodDataFetcher(Method method, TypeFunction typeFunction, ProcessingElementsContainer container) {
         this.method = method;
-        this.typeFunction=typeFunction;
+        this.typeFunction = typeFunction;
         this.container = container;
     }
 
@@ -56,15 +55,15 @@ class MethodDataFetcher implements DataFetcher {
                     return null;
                 }
             }
-            return method.invoke(obj, invocationArgs(environment,container));
+            return method.invoke(obj, invocationArgs(environment, container));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Object[] invocationArgs(DataFetchingEnvironment environment,ProcessingElementsContainer container) {
+    private Object[] invocationArgs(DataFetchingEnvironment environment, ProcessingElementsContainer container) {
         List<Object> result = new ArrayList<>();
-        Map<String,Object> envArgs = environment.getArguments();
+        Map<String, Object> envArgs = environment.getArguments();
         for (Parameter p : method.getParameters()) {
             String parameterName;
             GraphQLName name = p.getAnnotation(GraphQLName.class);
@@ -80,7 +79,7 @@ class MethodDataFetcher implements DataFetcher {
                 continue;
             }
 
-            graphql.schema.GraphQLType graphQLType = typeFunction.buildType(true, paramType, p.getAnnotatedType(),container);
+            graphql.schema.GraphQLType graphQLType = typeFunction.buildType(true, paramType, p.getAnnotatedType(), container);
             if (envArgs.containsKey(parameterName)) {
                 result.add(buildArg(p.getParameterizedType(), graphQLType, envArgs.get(parameterName)));
             } else {
@@ -108,7 +107,7 @@ class MethodDataFetcher implements DataFetcher {
                     Map map = (Map) arg;
                     for (Parameter parameter : parameters) {
                         String name = toGraphqlName(parameter.getAnnotation(GraphQLName.class) != null ? parameter.getAnnotation(GraphQLName.class).value() : parameter.getName());
-                        objects.add(buildArg(parameter.getParameterizedType(), ((GraphQLInputObjectType)graphQLType).getField(name).getType(),map.get(name)));
+                        objects.add(buildArg(parameter.getParameterizedType(), ((GraphQLInputObjectType) graphQLType).getField(name).getType(), map.get(name)));
                     }
                     return constructNewInstance(constructor, objects.toArray(new Object[objects.size()]));
                 }
@@ -116,7 +115,7 @@ class MethodDataFetcher implements DataFetcher {
             return null;
         } else if (p instanceof ParameterizedType && graphQLType instanceof GraphQLList) {
             List<Object> list = new ArrayList<>();
-            Type subType = ((ParameterizedType)p).getActualTypeArguments()[0];
+            Type subType = ((ParameterizedType) p).getActualTypeArguments()[0];
             GraphQLType wrappedType = ((GraphQLList) graphQLType).getWrappedType();
 
             for (Object item : ((List) arg)) {
