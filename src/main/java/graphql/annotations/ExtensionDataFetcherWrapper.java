@@ -25,6 +25,7 @@ import static graphql.annotations.ReflectionKit.newInstance;
 public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T>{
 
     private final Class declaringClass;
+
     private final DataFetcher<T> dataFetcher;
 
     public ExtensionDataFetcherWrapper(Class declaringClass, DataFetcher<T> dataFetcher) {
@@ -43,6 +44,10 @@ public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T>{
         }
 
         return dataFetcher.get(environment);
+    }
+
+    public DataFetcher<T> getUnwrappedDataFetcher() {
+        return dataFetcher;
     }
 
 }
