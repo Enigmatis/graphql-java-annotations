@@ -28,10 +28,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
@@ -44,6 +41,7 @@ public class GraphQLEnhancedConnectionTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
         GraphQLObjectType object = GraphQLAnnotations.object(TestListField.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
@@ -62,6 +60,7 @@ public class GraphQLEnhancedConnectionTest {
 
         @GraphQLField
         public String val;
+
         public Obj(String id, String val) {
             this.id = id;
             this.val = val;
@@ -80,64 +79,56 @@ public class GraphQLEnhancedConnectionTest {
         @GraphQLField
         @GraphQLConnection(connection = EnhancedConnectionFetcher.class)
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
-        public List<Obj> objs;
+        public PaginatedData<Obj> objs;
 
-        public TestListField(List<Obj> objs) {
+        public TestListField(PaginatedData<Obj> objs) {
             this.objs = objs;
         }
     }
 
-    public static class GoodConnectionDataFetcher implements PaginationDataFetcher<Obj> {
-
-
-        @Override
-        public boolean hasNextPage(String lastCursor) {
-            return true;
-        }
+    public static class GoodConnectionDataFetcher implements DataFetcher<PaginatedData<Obj>> {
 
         @Override
-        public boolean hasPreviousPage(String firstCursor) {
-            return false;
-        }
+        public PaginatedData<Obj> get(DataFetchingEnvironment environment) {
 
-        @Override
-        public String getCursor(Obj entity) {
-            return entity.id;
-        }
-
-        @Override
-        public List<Obj> get(DataFetchingEnvironment environment) {
             Integer first = environment.getArgument("first");
             List<Obj> objs = Arrays.asList(new Obj("1", "1"), new Obj("2", "2"), new Obj("3", "3"));
-            if(first != null && first <= 3) {
-                return objs.subList(0,first);
+            if (first != null && first <= 3) {
+                objs = objs.subList(0, first);
             }
-            return objs;
+            return new AbstarctPaginatedData<Obj>(false, true, objs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.getId();
+                }
+            };
         }
+
     }
 
-    public static class NotValidConnectionField {
-        @GraphQLField
-        @GraphQLConnection(connection = EnhancedConnectionFetcher.class)
-        @GraphQLDataFetcher(NotGoodDataFetcher.class)
-        public List<GraphQLConnectionTest.Obj> objs;
+public static class NotValidConnectionField {
+    @GraphQLField
+    @GraphQLConnection
+    @GraphQLDataFetcher(NotGoodDataFetcher.class)
+    public List<GraphQLConnectionTest.Obj> objs;
 
-        public NotValidConnectionField(List<GraphQLConnectionTest.Obj> objs) {
-            this.objs = objs;
-        }
+    public NotValidConnectionField(List<GraphQLConnectionTest.Obj> objs) {
+        this.objs = objs;
+    }
+}
+
+public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
+
+    @Override
+    public List<Obj> get(DataFetchingEnvironment environment) {
+        return Collections.emptyList();
     }
 
-    public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
-
-        @Override
-        public List<Obj> get(DataFetchingEnvironment environment) {
-            return Collections.emptyList();
-        }
-    }
+}
 
 
     @Test(expectedExceptions = GraphQLConnectionException.class)
-    public void datafetcherDoesntExtendPaginationDataFetcher_tryToBuildSchema_getException() throws Exception {
+    public void ConnectionFieldDoesntReturnPaginatedData_tryToBuildSchema_getException() throws Exception {
         //Act + Assert
         GraphQLAnnotations.object(NotValidConnectionField.class);
     }
