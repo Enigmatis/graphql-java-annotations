@@ -15,49 +15,59 @@
 package graphql.annotations.connection;
 
 import graphql.relay.*;
+import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Use this class in {@link GraphQLConnection} to do a real pagination,
  * i.e you fetch each time the relevant data, you make the cursors and
  * you decide if there are previous or next pages
+ * <p>
+ * Note: If you are using the connection, the return type of the associated dataFetcher must implement {@link PaginatedData}
  *
- * Note: If you are using the connection, the relevant dataFetcher must implements {@link PaginationDataFetcher}
  * @param <T> the entity type that is paginated
  */
-public class EnhancedConnectionFetcher<T> implements ConnectionFetcher<Connection<T>> {
+public class EnhancedConnectionFetcher<T> implements ConnectionFetcher<T> {
 
-    private PaginationDataFetcher<T> paginationDataFetcher;
+    private DataFetcher<PaginatedData<T>> paginationDataFetcher;
 
-    public EnhancedConnectionFetcher(PaginationDataFetcher<T> paginationDataFetcher) {
+    public EnhancedConnectionFetcher(DataFetcher<PaginatedData<T>> paginationDataFetcher) {
         this.paginationDataFetcher = paginationDataFetcher;
     }
 
     @Override
     public Connection<T> get(DataFetchingEnvironment environment) {
-        List<Edge<T>> edges = buildEdges(paginationDataFetcher.get(environment));
-        PageInfo pageInfo = getPageInfo(edges);
+        PaginatedData<T> paginatedData = paginationDataFetcher.get(environment);
+        if (paginatedData == null) {
+            return new DefaultConnection<>(Collections.emptyList(), new DefaultPageInfo(null,null,false,false));
+        }
+        List<Edge<T>> edges = buildEdges(paginatedData);
+        PageInfo pageInfo = getPageInfo(edges, paginatedData);
         return new DefaultConnection<>(edges, pageInfo);
     }
 
-    private PageInfo getPageInfo(List<Edge<T>> edges) {
+    private PageInfo getPageInfo(List<Edge<T>> edges, PaginatedData<T> paginatedData) {
         ConnectionCursor firstCursor = edges.get(0).getCursor();
-        ConnectionCursor lastCursor = edges.get(edges.size()-1).getCursor();
+        ConnectionCursor lastCursor = edges.get(edges.size() - 1).getCursor();
         return new DefaultPageInfo(
                 firstCursor,
                 lastCursor,
-                paginationDataFetcher.hasPreviousPage(firstCursor.getValue()),
-                paginationDataFetcher.hasNextPage(lastCursor.getValue())
+                paginatedData.hasPreviousPage(),
+                paginatedData.hasNextPage()
         );
     }
 
-    private List<Edge<T>> buildEdges(List<T> data) {
+    private List<Edge<T>> buildEdges(PaginatedData<T> paginatedData) {
+        Iterator<T> data = paginatedData.iterator();
         List<Edge<T>> edges = new ArrayList<>();
-        for (T object : data) {
-            edges.add(new DefaultEdge<>(object, new DefaultConnectionCursor(paginationDataFetcher.getCursor(object))));
+        for (; data.hasNext(); ) {
+            T entity = data.next();
+            edges.add(new DefaultEdge<>(entity, new DefaultConnectionCursor(paginatedData.getCursor(entity))));
         }
         return edges;
     }

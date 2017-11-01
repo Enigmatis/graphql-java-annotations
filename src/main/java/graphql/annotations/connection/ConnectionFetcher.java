@@ -14,7 +14,8 @@
  */
 package graphql.annotations.connection;
 
+import graphql.relay.Connection;
 import graphql.schema.DataFetcher;
 
-public interface ConnectionFetcher<T> extends DataFetcher<T> {
+public interface ConnectionFetcher<T> extends DataFetcher<Connection<T>> {
 }
