@@ -21,8 +21,8 @@ import java.lang.reflect.InvocationTargetException;
  * A package level helper in calling reflective methods and turning them into
  * GraphQLAnnotationsException runtime exceptions
  */
-class ReflectionKit {
-    static <T> T newInstance(Class<T> clazz) throws GraphQLAnnotationsException {
+public class ReflectionKit {
+    public static <T> T newInstance(Class<T> clazz) throws GraphQLAnnotationsException {
         try {
             return clazz.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
@@ -30,7 +30,7 @@ class ReflectionKit {
         }
     }
 
-    static <T> T constructNewInstance(Constructor<T> constructor, Object... args) throws GraphQLAnnotationsException {
+   public static <T> T constructNewInstance(Constructor<T> constructor, Object... args) throws GraphQLAnnotationsException {
         try {
             return constructor.newInstance(args);
 
@@ -39,7 +39,7 @@ class ReflectionKit {
         }
     }
 
-    static <T> Constructor<T> constructor(Class<T> type, Class<?>... parameterTypes) {
+    public static <T> Constructor<T> constructor(Class<T> type, Class<?>... parameterTypes) {
         try {
             return type.getConstructor(parameterTypes);
         } catch (NoSuchMethodException e) {
@@ -47,7 +47,7 @@ class ReflectionKit {
         }
     }
 
-    static <T> T newInstance(Class<T> clazz, Object parameter) {
+    public static <T> T newInstance(Class<T> clazz, Object parameter) {
         if (parameter != null) {
             for (Constructor<T> constructor : (Constructor<T>[]) clazz.getConstructors()) {
                 if (constructor.getParameterCount() == 1 && constructor.getParameters()[0].getType().isAssignableFrom(parameter.getClass())) {

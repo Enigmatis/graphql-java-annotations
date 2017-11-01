@@ -12,17 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.util;
 
-import graphql.annotations.typeFunctions.DefaultTypeFunction;
+import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.TreeMap;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public  class ObjectUtil {
 
-@Target({ElementType.TYPE_USE, ElementType.METHOD, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GraphQLType {
-    Class<? extends TypeFunction> value() default DefaultTypeFunction.class;
+    public static Map<String, Field> getAllFields(Class c) {
+        Map<String, Field> fields;
+
+        if (c.getSuperclass() != null) {
+            fields = getAllFields(c.getSuperclass());
+        } else {
+            fields = new TreeMap<>();
+        }
+
+        for (Field f : c.getDeclaredFields()) {
+            fields.put(f.getName(), f);
+        }
+
+        return fields;
+    }
 }

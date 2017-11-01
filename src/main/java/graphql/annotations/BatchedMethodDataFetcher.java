@@ -21,15 +21,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 public class BatchedMethodDataFetcher extends MethodDataFetcher {
-    public BatchedMethodDataFetcher(Method method) {
-        super(method);
-        if (!Modifier.isStatic(method.getModifiers())) {
-            throw new IllegalArgumentException("Batched method should be static");
-        }
-    }
 
-    public BatchedMethodDataFetcher(Method method, TypeFunction typeFunction) {
-        super(method, typeFunction);
+
+    public BatchedMethodDataFetcher(Method method,TypeFunction typeFunction, ProcessingElementsContainer container) {
+        super(method,typeFunction, container);
         if (!Modifier.isStatic(method.getModifiers())) {
             throw new IllegalArgumentException("Batched method should be static");
         }

@@ -17,6 +17,7 @@ package graphql.annotations;
 import graphql.schema.GraphQLType;
 
 import java.lang.reflect.AnnotatedType;
+import java.util.Map;
 
 /**
  * A GraphQLType builder for java types.
@@ -41,15 +42,10 @@ public interface TypeFunction {
      */
     boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType);
 
-    /**
-     * Build a {@link GraphQLType} object from a java type.
-     * This is a convenience method for calling {@link #buildType(boolean, Class, AnnotatedType)} without a type name.
-     * @param aClass The java type to build the type name for
-     * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
-     * @return The built {@link GraphQLType}
-     */
-    default GraphQLType buildType(Class<?> aClass, AnnotatedType annotatedType) {
-        return buildType(false, aClass, annotatedType);
+
+
+    default GraphQLType buildType(Class<?> aClass, AnnotatedType annotatedType, ProcessingElementsContainer container) {
+        return buildType(false, aClass, annotatedType,container);
     }
 
     /**
@@ -59,5 +55,6 @@ public interface TypeFunction {
      * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
      * @return The built {@link GraphQLType}
      */
-    GraphQLType buildType(boolean input, Class<?> aClass, AnnotatedType annotatedType);
+
+    GraphQLType buildType(boolean input, Class<?> aClass, AnnotatedType annotatedType, ProcessingElementsContainer container);
 }

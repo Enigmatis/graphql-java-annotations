@@ -18,29 +18,25 @@ import graphql.schema.*;
 import graphql.schema.GraphQLType;
 
 import java.lang.reflect.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static graphql.annotations.ReflectionKit.constructNewInstance;
-import static graphql.annotations.ReflectionKit.constructor;
 import static graphql.annotations.ReflectionKit.newInstance;
 import static graphql.annotations.util.NamingKit.toGraphqlName;
 
 class MethodDataFetcher implements DataFetcher {
     private final Method method;
+    private final ProcessingElementsContainer container;
     private final TypeFunction typeFunction;
 
-    public MethodDataFetcher(Method method) {
-        this(method, new DefaultTypeFunction());
-    }
 
-    public MethodDataFetcher(Method method, TypeFunction typeFunction) {
+
+    public MethodDataFetcher(Method method,TypeFunction typeFunction, ProcessingElementsContainer container) {
         this.method = method;
-        this.typeFunction = typeFunction;
+        this.typeFunction=typeFunction;
+        this.container = container;
     }
 
     @Override
@@ -60,13 +56,13 @@ class MethodDataFetcher implements DataFetcher {
                     return null;
                 }
             }
-            return method.invoke(obj, invocationArgs(environment));
+            return method.invoke(obj, invocationArgs(environment,container));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Object[] invocationArgs(DataFetchingEnvironment environment) {
+    private Object[] invocationArgs(DataFetchingEnvironment environment,ProcessingElementsContainer container) {
         List<Object> result = new ArrayList<>();
         Map<String,Object> envArgs = environment.getArguments();
         for (Parameter p : method.getParameters()) {
@@ -84,7 +80,7 @@ class MethodDataFetcher implements DataFetcher {
                 continue;
             }
 
-            graphql.schema.GraphQLType graphQLType = typeFunction.buildType(true, paramType, p.getAnnotatedType());
+            graphql.schema.GraphQLType graphQLType = typeFunction.buildType(true, paramType, p.getAnnotatedType(),container);
             if (envArgs.containsKey(parameterName)) {
                 result.add(buildArg(p.getParameterizedType(), graphQLType, envArgs.get(parameterName)));
             } else {
