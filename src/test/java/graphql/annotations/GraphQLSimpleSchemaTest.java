@@ -16,8 +16,8 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.annotations.GraphQLField;
-import graphql.annotations.annotations.GraphQLInvokeDetached;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.schema.GraphQLObjectType;

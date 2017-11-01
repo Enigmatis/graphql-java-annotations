@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations.annotations;
+package graphql.annotations.annotationTypes;
 
 import graphql.annotations.dataFetchers.connection.Connection;
 import graphql.annotations.dataFetchers.connection.DispatchingConnection;

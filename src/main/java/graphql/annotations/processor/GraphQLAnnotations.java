@@ -16,8 +16,8 @@ package graphql.annotations.processor;
 
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
-import graphql.annotations.annotations.GraphQLName;
-import graphql.annotations.annotations.GraphQLTypeExtension;
+import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLTypeExtension;
 import graphql.annotations.processor.graphQLProcessors.GraphQLAnnotationsProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;

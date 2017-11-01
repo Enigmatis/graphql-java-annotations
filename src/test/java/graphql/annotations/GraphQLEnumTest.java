@@ -16,7 +16,7 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.annotations.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;

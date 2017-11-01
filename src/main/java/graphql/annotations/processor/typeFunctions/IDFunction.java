@@ -15,7 +15,7 @@
 package graphql.annotations.processor.typeFunctions;
 
 import graphql.Scalars;
-import graphql.annotations.annotations.GraphQLID;
+import graphql.annotations.annotationTypes.GraphQLID;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.schema.GraphQLType;
 

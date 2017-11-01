@@ -12,18 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations.annotations;
+package graphql.annotations.annotationTypes;
+
+import graphql.annotations.processor.typeFunctions.TypeFunction;
+import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Use this annotation to indicate that a type is a mutation, useful
- * for automatic discovery
- */
+@Target({ElementType.TYPE_USE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface GraphQLMutation {
+public @interface GraphQLType {
+    Class<? extends TypeFunction> value() default DefaultTypeFunction.class;
 }

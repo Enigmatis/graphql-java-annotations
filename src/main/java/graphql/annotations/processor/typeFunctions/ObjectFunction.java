@@ -14,7 +14,7 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.annotations.annotations.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
 import graphql.annotations.processor.ProcessingElementsContainer;

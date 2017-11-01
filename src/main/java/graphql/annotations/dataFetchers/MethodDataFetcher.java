@@ -15,8 +15,8 @@
 package graphql.annotations.dataFetchers;
 
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.annotations.GraphQLInvokeDetached;
-import graphql.annotations.annotations.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
+import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.*;
 import graphql.schema.GraphQLType;

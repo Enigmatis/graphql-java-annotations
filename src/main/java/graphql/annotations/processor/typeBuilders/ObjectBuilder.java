@@ -14,8 +14,8 @@
  */
 package graphql.annotations.processor.typeBuilders;
 
-import graphql.annotations.annotations.GraphQLDescription;
-import graphql.annotations.annotations.GraphQLTypeResolver;
+import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
@@ -23,7 +23,6 @@ import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
-import graphql.annotations.processor.retrievers.GraphQLOutputObjectRetriever;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;

@@ -12,12 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.processor.graphQLProcessors;
 
 public interface GraphQLAnnotationsProcessor {
     /**
      * Register a new type extension class. This extension will be used when the extended object will be created.
-     * The class must have a {@link GraphQLTypeExtension} annotation.
+     * The class must have a {@link graphql.annotations.annotationTypes.GraphQLTypeExtension} annotation.
      *
      * @param objectClass The extension class to register
      */

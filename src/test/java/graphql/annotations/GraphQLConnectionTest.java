@@ -16,10 +16,10 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.annotations.GraphQLConnection;
-import graphql.annotations.annotations.GraphQLField;
-import graphql.annotations.annotations.GraphQLName;
-import graphql.annotations.annotations.GraphQLNonNull;
+import graphql.annotations.annotationTypes.GraphQLConnection;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.dataFetchers.connection.Connection;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;

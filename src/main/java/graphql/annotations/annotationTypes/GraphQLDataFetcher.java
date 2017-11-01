@@ -12,7 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations.annotations;
+package graphql.annotations.annotationTypes;
+
+import graphql.schema.DataFetcher;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,5 +23,8 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GraphQLBatched {
+public @interface GraphQLDataFetcher {
+    Class<? extends DataFetcher> value();
+    String[] args() default {};
+    boolean firstArgIsTargetName() default false;
 }

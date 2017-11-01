@@ -17,7 +17,7 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.TypeResolutionEnvironment;
-import graphql.annotations.annotations.*;
+import graphql.annotations.annotationTypes.*;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.strategies.EnhancedExecutionStrategy;
 import graphql.schema.*;

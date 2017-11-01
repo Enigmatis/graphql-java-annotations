@@ -15,8 +15,8 @@
 package graphql.annotations.processor.retrievers;
 
 
-import graphql.annotations.annotations.GraphQLField;
-import graphql.annotations.annotations.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLName;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;

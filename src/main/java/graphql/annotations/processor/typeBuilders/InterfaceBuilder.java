@@ -14,9 +14,9 @@
  */
 package graphql.annotations.processor.typeBuilders;
 
-import graphql.annotations.annotations.GraphQLDescription;
-import graphql.annotations.annotations.GraphQLField;
-import graphql.annotations.annotations.GraphQLTypeResolver;
+import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;

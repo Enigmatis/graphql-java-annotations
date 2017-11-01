@@ -14,10 +14,10 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.annotations.annotations.GraphQLDescription;
-import graphql.annotations.annotations.GraphQLField;
-import graphql.annotations.annotations.GraphQLID;
-import graphql.annotations.annotations.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLID;
+import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.schema.*;
@@ -78,28 +78,28 @@ public class DefaultTypeFunctionTest {
 
 
     @SuppressWarnings("unused")
-    public List<List<@graphql.annotations.annotations.GraphQLNonNull String>> listMethod() {
+    public List<List<@graphql.annotations.annotationTypes.GraphQLNonNull String>> listMethod() {
         return null;
     }
 
     @SuppressWarnings("unused")
-    public Iterable<Iterable<@graphql.annotations.annotations.GraphQLNonNull String>> iterableMethod() {
+    public Iterable<Iterable<@graphql.annotations.annotationTypes.GraphQLNonNull String>> iterableMethod() {
         return null;
     }
 
     @SuppressWarnings("unused")
-    public Collection<Collection<@graphql.annotations.annotations.GraphQLNonNull String>> collectionMethod() {
+    public Collection<Collection<@graphql.annotations.annotationTypes.GraphQLNonNull String>> collectionMethod() {
         return null;
     }
 
 
     @SuppressWarnings("unused")
-    public Stream<List<@graphql.annotations.annotations.GraphQLNonNull String>> streamMethod() {
+    public Stream<List<@graphql.annotations.annotationTypes.GraphQLNonNull String>> streamMethod() {
         return null;
     }
 
     @SuppressWarnings("unused")
-    public Set<Set<@graphql.annotations.annotations.GraphQLNonNull String>> setMethod() {
+    public Set<Set<@graphql.annotations.annotationTypes.GraphQLNonNull String>> setMethod() {
         return null;
     }
 
@@ -156,7 +156,7 @@ public class DefaultTypeFunctionTest {
     }
 
     @SuppressWarnings("unused")
-    public Optional<List<@graphql.annotations.annotations.GraphQLNonNull String>> optionalMethod() {
+    public Optional<List<@graphql.annotations.annotationTypes.GraphQLNonNull String>> optionalMethod() {
         return Optional.empty();
     }
 

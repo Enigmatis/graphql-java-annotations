@@ -14,8 +14,8 @@
  */
 package graphql.annotations.processor.typeBuilders;
 
-import graphql.annotations.annotations.GraphQLDescription;
-import graphql.annotations.annotations.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.schema.GraphQLEnumType;
 

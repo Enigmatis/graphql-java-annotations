@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.processor.retrievers;
 
-import graphql.annotations.util.GraphQLOutputObjectRetriever;
-import graphql.schema.GraphQLUnionType;
+
+import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 
 public class GraphQLInterfaceRetriever {
 

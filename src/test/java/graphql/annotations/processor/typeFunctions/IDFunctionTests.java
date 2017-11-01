@@ -15,7 +15,7 @@
 package graphql.annotations.processor.typeFunctions;
 
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.annotations.annotations.GraphQLID;
+import graphql.annotations.annotationTypes.GraphQLID;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,7 +34,7 @@ public class IDFunctionTests {
         GraphQLAnnotations.getInstance().getTypeRegistry().clear();
     }
 
-    public @graphql.annotations.annotations.GraphQLID String idStringMethod() {
+    public @graphql.annotations.annotationTypes.GraphQLID String idStringMethod() {
         return "asd";
     }
 

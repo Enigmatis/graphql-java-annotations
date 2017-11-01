@@ -12,16 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations.util;
+package graphql.annotations.processor.retrievers;
 
-import graphql.annotations.*;
-import graphql.annotations.builders.EnumBuilder;
-import graphql.annotations.builders.InterfaceBuilder;
-import graphql.annotations.builders.ObjectBuilder;
-import graphql.annotations.builders.UnionBuilder;
-import graphql.annotations.searchAlgorithms.BreadthFirstSearch;
-import graphql.annotations.searchAlgorithms.CannotCastMemberException;
-import graphql.annotations.searchAlgorithms.ParentalSearch;
+import graphql.annotations.annotationTypes.GraphQLTypeResolver;
+import graphql.annotations.annotationTypes.GraphQLUnion;
+import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
+import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
+import graphql.annotations.processor.typeBuilders.EnumBuilder;
+import graphql.annotations.processor.typeBuilders.InterfaceBuilder;
+import graphql.annotations.processor.typeBuilders.ObjectBuilder;
+import graphql.annotations.processor.typeBuilders.UnionBuilder;
 import graphql.schema.*;
 
 public class GraphQLOutputObjectRetriever {
@@ -39,17 +42,17 @@ public class GraphQLOutputObjectRetriever {
     }
 
     /**
-     * This will examine the object and will return a {@link GraphQLOutputType} based on the class type and annotations.
-     * - If its annotated with {@link GraphQLUnion} it will return a {@link GraphQLUnionType}
-     * - If its annotated with {@link GraphQLTypeResolver} it will return a {@link GraphQLInterfaceType}
+     * This will examine the object and will return a {@link GraphQLOutputType} based on the class type and annotationTypes.
+     * - If its annotated with {@link graphql.annotations.annotationTypes.GraphQLUnion} it will return a {@link GraphQLUnionType}
+     * - If its annotated with {@link graphql.annotations.annotationTypes.GraphQLTypeResolver} it will return a {@link GraphQLInterfaceType}
      * - It it's an Enum it will return a {@link GraphQLEnumType},
      * otherwise it will return a {@link GraphQLObjectType}.
      *
      * @param object    the object class to examine*
      * @param container a class that hold several members that are required in order to build schema
      * @return a {@link GraphQLOutputType} that represents that object class
-     * @throws GraphQLAnnotationsException if the object class cannot be examined
-     * @throws CannotCastMemberException   if the object class cannot be examined
+     * @throws graphql.annotations.processor.exceptions.GraphQLAnnotationsException if the object class cannot be examined
+     * @throws graphql.annotations.processor.exceptions.CannotCastMemberException   if the object class cannot be examined
      */
     public GraphQLOutputType getOutputType(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException, CannotCastMemberException {
         // because the TypeFunction can call back to this processor and
