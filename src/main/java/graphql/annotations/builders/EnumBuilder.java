@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,13 @@ public class EnumBuilder {
     public EnumBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
     }
+
+    /**
+     * This will examine the object class and return a {@link GraphQLEnumType.Builder} ready for further definition
+     *
+     * @param aClass the object class to examine
+     * @return a {@link GraphQLEnumType.Builder} that represents that object class
+     */
 
     public GraphQLEnumType.Builder getEnumBuilder(Class<?> aClass) {
         String typeName = graphQLObjectInfoRetriever.getTypeName(aClass);

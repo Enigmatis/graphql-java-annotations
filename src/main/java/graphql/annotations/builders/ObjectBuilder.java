@@ -39,19 +39,26 @@ public class ObjectBuilder {
     private BreadthFirstSearch breadthFirstSearch;
     private ParentalSearch parentalSearch;
     private GraphQLFieldRetriever graphQLFieldRetriever;
-    private InterfaceBuilder interfaceBuilder;
     private GraphQLInterfaceRetriever graphQLInterfaceRetriever;
 
-    public ObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, ParentalSearch parentalSearch, BreadthFirstSearch breadthFirstSearch,GraphQLFieldRetriever graphQLFieldRetriever,InterfaceBuilder interfaceBuilder,GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
+    public ObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, ParentalSearch parentalSearch, BreadthFirstSearch breadthFirstSearch,GraphQLFieldRetriever graphQLFieldRetriever,GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.breadthFirstSearch=breadthFirstSearch;
         this.parentalSearch=parentalSearch;
         this.graphQLFieldRetriever=graphQLFieldRetriever;
-        this.interfaceBuilder=interfaceBuilder;
         this.graphQLInterfaceRetriever=graphQLInterfaceRetriever;
     }
 
-    public GraphQLObjectType.Builder getObjectBuilder(Class<?> object, ProcessingElementsContainer container, GraphQLOutputObjectRetriever outputObjectRetriever) throws GraphQLAnnotationsException {
+    /**
+     * This will examine the object class and return a {@link GraphQLObjectType.Builder} ready for further definition
+     *
+     * @param object the object class to examine
+     * @param container a class that hold several members that are required in order to build schema
+     * @return a {@link GraphQLObjectType.Builder} that represents that object class
+     * @throws GraphQLAnnotationsException if the object class cannot be examined
+     */
+
+    public GraphQLObjectType.Builder getObjectBuilder(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLObjectType.Builder builder = newObject();
         builder.name(graphQLObjectInfoRetriever.getTypeName(object));
         GraphQLDescription description = object.getAnnotation(GraphQLDescription.class);
