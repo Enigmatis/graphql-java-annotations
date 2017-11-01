@@ -30,7 +30,7 @@ import static graphql.annotations.ReflectionKit.constructor;
 import static graphql.annotations.ReflectionKit.newInstance;
 import static graphql.annotations.util.NamingKit.toGraphqlName;
 
-class MethodDataFetcher implements DataFetcher {
+public class MethodDataFetcher<T> implements DataFetcher<T> {
     private final Method method;
     private final TypeFunction typeFunction;
 
@@ -44,23 +44,23 @@ class MethodDataFetcher implements DataFetcher {
     }
 
     @Override
-    public Object get(DataFetchingEnvironment environment) {
+    public T get(DataFetchingEnvironment environment) {
         try {
-            Object obj;
+            T obj;
 
             if (Modifier.isStatic(method.getModifiers())) {
                 obj = null;
             } else if (method.getAnnotation(GraphQLInvokeDetached.class) != null) {
-                obj = newInstance(method.getDeclaringClass());
+                obj = newInstance((Class<T>) method.getDeclaringClass());
             } else if (!method.getDeclaringClass().isInstance(environment.getSource())) {
-                obj = newInstance(method.getDeclaringClass(), environment.getSource());
+                obj = newInstance((Class<T>) method.getDeclaringClass(), environment.getSource());
             } else {
                 obj = environment.getSource();
                 if (obj == null) {
                     return null;
                 }
             }
-            return method.invoke(obj, invocationArgs(environment));
+            return (T) method.invoke(obj, invocationArgs(environment));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
