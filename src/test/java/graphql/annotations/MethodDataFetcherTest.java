@@ -39,7 +39,7 @@ public class MethodDataFetcherTest {
     @Test(expectedExceptions = RuntimeException.class)
     public void exceptionRethrowing() {
         try {
-            MethodDataFetcher methodDataFetcher = new MethodDataFetcher(getClass().getMethod("method"));
+            MethodDataFetcher methodDataFetcher = new MethodDataFetcher(getClass().getMethod("method"),null,null);
             methodDataFetcher.get(new DataFetchingEnvironmentImpl(this, new HashMap<String,Object>(), null, null, null, new ArrayList<>(), null, null, null, null, null, null, null));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();

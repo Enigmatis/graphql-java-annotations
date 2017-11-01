@@ -75,12 +75,12 @@ public class GraphQLObjectTest {
         }
 
         @GraphQLField
-        public String fieldWithArgs(@GraphQLNonNull String a, @GraphQLDefaultValue(DefaultAValue.class) @GraphQLDescription("b") String b) {
+        public String fieldWithArgs(@GraphQLName("a") @GraphQLNonNull String a, @GraphQLName("b") @GraphQLDefaultValue(DefaultAValue.class) @GraphQLDescription("b") String b) {
             return b;
         }
 
         @GraphQLField
-        public String fieldWithArgsAndEnvironment(DataFetchingEnvironment env, String a, String b) {
+        public String fieldWithArgsAndEnvironment(DataFetchingEnvironment env,@GraphQLName("a") String a, @GraphQLName("b") String b) {
             return a;
         }
 
@@ -494,7 +494,7 @@ public class GraphQLObjectTest {
     @Test
     public void recursiveTypes() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectType object = graphQLAnnotations.getObject(Class1.class);
+        GraphQLObjectType object = new GraphQLObjectHandler().getObject(Class1.class,graphQLAnnotations.getContainer());
         GraphQLSchema schema = newSchema().query(object).build();
 
         Class1 class1 = new Class1();
@@ -553,7 +553,7 @@ public class GraphQLObjectTest {
         @GraphQLField
         public int b;
 
-        public TestInputArgument(String a, int b) {
+        public TestInputArgument(@GraphQLName("a") String a, @GraphQLName("b") int b) {
             this.a = a;
             this.b = b;
         }
@@ -563,7 +563,7 @@ public class GraphQLObjectTest {
 
         public Collection<TestInputArgument> inputs;
 
-        public TestComplexInputArgument(Collection<TestInputArgument> inputs) {
+        public TestComplexInputArgument(@GraphQLName("inputs") Collection<TestInputArgument> inputs) {
             this.inputs = inputs;
         }
 
@@ -578,12 +578,12 @@ public class GraphQLObjectTest {
 
     private static class TestObjectInput {
         @GraphQLField
-        public String test(int other, TestInputArgument arg) {
+        public String test(@GraphQLName("other") int other, @GraphQLName("arg") TestInputArgument arg) {
             return arg.a;
         }
 
         @GraphQLField
-        public String test2(int other, TestComplexInputArgument arg) {
+        public String test2(@GraphQLName("other") int other, @GraphQLName("arg") TestComplexInputArgument arg) {
             return arg.inputs.iterator().next().a;
         }
     }
@@ -597,7 +597,7 @@ public class GraphQLObjectTest {
         assertEquals(argument.getName(), "arg");
 
         GraphQLSchema schema = newSchema().query(object).build();
-        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{ test(arg: { a:\"ok\", b:2 }, other:0) }", new TestObjectInput());
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{ test( other:0,arg: { a:\"ok\", b:2 }) }", new TestObjectInput());
         assertTrue(result.getErrors().isEmpty());
         Map<String, Object> v = (Map<String, Object>) result.getData();
         assertEquals(v.get("test"), "ok");
@@ -620,7 +620,8 @@ public class GraphQLObjectTest {
     @Test
     public void inputObject() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
-        GraphQLInputObjectType inputObjectType = GraphQLAnnotations.inputObject(object, "input");
+        GraphQLInputObjectRetriever graphQLInputObjectRetrieve=new GraphQLInputObjectRetriever();
+        GraphQLInputObjectType inputObjectType = (GraphQLInputObjectType) graphQLInputObjectRetrieve.getInputObject(object, "input",GraphQLAnnotations.getInstance().getContainer().getTypeRegistry());
         assertEquals(inputObjectType.getFields().size(), object.getFieldDefinitions().size());
     }
 
@@ -631,11 +632,15 @@ public class GraphQLObjectTest {
         }
 
         @Override
+        public GraphQLType buildType(boolean input, Class<?> aClass, AnnotatedType annotatedType, ProcessingElementsContainer container) {
+            return buildType(input,aClass,annotatedType);
+        }
+
+        @Override
         public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
             return "UUID";
         }
 
-        @Override
         public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
             return GraphQLString;
         }
@@ -680,7 +685,8 @@ public class GraphQLObjectTest {
     @Test
     public void optionalInput() {
         GraphQLObjectType object = GraphQLAnnotations.object(OptionalTest.class);
-        GraphQLInputObjectType inputObject = GraphQLAnnotations.inputObject(object, "input");
+        GraphQLInputObjectRetriever graphQLInputObjectRetriever=new GraphQLInputObjectRetriever();
+        GraphQLInputObjectType inputObject = (GraphQLInputObjectType) graphQLInputObjectRetriever.getInputObject(object, "input",GraphQLAnnotations.getInstance().getTypeRegistry());
         GraphQLObjectType mutation = GraphQLObjectType.newObject().name("mut").field(newFieldDefinition().name("test").type(object).
                 argument(GraphQLArgument.newArgument().type(inputObject).name("input").build()).dataFetcher(environment -> {
             Map<String, String> input = environment.getArgument("input");

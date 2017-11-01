@@ -50,8 +50,8 @@ public class GraphQLFragmentTest {
     public void testInterfaceInlineFragment() throws Exception {
         // Given
         registry = new HashMap<>();
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
 
-        GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(MyInterface.class);
 
         GraphQLObjectType rootType = GraphQLAnnotations.object(RootObject.class);
 
@@ -62,6 +62,8 @@ public class GraphQLFragmentTest {
         GraphQLObjectType objectType = GraphQLAnnotations.object(MyObject.class);
 
         registry.put("MyObject", objectType);
+
+        GraphQLInterfaceType iface = (GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(MyInterface.class,GraphQLAnnotations.getInstance().getContainer());
 
         GraphQLSchema schema = GraphQLSchema.newSchema()
                 .query(rootType)

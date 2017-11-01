@@ -52,7 +52,9 @@ public class GraphQLInterfaceTest {
 
     @Test
     public void noResolver() {
-        GraphQLObjectType object = (GraphQLObjectType) GraphQLAnnotations.iface(NoResolverIface.class);
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
+
+        GraphQLObjectType object = (GraphQLObjectType) graphQLInterfaceRetriever.getInterface(NoResolverIface.class,GraphQLAnnotations.getInstance().getContainer());
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 1);
         assertEquals(fields.get(0).getName(), "value");
@@ -105,7 +107,9 @@ public class GraphQLInterfaceTest {
 
     @Test
     public void test() {
-        GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(TestIface.class);
+
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
+        GraphQLInterfaceType iface = (GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(TestIface.class,GraphQLAnnotations.getInstance().getContainer());
         List<GraphQLFieldDefinition> fields = iface.getFieldDefinitions();
         assertEquals(fields.size(), 1);
         assertEquals(fields.get(0).getName(), "value");
@@ -113,7 +117,8 @@ public class GraphQLInterfaceTest {
 
     @Test
     public void testUnion() {
-        GraphQLUnionType unionType = (GraphQLUnionType) GraphQLAnnotations.iface(TestUnion.class);
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
+        GraphQLUnionType unionType = (GraphQLUnionType) graphQLInterfaceRetriever.getInterface(TestUnion.class,GraphQLAnnotations.getInstance().getContainer());
         assertEquals(unionType.getTypes().size(), 1);
         assertEquals(unionType.getTypes().get(0).getName(), "TestObject1");
     }
