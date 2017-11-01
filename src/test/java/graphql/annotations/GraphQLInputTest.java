@@ -46,7 +46,7 @@ public class GraphQLInputTest {
         }
     }
 
-    static class SubInputObject {
+    public static class SubInputObject {
         public SubInputObject(@GraphQLName("subKey") String subKey) {
             this.subKey = subKey;
         }
@@ -55,7 +55,7 @@ public class GraphQLInputTest {
         private String subKey;
     }
 
-    static class InputObject {
+    public static class InputObject {
         public InputObject(@GraphQLName("key") String key, @GraphQLName("complex") List<SubInputObject> complex) {
             this.key = key;
             this.complex = complex;
@@ -68,7 +68,7 @@ public class GraphQLInputTest {
         private List<SubInputObject> complex;
     }
 
-    static class RecursiveInputObject {
+    public static class RecursiveInputObject {
         public RecursiveInputObject(@GraphQLName("map") HashMap map) {
             key = (String) map.get("key");
             if (map.containsKey("rec")) {
@@ -84,12 +84,12 @@ public class GraphQLInputTest {
     }
 
     @GraphQLTypeResolver(Resolver.class)
-    interface TestIface {
+    public interface TestIface {
         @GraphQLField
         String value(@GraphQLName("input") InputObject input);
     }
 
-    static class TestObject implements TestIface {
+    public static class TestObject implements TestIface {
 
         @Override
         public String value(@GraphQLName("input") InputObject input) {
@@ -97,7 +97,7 @@ public class GraphQLInputTest {
         }
     }
 
-    static class TestObjectList {
+    public static class TestObjectList {
         @GraphQLField
         public String value(@GraphQLName("input") List<List<List<InputObject>>> input) {
             InputObject inputObject = input.get(0).get(0).get(0);
@@ -105,14 +105,14 @@ public class GraphQLInputTest {
         }
     }
 
-    static class TestObjectRec {
+    public static class TestObjectRec {
         @GraphQLField
         public String value(@GraphQLName("input") RecursiveInputObject input) {
             return (input.rec != null ? ("rec"+input.rec.key) : input.key) + "a";
         }
     }
 
-    static class Code {
+    public static class Code {
         public Code(@GraphQLName("map") HashMap map) {
             this.firstField = (String) map.get("firstField");
             this.secondField = (String) map.get("secondField");
@@ -124,7 +124,7 @@ public class GraphQLInputTest {
         public String secondField;
     }
 
-    static class QueryMultipleDefinitions {
+    public static class QueryMultipleDefinitions {
         @GraphQLField
         public String something(@GraphQLName("code") Code code) {
             return code.firstField + code.secondField;
@@ -136,28 +136,28 @@ public class GraphQLInputTest {
         }
     }
 
-    static class Query {
+    public static class Query {
         @GraphQLField
         public TestIface object() {
             return new TestObject();
         };
     }
 
-    static class QueryRecursion {
+    public static class QueryRecursion {
         @GraphQLField
         public TestObjectRec object() {
             return new TestObjectRec();
         };
     }
 
-    static class QueryList {
+    public static class QueryList {
         @GraphQLField
         public TestObjectList object() {
             return new TestObjectList();
         };
     }
 
-    static class QueryIface {
+    public static class QueryIface {
         @GraphQLField
         public TestObject iface() {
             return new TestObject();

@@ -71,7 +71,7 @@ public class GraphQLObjectTest {
 
     @GraphQLDescription("TestObject object")
     @GraphQLName("TestObject")
-    private static class TestObject {
+    public static class TestObject {
         @GraphQLField
         @GraphQLName("field0")
         @GraphQLDescription("field")
@@ -221,7 +221,7 @@ public class GraphQLObjectTest {
         assertTrue(fields.get(7).getType() instanceof graphql.schema.GraphQLNonNull);
     }
 
-    private static class TestObjectInherited extends TestObject {
+    public static class TestObjectInherited extends TestObject {
         @Override
         @GraphQLName("field1") // Test overriding field
         public String field() {
@@ -245,7 +245,7 @@ public class GraphQLObjectTest {
         assertEquals(((Map<String, Object>) result.getData()).get("field1"), "inherited");
     }
 
-    private static class TestObjectBridgMethodParent<Type> {
+    public static class TestObjectBridgMethodParent<Type> {
         private final Type id;
 
         public TestObjectBridgMethodParent(Type id) {
@@ -257,7 +257,7 @@ public class GraphQLObjectTest {
         }
     }
 
-    private static class TestObjectBridgMethod extends TestObjectBridgMethodParent<Long> {
+    public static class TestObjectBridgMethod extends TestObjectBridgMethodParent<Long> {
 
         public TestObjectBridgMethod() {
             super(1L);
@@ -554,7 +554,7 @@ public class GraphQLObjectTest {
         assertEquals(object.getFieldDefinition("id").getType(), GraphQLString);
     }
 
-    private static class TestInputArgument {
+    public  static class TestInputArgument {
         @GraphQLField
         public String a;
         @GraphQLField
@@ -566,7 +566,7 @@ public class GraphQLObjectTest {
         }
     }
 
-    private static class TestComplexInputArgument {
+    public static class TestComplexInputArgument {
 
         public Collection<TestInputArgument> inputs;
 
@@ -583,7 +583,7 @@ public class GraphQLObjectTest {
 
 
 
-    private static class TestObjectInput {
+    public  static class TestObjectInput {
         @GraphQLField
         public String test(@GraphQLName("other") int other, @GraphQLName("arg") TestInputArgument arg) {
             return arg.a;

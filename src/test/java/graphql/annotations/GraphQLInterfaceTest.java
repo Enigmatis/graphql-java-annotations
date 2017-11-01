@@ -80,20 +80,20 @@ public class GraphQLInterfaceTest {
     }
 
     @GraphQLTypeResolver(Resolver.class)
-    interface BaseTestIface {
+    public interface BaseTestIface {
         @GraphQLField
         String value();
     }
 
     @GraphQLTypeResolver(Resolver.class)
-    interface TestIface extends BaseTestIface {
+    public interface TestIface extends BaseTestIface {
     }
 
     @GraphQLUnion(possibleTypes = TestObject1.class)
-    interface TestUnion extends BaseTestIface {
+    public interface TestUnion extends BaseTestIface {
     }
 
-    static class TestObject implements TestIface {
+    public static class TestObject implements TestIface {
 
         @Override
         public String value() {
@@ -146,7 +146,7 @@ public class GraphQLInterfaceTest {
         }
     }
 
-    static class Query {
+    public static class Query {
         @GraphQLDataFetcher(IfaceFetcher.class)
         @GraphQLField
         public TestIface iface;
