@@ -14,16 +14,12 @@
  */
 package graphql.annotations.connection;
 
-import graphql.annotations.ExtensionDataFetcherWrapper;
 import graphql.relay.Connection;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.FieldDataFetcher;
-import graphql.schema.PropertyDataFetcher;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static graphql.annotations.ReflectionKit.constructNewInstance;
@@ -32,10 +28,8 @@ public class ConnectionDataFetcher<T> implements DataFetcher<Connection<T>> {
     private final Class<? extends ConnectionFetcher<T>> connection;
     private final DataFetcher<PaginatedData<T>> actualDataFetcher;
     private final Constructor<ConnectionFetcher<T>> constructor;
-    private final List<Class<?>> blackListOfDataFetchers = Arrays.asList(PropertyDataFetcher.class, FieldDataFetcher.class);
 
     public ConnectionDataFetcher(Class<? extends ConnectionFetcher<T>> connection, DataFetcher<T> actualDataFetcher) {
-        validateDataFetcher(actualDataFetcher);
         this.connection = connection;
         this.actualDataFetcher = (DataFetcher<PaginatedData<T>>) actualDataFetcher;
         Optional<Constructor<ConnectionFetcher<T>>> constructor =
@@ -47,17 +41,6 @@ public class ConnectionDataFetcher<T> implements DataFetcher<Connection<T>> {
             this.constructor = constructor.get();
         } else {
             throw new IllegalArgumentException(connection.getSimpleName() + " doesn't have a single argument constructor");
-        }
-    }
-
-    private void validateDataFetcher(DataFetcher<?> dataFetcher) {
-        if( dataFetcher instanceof ExtensionDataFetcherWrapper) {
-            dataFetcher = ((ExtensionDataFetcherWrapper) dataFetcher).getUnwrappedDataFetcher();
-        }
-        final DataFetcher<?> finalDataFetcher = dataFetcher;
-        if(blackListOfDataFetchers.stream().anyMatch(aClass -> aClass.isInstance(finalDataFetcher))) {
-            throw new GraphQLConnectionException("Please don't use @GraphQLConnection on a field without @GraphQLDataFetcher, because " +
-                    "neither PropertyDataFetcher nor FieldDataFetcher know how to handle connection");
         }
     }
 
