@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package typeFunctions;
+package graphql.annotations.typeFunctions;
 
 import graphql.annotations.*;
 import graphql.schema.*;

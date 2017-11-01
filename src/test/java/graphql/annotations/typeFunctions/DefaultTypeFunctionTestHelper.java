@@ -12,12 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package typeFunctions;
+package graphql.annotations.typeFunctions;
 
 import graphql.annotations.GraphQLAnnotations;
 import graphql.annotations.graphQLProcessors.GraphQLInputProcessor;
 import graphql.annotations.graphQLProcessors.GraphQLOutputProcessor;
-import graphql.annotations.typeFunctions.DefaultTypeFunction;
 
 public class DefaultTypeFunctionTestHelper {
     public static DefaultTypeFunction testedDefaultTypeFunction() {

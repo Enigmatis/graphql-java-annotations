@@ -12,18 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package typeFunctions;
+package graphql.annotations.typeFunctions;
+
 
 import graphql.annotations.GraphQLAnnotations;
-import graphql.annotations.typeFunctions.DefaultTypeFunction;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static graphql.Scalars.GraphQLString;
+import static graphql.Scalars.GraphQLLong;
 import static org.testng.Assert.assertEquals;
-import static typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
+import static graphql.annotations.typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
 
-public class StringFunctionTests {
+public class LongFunctionTests {
 
     @BeforeMethod
     public void init() {
@@ -31,10 +31,9 @@ public class StringFunctionTests {
     }
 
     @Test
-    public void buildType_stringType_returnsGraphQLString() {
+    public void buildType_longType_returnsGraphQLLong() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
-        assertEquals(instance.buildType(String.class, null,null), GraphQLString);
+        assertEquals(instance.buildType(long.class, null,null), GraphQLLong);
+        assertEquals(instance.buildType(Long.class, null,null), GraphQLLong);
     }
-
-
 }

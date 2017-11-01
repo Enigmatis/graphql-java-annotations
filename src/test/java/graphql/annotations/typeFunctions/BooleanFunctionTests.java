@@ -12,19 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package typeFunctions;
-
+package graphql.annotations.typeFunctions;
 
 import graphql.annotations.GraphQLAnnotations;
-import graphql.annotations.typeFunctions.DefaultTypeFunction;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static graphql.Scalars.GraphQLLong;
+import static graphql.Scalars.GraphQLBoolean;
 import static org.testng.Assert.assertEquals;
-import static typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
+import static graphql.annotations.typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
 
-public class LongFunctionTests {
+public class BooleanFunctionTests {
 
     @BeforeMethod
     public void init() {
@@ -32,9 +30,9 @@ public class LongFunctionTests {
     }
 
     @Test
-    public void buildType_longType_returnsGraphQLLong() {
+    public void buildType_booleanType_returnsGraphQLBoolean() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
-        assertEquals(instance.buildType(long.class, null,null), GraphQLLong);
-        assertEquals(instance.buildType(Long.class, null,null), GraphQLLong);
+        assertEquals(instance.buildType(boolean.class, null,null), GraphQLBoolean);
+        assertEquals(instance.buildType(Boolean.class, null,null), GraphQLBoolean);
     }
 }
