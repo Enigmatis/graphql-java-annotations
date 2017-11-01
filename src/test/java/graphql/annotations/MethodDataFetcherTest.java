@@ -14,6 +14,8 @@
  */
 package graphql.annotations;
 
+import graphql.annotations.dataFetchers.MethodDataFetcher;
+import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetchingEnvironmentImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

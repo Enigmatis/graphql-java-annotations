@@ -17,6 +17,13 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.Scalars;
+import graphql.annotations.annotations.*;
+import graphql.annotations.dataFetchers.ExtensionDataFetcherWrapper;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.retrievers.GraphQLInputObjectRetriever;
+import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
+import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 
@@ -535,7 +542,7 @@ public class GraphQLObjectTest {
 
     private static class TestCustomTypeFunction {
         @GraphQLField
-        @graphql.annotations.GraphQLType(UUIDTypeFunction.class)
+        @graphql.annotations.annotations.GraphQLType(UUIDTypeFunction.class)
         public UUID id() {
             return UUID.randomUUID();
         }

@@ -16,6 +16,10 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.annotations.GraphQLDataFetcher;
+import graphql.annotations.annotations.GraphQLField;
+import graphql.annotations.annotations.GraphQLName;
+import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLObjectType;

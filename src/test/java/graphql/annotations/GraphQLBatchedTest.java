@@ -17,11 +17,13 @@ package graphql.annotations;
 import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.annotations.GraphQLBatched;
+import graphql.annotations.annotations.GraphQLField;
+import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.execution.batched.BatchedExecutionStrategy;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

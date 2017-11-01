@@ -16,6 +16,10 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.annotations.GraphQLField;
+import graphql.annotations.annotations.GraphQLInvokeDetached;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.schema.GraphQLObjectType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

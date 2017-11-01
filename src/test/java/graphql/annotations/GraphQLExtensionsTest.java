@@ -16,10 +16,11 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.annotations.*;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.schema.*;
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.List;

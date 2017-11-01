@@ -17,6 +17,11 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.TypeResolutionEnvironment;
+import graphql.annotations.annotations.GraphQLField;
+import graphql.annotations.annotations.GraphQLName;
+import graphql.annotations.annotations.GraphQLTypeResolver;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.schema.*;
 import org.testng.annotations.Test;
 

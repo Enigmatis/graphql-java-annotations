@@ -16,7 +16,14 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.util.CustomRelay;
+import graphql.annotations.annotations.GraphQLConnection;
+import graphql.annotations.annotations.GraphQLField;
+import graphql.annotations.annotations.GraphQLName;
+import graphql.annotations.annotations.GraphQLNonNull;
+import graphql.annotations.dataFetchers.connection.Connection;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.util.CustomRelay;
 import graphql.relay.Relay;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLList;
@@ -30,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static graphql.annotations.util.RelayKit.EMPTY_CONNECTION;
+import static graphql.annotations.processor.util.RelayKit.EMPTY_CONNECTION;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
