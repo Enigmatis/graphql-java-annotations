@@ -74,7 +74,7 @@ public class GraphQLConnectionTest {
         @GraphQLField
         @GraphQLConnection
         public PaginatedData<Obj> objs() {
-            return new AbstarctPaginatedData<Obj>(false, true, objs) {
+            return new AbstractPaginatedData<Obj>(false, true, objs) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.id;
@@ -94,7 +94,7 @@ public class GraphQLConnectionTest {
         @GraphQLField
         @GraphQLConnection
         public PaginatedData<Obj> objs() {
-            return new AbstarctPaginatedData<Obj>(false, true, objs) {
+            return new AbstractPaginatedData<Obj>(false, true, objs) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.id;
@@ -109,7 +109,7 @@ public class GraphQLConnectionTest {
         public PaginatedData<Obj> objs;
 
         public TestConnectionOnField(List<Obj> objs) {
-            this.objs = new AbstarctPaginatedData<Obj>(false, true, objs) {
+            this.objs = new AbstractPaginatedData<Obj>(false, true, objs) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.id;
@@ -144,7 +144,7 @@ public class GraphQLConnectionTest {
             if (first != null && first < objs.size()) {
                 actualobjs = actualobjs.subList(0, first);
             }
-            return new AbstarctPaginatedData<Obj>(false, true, actualobjs) {
+            return new AbstractPaginatedData<Obj>(false, true, actualobjs) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.id;
@@ -164,7 +164,7 @@ public class GraphQLConnectionTest {
 
             Obj[] a = new Obj[actualobjs.size()];
             Iterable<Obj> data = Stream.of(actualobjs.toArray(a))::iterator;
-            return new AbstarctPaginatedData<Obj>(false, true, data) {
+            return new AbstractPaginatedData<Obj>(false, true, data) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.id;
@@ -182,7 +182,7 @@ public class GraphQLConnectionTest {
                 filteredObjs = filteredObjs.subList(0, first);
             }
             Iterable<Obj> objIterable = filteredObjs::iterator;
-            return new AbstarctPaginatedData<Obj>(false, true, objIterable) {
+            return new AbstractPaginatedData<Obj>(false, true, objIterable) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.id;
@@ -200,7 +200,7 @@ public class GraphQLConnectionTest {
             if (first != null && first < objs.size()) {
                 actualobjs = actualobjs.subList(0, first);
             }
-            return new AbstarctPaginatedData<Obj>(false, true, actualobjs) {
+            return new AbstractPaginatedData<Obj>(false, true, actualobjs) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.id;
@@ -347,7 +347,7 @@ public class GraphQLConnectionTest {
         @GraphQLField
         @GraphQLConnection(connection = CustomConnection.class)
         public PaginatedData<Obj> getObjs() {
-            return new AbstarctPaginatedData<Obj>(true, false, objs) {
+            return new AbstractPaginatedData<Obj>(true, false, objs) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.id;

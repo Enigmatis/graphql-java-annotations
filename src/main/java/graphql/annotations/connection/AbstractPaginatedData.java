@@ -16,13 +16,13 @@ package graphql.annotations.connection;
 
 import java.util.Iterator;
 
-public abstract class AbstarctPaginatedData<T> implements PaginatedData<T> {
+public abstract class AbstractPaginatedData<T> implements PaginatedData<T> {
 
-    private boolean hasPreviousPage;
-    private boolean hasNextPage;
-    private Iterable<T> data;
+     boolean hasPreviousPage;
+     boolean hasNextPage;
+     Iterable<T> data;
 
-    public AbstarctPaginatedData(boolean hasPreviousPage, boolean hasNextPage, Iterable<T> data) {
+    public AbstractPaginatedData(boolean hasPreviousPage, boolean hasNextPage, Iterable<T> data) {
         this.hasNextPage = hasNextPage;
         this.hasPreviousPage = hasPreviousPage;
         this.data = data;

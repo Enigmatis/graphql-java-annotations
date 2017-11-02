@@ -77,7 +77,7 @@ public class GraphQLEnhancedConnectionTest {
 
     public static class TestListField {
         @GraphQLField
-        @GraphQLConnection(connection = EnhancedConnectionFetcher.class)
+        @GraphQLConnection(connection = PaginatedDataConnectionFetcher.class)
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
         public PaginatedData<Obj> objs;
 
@@ -96,7 +96,7 @@ public class GraphQLEnhancedConnectionTest {
             if (first != null && first <= 3) {
                 objs = objs.subList(0, first);
             }
-            return new AbstarctPaginatedData<Obj>(false, true, objs) {
+            return new AbstractPaginatedData<Obj>(false, true, objs) {
                 @Override
                 public String getCursor(Obj entity) {
                     return entity.getId();

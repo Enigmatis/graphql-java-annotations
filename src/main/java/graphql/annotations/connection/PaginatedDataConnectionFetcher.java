@@ -32,11 +32,11 @@ import java.util.List;
  *
  * @param <T> the entity type that is paginated
  */
-public class EnhancedConnectionFetcher<T> implements ConnectionFetcher<T> {
+public class PaginatedDataConnectionFetcher<T> implements ConnectionFetcher<T> {
 
     private DataFetcher<PaginatedData<T>> paginationDataFetcher;
 
-    public EnhancedConnectionFetcher(DataFetcher<PaginatedData<T>> paginationDataFetcher) {
+    public PaginatedDataConnectionFetcher(DataFetcher<PaginatedData<T>> paginationDataFetcher) {
         this.paginationDataFetcher = paginationDataFetcher;
     }
 
