@@ -25,15 +25,14 @@ import java.util.Optional;
 import static graphql.annotations.ReflectionKit.constructNewInstance;
 
 public class ConnectionDataFetcher<T> implements DataFetcher<Connection<T>> {
-    private final Class<? extends ConnectionFetcher<T>> connection;
-    private final DataFetcher<PaginatedData<T>> actualDataFetcher;
+    private final DataFetcher<?> actualDataFetcher;
     private final Constructor<ConnectionFetcher<T>> constructor;
 
-    public ConnectionDataFetcher(Class<? extends ConnectionFetcher<T>> connection, DataFetcher<T> actualDataFetcher) {
-        this.connection = connection;
-        this.actualDataFetcher = (DataFetcher<PaginatedData<T>>) actualDataFetcher;
+    @SuppressWarnings("unchecked")
+    public ConnectionDataFetcher(Class<? extends ConnectionFetcher<T>> connection, DataFetcher<?> actualDataFetcher) {
+        this.actualDataFetcher =  actualDataFetcher;
         Optional<Constructor<ConnectionFetcher<T>>> constructor =
-                Arrays.stream(this.connection.getConstructors()).
+                Arrays.stream(connection.getConstructors()).
                         filter(c -> c.getParameterCount() == 1).
                         map(c -> (Constructor<ConnectionFetcher<T>>) c).
                         findFirst();
