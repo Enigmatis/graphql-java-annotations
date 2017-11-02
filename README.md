@@ -231,10 +231,14 @@ Relay [specification for mutations](https://facebook.github.io/relay/graphql/mut
 
 You can use `@GraphQLConnection` annotation to make a field iterable in adherence to Relay [Connection specification](https://facebook.github.io/relay/graphql/connections.htm).\
 If a field is annotated with the annotation, the associated dataFetcher must return an instance of `PaginatedData`.\
-The `PaginatedData` class holds the result of the conneciton:
+The `PaginatedData` class holds the result of the connection:
 1. The data of the page
 2. Whether or not there is a next page and a previous page
 3. A method that returns for each entity the encoded cursor of the entity (it returns string)
+
+If you want to use you own implementation of connection, that's fine, just give a value to connection().\
+Please note that if you do so, you also have to specify your own connection validator that implements `ConnectionValidator`\
+(and should throw `@GraphQLConnectionException` if something is wrong) 
 
 NOTE: because `PropertyDataFetcher` and `FieldDataFetcher` can't handle connection, this annotation cant be used on a field that doesn't have a dataFetcher
 
