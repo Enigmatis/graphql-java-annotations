@@ -32,7 +32,6 @@ public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T>{
         this.dataFetcher = dataFetcher;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public T get(DataFetchingEnvironment environment) {
         Object source = environment.getSource();
