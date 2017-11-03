@@ -159,8 +159,7 @@ public class GraphQLFieldRetriever {
                 args.stream().
                         map(t -> newInputObjectField().name(t.getName()).type(t.getType()).description(t.getDescription()).build()).
                         collect(Collectors.toList()), fieldDefinitions, new StaticDataFetcher(null));
-        builder.argument(relayFieldDefinition.getArguments());
-        builder.type(relayFieldDefinition.getType());
+        builder.argument(relayFieldDefinition.getArguments()).type(relayFieldDefinition.getType());
         return relayFieldDefinition;
     }
 
@@ -176,13 +175,9 @@ public class GraphQLFieldRetriever {
             builder.argument(container.getRelay().getConnectionFieldArguments());
         }
 
-        builder.type(outputType);
-
-        builder.description(new DescriptionBuilder(field).build());
-
-        builder.deprecate(new DeprecateBuilder(field).build());
-
-        builder.dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, isConnection).build());
+        builder.type(outputType).description(new DescriptionBuilder(field).build())
+                .deprecate(new DeprecateBuilder(field).build())
+                .dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, isConnection).build());
 
         return new GraphQLAnnotations.GraphQLFieldDefinitionWrapper(builder.build());
     }
