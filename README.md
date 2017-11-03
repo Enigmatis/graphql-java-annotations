@@ -236,6 +236,8 @@ The `PaginatedData` class holds the result of the connection:
 2. Whether or not there is a next page and a previous page
 3. A method that returns for each entity the encoded cursor of the entity (it returns string)
 
+For you convenience, there is `AbstractPaginatedData` that can be extended.
+
 If you want to use you own implementation of connection, that's fine, just give a value to connection().\
 Please note that if you do so, you also have to specify your own connection validator that implements `ConnectionValidator`\
 (and should throw `@GraphQLConnectionException` if something is wrong) 
