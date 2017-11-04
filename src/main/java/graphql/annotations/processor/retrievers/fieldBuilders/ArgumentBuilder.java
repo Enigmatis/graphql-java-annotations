@@ -54,24 +54,24 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
         return args;
     }
 
-    private GraphQLArgument getArgument(Parameter parameter, graphql.schema.GraphQLInputType t) throws
+    private GraphQLArgument getArgument(Parameter parameter, graphql.schema.GraphQLInputType inputType) throws
             GraphQLAnnotationsException {
-        GraphQLArgument.Builder builder = newArgument().type(t);
+        GraphQLArgument.Builder argumentBuilder = newArgument().type(inputType);
         GraphQLDescription description = parameter.getAnnotation(GraphQLDescription.class);
         if (description != null) {
-            builder.description(description.value());
+            argumentBuilder.description(description.value());
         }
         GraphQLDefaultValue defaultValue = parameter.getAnnotation(GraphQLDefaultValue.class);
         if (defaultValue != null) {
-            builder.defaultValue(newInstance(defaultValue.value()).get());
+            argumentBuilder.defaultValue(newInstance(defaultValue.value()).get());
         }
         GraphQLName name = parameter.getAnnotation(GraphQLName.class);
         if (name != null) {
-            builder.name(toGraphqlName(name.value()));
+            argumentBuilder.name(toGraphqlName(name.value()));
         } else {
-            builder.name(toGraphqlName(parameter.getName()));
+            argumentBuilder.name(toGraphqlName(parameter.getName()));
         }
-        return builder.build();
+        return argumentBuilder.build();
     }
 
 }
