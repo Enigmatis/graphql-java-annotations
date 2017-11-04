@@ -1,7 +1,6 @@
-package graphql.annotations.processor.retrievers.fieldBuilders.method;
+package graphql.annotations.processor.retrievers.fieldBuilders;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
-import graphql.annotations.processor.retrievers.fieldBuilders.Builder;
 
 import java.lang.reflect.AccessibleObject;
 

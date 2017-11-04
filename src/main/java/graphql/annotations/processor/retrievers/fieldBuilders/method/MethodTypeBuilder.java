@@ -10,12 +10,12 @@ import graphql.schema.GraphQLOutputType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 
-public class TypeBuilder implements Builder<GraphQLOutputType> {
+public class MethodTypeBuilder implements Builder<GraphQLOutputType> {
     private Method method;
     private TypeFunction typeFunction;
     private ProcessingElementsContainer container;
 
-    public TypeBuilder(Method method, TypeFunction typeFunction, ProcessingElementsContainer container) {
+    public MethodTypeBuilder(Method method, TypeFunction typeFunction, ProcessingElementsContainer container) {
         this.method = method;
         this.typeFunction = typeFunction;
         this.container = container;

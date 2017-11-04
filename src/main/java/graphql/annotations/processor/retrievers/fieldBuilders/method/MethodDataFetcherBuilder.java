@@ -20,7 +20,7 @@ import graphql.schema.GraphQLOutputType;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class DataFetcherBuilder implements Builder<DataFetcher> {
+public class MethodDataFetcherBuilder implements Builder<DataFetcher> {
     private Method method;
     private GraphQLOutputType outputType;
     private TypeFunction typeFunction;
@@ -30,9 +30,9 @@ public class DataFetcherBuilder implements Builder<DataFetcher> {
     private DataFetcherConstructor dataFetcherConstructor;
     private boolean isConnection;
 
-    public DataFetcherBuilder(Method method, GraphQLOutputType outputType, TypeFunction typeFunction,
-                              ProcessingElementsContainer container, GraphQLFieldDefinition relayFieldDefinition,
-                              List<GraphQLArgument> args, DataFetcherConstructor dataFetcherConstructor, boolean isConnection) {
+    public MethodDataFetcherBuilder(Method method, GraphQLOutputType outputType, TypeFunction typeFunction,
+                                    ProcessingElementsContainer container, GraphQLFieldDefinition relayFieldDefinition,
+                                    List<GraphQLArgument> args, DataFetcherConstructor dataFetcherConstructor, boolean isConnection) {
         this.method = method;
         this.outputType = outputType;
         this.typeFunction = typeFunction;

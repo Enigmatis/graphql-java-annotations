@@ -7,10 +7,10 @@ import java.lang.reflect.Method;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 
-public class NameBuilder implements Builder<String> {
+public class MethodNameBuilder implements Builder<String> {
     private Method method;
 
-    public NameBuilder(Method method) {
+    public MethodNameBuilder(Method method) {
         this.method = method;
     }
 

@@ -1,4 +1,4 @@
-package graphql.annotations.processor.retrievers.fieldBuilders.method;
+package graphql.annotations.processor.retrievers.fieldBuilders;
 
 import graphql.annotations.annotationTypes.GraphQLDefaultValue;
 import graphql.annotations.annotationTypes.GraphQLDescription;
