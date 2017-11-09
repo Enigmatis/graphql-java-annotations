@@ -44,7 +44,6 @@ idea {
         vcs = 'Git'
     }
 }
-
 release {
     tagTemplate = 'v${version}'
     failOnPublishNeeded = false
@@ -152,12 +151,12 @@ bintray {
         vcsUrl = 'https://github.com/graphql-java/graphql-java-annotations'
         version {
             name = project.version
-            released  = new Date()
+            released = new Date()
         }
     }
 }
 
 task bundle(type: Bundle) {
-  from sourceSets.main.output
-  bndfile = file('bundle.bnd')
+    from sourceSets.main.output
+    bndfile = file('bundle.bnd')
 }

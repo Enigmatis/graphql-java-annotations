@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
-import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
+import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 
-public class MethodDataFetcher implements DataFetcher {
+public class MethodDataFetcher<T> implements DataFetcher<T> {
     private final Method method;
     private final ProcessingElementsContainer container;
     private final TypeFunction typeFunction;
@@ -43,23 +43,23 @@ public class MethodDataFetcher implements DataFetcher {
     }
 
     @Override
-    public Object get(DataFetchingEnvironment environment) {
+    public T get(DataFetchingEnvironment environment) {
         try {
-            Object obj;
+            T obj;
 
             if (Modifier.isStatic(method.getModifiers())) {
                 obj = null;
             } else if (method.getAnnotation(GraphQLInvokeDetached.class) != null) {
-                obj = newInstance(method.getDeclaringClass());
+                obj = newInstance((Class<T>) method.getDeclaringClass());
             } else if (!method.getDeclaringClass().isInstance(environment.getSource())) {
-                obj = newInstance(method.getDeclaringClass(), environment.getSource());
+                obj = newInstance((Class<T>) method.getDeclaringClass(), environment.getSource());
             } else {
                 obj = environment.getSource();
                 if (obj == null) {
                     return null;
                 }
             }
-            return method.invoke(obj, invocationArgs(environment, container));
+            return (T)method.invoke(obj, invocationArgs(environment, container));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

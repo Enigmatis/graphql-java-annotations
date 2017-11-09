@@ -15,9 +15,9 @@
 package graphql.annotations.processor.retrievers.fieldBuilders.method;
 
 import graphql.annotations.annotationTypes.GraphQLBatched;
-import graphql.annotations.annotationTypes.GraphQLConnection;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
+import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.dataFetchers.BatchedMethodDataFetcher;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.dataFetchers.RelayMutationMethodDataFetcher;

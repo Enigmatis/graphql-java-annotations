@@ -14,50 +14,38 @@
  */
 package graphql.annotations.dataFetchers.connection;
 
+import graphql.annotations.connection.ConnectionFetcher;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.DataFetchingEnvironmentImpl;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Optional;
 
 import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 
- public class ConnectionDataFetcher implements DataFetcher {
-    private final Class<? extends Connection> connection;
-    private final DataFetcher actualDataFetcher;
-    private final Constructor<Connection> constructor;
+public class ConnectionDataFetcher<T> implements DataFetcher<graphql.relay.Connection<T>> {
+    private final DataFetcher<?> actualDataFetcher;
+    private final Constructor<ConnectionFetcher<T>> constructor;
 
-    public ConnectionDataFetcher(Class<? extends Connection> connection, DataFetcher actualDataFetcher) {
-        this.connection = connection;
-        Optional<Constructor<Connection>> constructor =
-                Arrays.asList(connection.getConstructors()).stream().
+    @SuppressWarnings("unchecked")
+    public ConnectionDataFetcher(Class<? extends ConnectionFetcher<T>> connection, DataFetcher<?> actualDataFetcher) {
+        this.actualDataFetcher =  actualDataFetcher;
+        Optional<Constructor<ConnectionFetcher<T>>> constructor =
+                Arrays.stream(connection.getConstructors()).
                         filter(c -> c.getParameterCount() == 1).
-                        map(c -> (Constructor<Connection>) c).
+                        map(c -> (Constructor<ConnectionFetcher<T>>) c).
                         findFirst();
         if (constructor.isPresent()) {
             this.constructor = constructor.get();
         } else {
-            throw new IllegalArgumentException(connection + " doesn't have a single argument constructor");
+            throw new IllegalArgumentException(connection.getSimpleName() + " doesn't have a single argument constructor");
         }
-        this.actualDataFetcher = actualDataFetcher;
     }
 
     @Override
-    public Object get(DataFetchingEnvironment environment) {
-        // Create a list of arguments with connection specific arguments excluded
-        HashMap<String, Object> arguments = new HashMap<>(environment.getArguments());
-        arguments.keySet().removeAll(Arrays.asList("first", "last", "before", "after"));
-        DataFetchingEnvironment env = new DataFetchingEnvironmentImpl(environment.getSource(), arguments, environment.getContext(),
-                environment.getRoot(), environment.getFieldDefinition(), environment.getFields(), environment.getFieldType(), environment.getParentType(), environment.getGraphQLSchema(),
-                environment.getFragmentsByName(), environment.getExecutionId(), environment.getSelectionSet(), environment.getFieldTypeInfo());
-        Object data = actualDataFetcher.get(env);
-        if (data != null) {
-            Connection conn = constructNewInstance(constructor, data);
-            return conn.get(environment);
-        }
-        return null;
+    public graphql.relay.Connection<T> get(DataFetchingEnvironment environment) {
+        ConnectionFetcher<T> conn = constructNewInstance(constructor, actualDataFetcher);
+        return conn.get(environment);
     }
 }

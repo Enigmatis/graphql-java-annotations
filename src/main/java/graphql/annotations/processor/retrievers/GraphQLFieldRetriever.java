@@ -16,9 +16,9 @@ package graphql.annotations.processor.retrievers;
 
 
 import graphql.annotations.GraphQLFieldDefinitionWrapper;
-import graphql.annotations.annotationTypes.GraphQLConnection;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.annotationTypes.GraphQLType;
+import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;

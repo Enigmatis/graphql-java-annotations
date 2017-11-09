@@ -14,12 +14,15 @@
  */
 package graphql.annotations.processor.util;
 
-import graphql.annotations.annotationTypes.GraphQLConnection;
+import graphql.annotations.connection.ConnectionValidator;
+import graphql.annotations.connection.GraphQLConnection;
 import graphql.schema.*;
 
 import java.lang.reflect.AccessibleObject;
 import java.util.Arrays;
 import java.util.List;
+
+import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 
 public class ConnectionUtil {
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
@@ -29,8 +32,17 @@ public class ConnectionUtil {
             type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
         }
         final GraphQLOutputType actualType = type;
-        return obj.isAnnotationPresent(GraphQLConnection.class) &&
-                actualType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(((GraphQLList) actualType).getWrappedType()));
+        boolean isValidGraphQLTypeForConnection = obj.isAnnotationPresent(GraphQLConnection.class) &&
+                actualType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass ->
+                aClass.isInstance(((GraphQLList) actualType).getWrappedType()));
+
+        if (isValidGraphQLTypeForConnection) {
+            ConnectionValidator validator = newInstance(obj.getAnnotation(GraphQLConnection.class).validator());
+            validator.validate(obj);
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

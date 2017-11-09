@@ -5,22 +5,20 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations;
+package graphql.annotations.connection;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.annotationTypes.GraphQLConnection;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLNonNull;
-import graphql.annotations.dataFetchers.connection.Connection;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.util.CustomRelay;
@@ -32,9 +30,8 @@ import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static graphql.annotations.processor.util.RelayKit.EMPTY_CONNECTION;
@@ -72,36 +69,67 @@ public class GraphQLConnectionTest {
     }
 
     public static class TestListField {
-        @GraphQLField
-        @GraphQLConnection
         public List<Obj> objs;
 
         public TestListField(List<Obj> objs) {
             this.objs = objs;
         }
+
+        @GraphQLField
+        @GraphQLConnection
+        public PaginatedData<Obj> objs() {
+            return new AbstractPaginatedData<Obj>(false, true, objs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
+        }
     }
 
     public static class TestListField2 {
-        @GraphQLField
-        @GraphQLConnection
+
         public List<Obj> objs;
 
         public TestListField2(List<Obj> objs) {
             this.objs = objs;
         }
+
+        @GraphQLField
+        @GraphQLConnection
+        public PaginatedData<Obj> objs() {
+            return new AbstractPaginatedData<Obj>(false, true, objs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
+        }
     }
 
-    @Test
+    public static class TestConnectionOnField {
+        @GraphQLField
+        @GraphQLConnection
+        public PaginatedData<Obj> objs;
+
+        public TestConnectionOnField(List<Obj> objs) {
+            this.objs = new AbstractPaginatedData<Obj>(false, true, objs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
+        }
+    }
+
+    @Test(expectedExceptions = GraphQLConnectionException.class)
     public void fieldList() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestListField.class);
+        GraphQLObjectType object = GraphQLAnnotations.object(TestConnectionOnField.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
                 new TestListField(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
-        assertTrue(result.getErrors().isEmpty());
-
-        testResult("objs", result);
     }
 
     public static class TestConnections {
@@ -113,33 +141,80 @@ public class GraphQLConnectionTest {
 
         @GraphQLField
         @GraphQLConnection
-        public List<Obj> getObjs() {
-            return this.objs;
+        public PaginatedData<Obj> getObjs(DataFetchingEnvironment environment) {
+            Integer first = environment.getArgument("first");
+            List<Obj> actualobjs = new ArrayList<>(objs);
+
+            if (first != null && first < objs.size()) {
+                actualobjs = actualobjs.subList(0, first);
+            }
+            return new AbstractPaginatedData<Obj>(false, true, actualobjs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
         }
 
         @GraphQLField
         @GraphQLConnection(name = "objStream")
-        public Stream<Obj> getObjStream() {
-            Obj[] a = new Obj[objs.size()];
-            return Stream.of(objs.toArray(a));
+        public PaginatedData<Obj> getObjStream(DataFetchingEnvironment environment) {
+            Integer first = environment.getArgument("first");
+            List<Obj> actualobjs = new ArrayList<>(objs);
+
+            if (first != null && first < objs.size()) {
+                actualobjs = actualobjs.subList(0, first);
+            }
+
+            Obj[] a = new Obj[actualobjs.size()];
+            Iterable<Obj> data = Stream.of(actualobjs.toArray(a))::iterator;
+            return new AbstractPaginatedData<Obj>(false, true, data) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
         }
 
         @GraphQLField
         @GraphQLConnection(name = "objStreamWithParam")
-        public Stream<Obj> getObjStreamWithParam(@GraphQLName("filter") String filter) {
-            return this.objs.stream().filter( obj -> obj.val.startsWith(filter));
+        public PaginatedData<Obj> getObjStreamWithParam(DataFetchingEnvironment environment, @GraphQLName("filter") String filter) {
+            Integer first = environment.getArgument("first");
+            List<Obj> actualobjs = new ArrayList<>(objs);
+            List<Obj> filteredObjs = actualobjs.stream().filter(obj -> obj.val.startsWith(filter)).collect(Collectors.toList());
+            if (first != null && first < filteredObjs.size()) {
+                filteredObjs = filteredObjs.subList(0, first);
+            }
+            Iterable<Obj> objIterable = filteredObjs::iterator;
+            return new AbstractPaginatedData<Obj>(false, true, objIterable) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
         }
 
         @GraphQLField
         @GraphQLConnection(name = "nonNullObjs")
         @GraphQLNonNull
-        public List<Obj> getNonNullObjs() {
-            return this.objs;
+        public PaginatedData<Obj> getNonNullObjs(DataFetchingEnvironment environment) {
+            Integer first = environment.getArgument("first");
+            List<Obj> actualobjs = new ArrayList<>(objs);
+
+            if (first != null && first < objs.size()) {
+                actualobjs = actualobjs.subList(0, first);
+            }
+            return new AbstractPaginatedData<Obj>(false, true, actualobjs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
         }
 
         @GraphQLField
         @GraphQLConnection(name = "nullObj")
-        public List<Obj> getNullObj() {
+        public PaginatedData<Obj> getNullObj() {
             return null;
         }
 
@@ -171,7 +246,7 @@ public class GraphQLConnectionTest {
             graphql.schema.GraphQLObjectType f = (GraphQLObjectType) schema.getType("ObjConnection");
             assertTrue(f.getFieldDefinitions().size() == 4);
             assertTrue(f.getFieldDefinition("nodes").getType() instanceof GraphQLList);
-            assertEquals(((GraphQLList)f.getFieldDefinition("nodes").getType()).getWrappedType().getName(), "Obj");
+            assertEquals(((GraphQLList) f.getFieldDefinition("nodes").getType()).getWrappedType().getName(), "Obj");
 
             GraphQLObjectType pageInfo = (GraphQLObjectType) schema.getType("PageInfo");
             assertTrue(pageInfo.getFieldDefinition("additionalInfo") != null);
@@ -230,7 +305,7 @@ public class GraphQLConnectionTest {
 
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
 
-        assertEquals(data.get("nullObj"), null);
+        assertEquals(data.get("nullObj").get("edges").size(), 0);
     }
 
     @Test
@@ -255,7 +330,7 @@ public class GraphQLConnectionTest {
     }
 
 
-    public static class CustomConnection implements Connection {
+    public static class CustomConnection implements ConnectionFetcher {
 
         public CustomConnection(Object o) {
         }
@@ -275,8 +350,13 @@ public class GraphQLConnectionTest {
 
         @GraphQLField
         @GraphQLConnection(connection = CustomConnection.class)
-        public List<Obj> getObjs() {
-            return this.objs;
+        public PaginatedData<Obj> getObjs() {
+            return new AbstractPaginatedData<Obj>(true, false, objs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
         }
     }
 
@@ -302,7 +382,7 @@ public class GraphQLConnectionTest {
             GraphQLObjectType object = GraphQLAnnotations.object(DuplicateTest.class);
             GraphQLSchema schema = newSchema().query(object).build();
         } catch (GraphQLAnnotationsException e) {
-            fail("Schema cannot be created",e);
+            fail("Schema cannot be created", e);
         }
     }
 

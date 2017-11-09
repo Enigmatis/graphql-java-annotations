@@ -14,8 +14,8 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders.field;
 
-import graphql.annotations.annotationTypes.GraphQLConnection;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
+import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.dataFetchers.ExtensionDataFetcherWrapper;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.dataFetchers.connection.ConnectionDataFetcher;

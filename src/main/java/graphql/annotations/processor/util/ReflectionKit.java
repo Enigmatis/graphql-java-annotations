@@ -32,7 +32,7 @@ public class ReflectionKit {
         }
     }
 
-   public static <T> T constructNewInstance(Constructor<T> constructor, Object... args) throws GraphQLAnnotationsException {
+    public static <T> T constructNewInstance(Constructor<T> constructor, Object... args) throws GraphQLAnnotationsException {
         try {
             return constructor.newInstance(args);
 
