@@ -17,11 +17,13 @@ package graphql.annotations;
 import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.annotationTypes.GraphQLBatched;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.execution.batched.BatchedExecutionStrategy;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -41,7 +43,7 @@ public class GraphQLBatchedTest {
         GraphQLAnnotations.getInstance().getTypeRegistry().clear();
     }
 
-    private static class SimpleBatchedField {
+    public static class SimpleBatchedField {
         @GraphQLField
         @GraphQLBatched
         public static List<String> a() {
@@ -49,7 +51,7 @@ public class GraphQLBatchedTest {
         }
     }
 
-    private static class TestBatchedObject {
+    public static class TestBatchedObject {
         @GraphQLField
         public List<SimpleBatchedField> fields() {
             return Arrays.asList(new SimpleBatchedField(), new SimpleBatchedField());
@@ -76,7 +78,7 @@ public class GraphQLBatchedTest {
         assertEquals(fields.get(1).get("a"), "two");
     }
 
-    private static class NoStaticBatchedField {
+    public static class NoStaticBatchedField {
         @GraphQLField
         @GraphQLBatched
         public List<String> a() {
@@ -89,7 +91,7 @@ public class GraphQLBatchedTest {
         GraphQLObjectType object = GraphQLAnnotations.object(NoStaticBatchedField.class);
     }
 
-    private static class NoListBatchedField {
+    public static class NoListBatchedField {
         @GraphQLField
         @GraphQLBatched
         public String a() {
@@ -102,7 +104,7 @@ public class GraphQLBatchedTest {
         GraphQLObjectType object = GraphQLAnnotations.object(NoStaticBatchedField.class);
     }
 
-    private static class NoParameterizedBatchedField {
+    public static class NoParameterizedBatchedField {
         @GraphQLField
         @GraphQLBatched
         public List a() {

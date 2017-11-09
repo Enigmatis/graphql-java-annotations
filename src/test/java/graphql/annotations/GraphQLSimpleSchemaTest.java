@@ -16,6 +16,10 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.schema.GraphQLObjectType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -70,7 +74,8 @@ public class GraphQLSimpleSchemaTest {
     @Test
     public void detachedCall() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectType queryObject = graphQLAnnotations.getObject(Query.class);
+        GraphQLObjectHandler graphQLObjectHandler=new GraphQLObjectHandler();
+        GraphQLObjectType queryObject = graphQLObjectHandler.getObject(Query.class,graphQLAnnotations.getContainer());
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
@@ -81,7 +86,8 @@ public class GraphQLSimpleSchemaTest {
     @Test
     public void staticCall() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectType queryObject = graphQLAnnotations.getObject(Query.class);
+        GraphQLObjectHandler graphQLObjectHandler=new GraphQLObjectHandler();
+        GraphQLObjectType queryObject = graphQLObjectHandler.getObject(Query.class,graphQLAnnotations.getContainer());
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser2{ name } }");
