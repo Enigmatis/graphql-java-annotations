@@ -15,9 +15,13 @@
 package graphql.annotations.processor;
 
 
+import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
+import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
+import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.relay.Relay;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -39,6 +43,13 @@ public class ProcessingElementsContainer {
         this.processing = processing;
     }
 
+    public ProcessingElementsContainer(TypeFunction typeFunction) {
+        this(typeFunction, new Relay(), new HashMap<>(), new HashMap<>(), new Stack<>());
+    }
+
+    public ProcessingElementsContainer(){
+        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()),new Relay(), new HashMap<>(), new HashMap<>(), new Stack<>());
+    }
 
     public Relay getRelay() {
         return this.relay;

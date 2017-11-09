@@ -36,7 +36,7 @@ public class GraphQLInputObjectRetriever {
 
     public GraphQLInputType getInputObject(graphql.schema.GraphQLType graphQLType, String newNamePrefix, Map<String, graphql.schema.GraphQLType> typeRegistry) {
         if (graphQLType instanceof GraphQLObjectType) {
-            return HandleGraphQLObjectType((GraphQLObjectType) graphQLType, newNamePrefix, typeRegistry);
+            return handleGraphQLObjectType((GraphQLObjectType) graphQLType, newNamePrefix, typeRegistry);
         } else if (graphQLType instanceof GraphQLList) {
             return new GraphQLList(getInputObject(((GraphQLList) graphQLType).getWrappedType(), newNamePrefix, typeRegistry));
         } else if (graphQLType instanceof graphql.schema.GraphQLNonNull) {
@@ -49,7 +49,7 @@ public class GraphQLInputObjectRetriever {
         throw new IllegalArgumentException("Cannot convert type to input : " + graphQLType);
     }
 
-    private GraphQLInputType HandleGraphQLObjectType(GraphQLObjectType graphQLType, String newNamePrefix, Map<String, GraphQLType> typeRegistry) {
+    private GraphQLInputType handleGraphQLObjectType(GraphQLObjectType graphQLType, String newNamePrefix, Map<String, GraphQLType> typeRegistry) {
         GraphQLObjectType object = graphQLType;
         String newObjectName = newNamePrefix + object.getName();
         GraphQLType objectInTypeRegistry = typeRegistry.get(newObjectName);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  */
 package graphql.annotations.processor.graphQLProcessors;
+
+import graphql.annotations.processor.typeFunctions.TypeFunction;
+import graphql.relay.Relay;
 
 public interface GraphQLAnnotationsProcessor {
     /**
@@ -30,4 +33,17 @@ public interface GraphQLAnnotationsProcessor {
      */
     void unregisterTypeExtension(Class<?> objectClass);
 
+    /**
+     * Allows you to set a custom relay object
+     *
+     * @param relay The extension class to register
+     */
+    void setRelay(Relay relay);
+
+    /**
+     * Allows you to register a new type function
+     *
+     * @param typeFunction The extension class to register
+     */
+    void registerType(TypeFunction typeFunction);
 }

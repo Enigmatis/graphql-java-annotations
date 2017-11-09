@@ -14,22 +14,22 @@
  */
 package graphql.annotations.processor;
 
-import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLTypeExtension;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.graphQLProcessors.GraphQLAnnotationsProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
+import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
-import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.relay.Relay;
-import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 
@@ -43,26 +43,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     private GraphQLObjectHandler graphQLObjectHandler;
     private ProcessingElementsContainer container;
 
-    private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
-
     public GraphQLAnnotations() {
-        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new GraphQLObjectInfoRetriever(), new GraphQLObjectHandler());
+        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new GraphQLObjectHandler());
     }
 
-    public GraphQLAnnotations(TypeFunction defaultTypeFunction, GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLObjectHandler graphQLObjectHandler) {
-        this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
-        this.defaultTypeFunction = defaultTypeFunction;
+    public GraphQLAnnotations(TypeFunction defaultTypeFunction, GraphQLObjectHandler graphQLObjectHandler) {
         this.graphQLObjectHandler = graphQLObjectHandler;
-        this.container = initializeContainer(this.defaultTypeFunction);
-    }
-
-    private ProcessingElementsContainer initializeContainer(TypeFunction defaultTypeFunction) {
-        Map<String, graphql.schema.GraphQLType> typeRegistry = new HashMap<>();
-        Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry = new HashMap<>();
-        final Stack<String> processing = new Stack<>();
-        Relay relay = new Relay();
-        ProcessingElementsContainer container = new ProcessingElementsContainer(defaultTypeFunction, relay, typeRegistry, extensionsTypeRegistry, processing);
-        return container;
+        this.container = new ProcessingElementsContainer(defaultTypeFunction);
     }
 
     public static GraphQLAnnotations instance = new GraphQLAnnotations();
@@ -75,31 +62,15 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         this.container.setRelay(relay);
     }
 
-
     public String getTypeName(Class<?> objectClass) {
         GraphQLName name = objectClass.getAnnotation(GraphQLName.class);
         return toGraphqlName(name == null ? objectClass.getSimpleName() : name.value());
     }
 
     public static GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
-        return new GraphQLObjectHandler().getObject(object, getInstance().getContainer());
+        GraphQLAnnotations instance = getInstance();
+        return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
     }
-
-    public static class GraphQLFieldDefinitionWrapper extends GraphQLFieldDefinition {
-
-        public GraphQLFieldDefinitionWrapper(GraphQLFieldDefinition fieldDefinition) {
-            super(fieldDefinition.getName(), fieldDefinition.getDescription(), fieldDefinition.getType(),
-                    fieldDefinition.getDataFetcher(), fieldDefinition.getArguments(), fieldDefinition.getDeprecationReason());
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof GraphQLFieldDefinition &&
-                    ((GraphQLFieldDefinition) obj).getName().contentEquals(getName());
-        }
-    }
-
-    protected TypeFunction defaultTypeFunction;
 
     public void registerTypeExtension(Class<?> objectClass) {
         GraphQLTypeExtension typeExtension = objectClass.getAnnotation(GraphQLTypeExtension.class);
@@ -127,7 +98,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     public void registerType(TypeFunction typeFunction) {
-        ((DefaultTypeFunction) defaultTypeFunction).register(typeFunction);
+        ((DefaultTypeFunction) container.getDefaultTypeFunction()).register(typeFunction);
     }
 
     public static void register(TypeFunction typeFunction) {
@@ -140,6 +111,15 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     public ProcessingElementsContainer getContainer() {
         return container;
+    }
+
+    public void setContainer(ProcessingElementsContainer container) {
+        this.container = container;
+    }
+
+    @Reference(target = "(type=default)")
+    public void setDefaultTypeFunction(TypeFunction function) {
+        this.container.setDefaultTypeFunction(function);
     }
 
 }

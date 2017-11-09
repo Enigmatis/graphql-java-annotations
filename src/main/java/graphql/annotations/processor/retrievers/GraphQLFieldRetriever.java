@@ -15,36 +15,43 @@
 package graphql.annotations.processor.retrievers;
 
 
-import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.annotationTypes.*;
+import graphql.annotations.GraphQLFieldDefinitionWrapper;
+import graphql.annotations.annotationTypes.GraphQLConnection;
+import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.annotationTypes.GraphQLType;
-import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.fieldBuilders.ArgumentBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.DeprecateBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.DescriptionBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.field.FieldDataFetcherBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.field.FieldNameBuilder;
-import graphql.annotations.processor.retrievers.fieldBuilders.method.*;
+import graphql.annotations.processor.retrievers.fieldBuilders.method.MethodDataFetcherBuilder;
+import graphql.annotations.processor.retrievers.fieldBuilders.method.MethodNameBuilder;
+import graphql.annotations.processor.retrievers.fieldBuilders.method.MethodTypeBuilder;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
-import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.ConnectionUtil;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
 import graphql.schema.*;
-import graphql.schema.GraphQLNonNull;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
+import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
-import static java.util.Arrays.stream;
 
 public class GraphQLFieldRetriever {
 
@@ -110,7 +117,7 @@ public class GraphQLFieldRetriever {
         builder.description(new DescriptionBuilder(method).build())
                 .deprecate(new DeprecateBuilder(method).build())
                 .dataFetcher(new MethodDataFetcherBuilder(method, outputType, typeFunction, container, relayFieldDefinition, args, dataFetcherConstructor, isConnection).build());
-        return new GraphQLAnnotations.GraphQLFieldDefinitionWrapper(builder.build());
+        return new GraphQLFieldDefinitionWrapper(builder.build());
     }
 
     private GraphQLFieldDefinition handleRelayArguments(Method method, ProcessingElementsContainer container, GraphQLFieldDefinition.Builder builder, GraphQLOutputType outputType, List<GraphQLArgument> args) {
@@ -175,7 +182,7 @@ public class GraphQLFieldRetriever {
                 .deprecate(new DeprecateBuilder(field).build())
                 .dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, isConnection).build());
 
-        return new GraphQLAnnotations.GraphQLFieldDefinitionWrapper(builder.build());
+        return new GraphQLFieldDefinitionWrapper(builder.build());
     }
 
     private TypeFunction getTypeFunction(Field field, ProcessingElementsContainer container) {
