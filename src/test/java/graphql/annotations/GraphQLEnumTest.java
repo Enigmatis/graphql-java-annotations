@@ -16,17 +16,12 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-
-import static graphql.schema.GraphQLEnumType.newEnum;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 

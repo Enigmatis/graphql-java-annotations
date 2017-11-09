@@ -17,6 +17,13 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.TypeResolutionEnvironment;
+import graphql.annotations.annotationTypes.GraphQLDataFetcher;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLTypeResolver;
+import graphql.annotations.annotationTypes.GraphQLUnion;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
@@ -52,7 +59,9 @@ public class GraphQLInterfaceTest {
 
     @Test
     public void noResolver() {
-        GraphQLObjectType object = (GraphQLObjectType) GraphQLAnnotations.iface(NoResolverIface.class);
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
+
+        GraphQLObjectType object = (GraphQLObjectType) graphQLInterfaceRetriever.getInterface(NoResolverIface.class,GraphQLAnnotations.getInstance().getContainer());
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 1);
         assertEquals(fields.get(0).getName(), "value");
@@ -71,20 +80,20 @@ public class GraphQLInterfaceTest {
     }
 
     @GraphQLTypeResolver(Resolver.class)
-    interface BaseTestIface {
+    public interface BaseTestIface {
         @GraphQLField
         String value();
     }
 
     @GraphQLTypeResolver(Resolver.class)
-    interface TestIface extends BaseTestIface {
+    public interface TestIface extends BaseTestIface {
     }
 
     @GraphQLUnion(possibleTypes = TestObject1.class)
-    interface TestUnion extends BaseTestIface {
+    public interface TestUnion extends BaseTestIface {
     }
 
-    static class TestObject implements TestIface {
+    public static class TestObject implements TestIface {
 
         @Override
         public String value() {
@@ -105,7 +114,9 @@ public class GraphQLInterfaceTest {
 
     @Test
     public void test() {
-        GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(TestIface.class);
+
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
+        GraphQLInterfaceType iface = (GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(TestIface.class,GraphQLAnnotations.getInstance().getContainer());
         List<GraphQLFieldDefinition> fields = iface.getFieldDefinitions();
         assertEquals(fields.size(), 1);
         assertEquals(fields.get(0).getName(), "value");
@@ -113,7 +124,8 @@ public class GraphQLInterfaceTest {
 
     @Test
     public void testUnion() {
-        GraphQLUnionType unionType = (GraphQLUnionType) GraphQLAnnotations.iface(TestUnion.class);
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
+        GraphQLUnionType unionType = (GraphQLUnionType) graphQLInterfaceRetriever.getInterface(TestUnion.class,GraphQLAnnotations.getInstance().getContainer());
         assertEquals(unionType.getTypes().size(), 1);
         assertEquals(unionType.getTypes().get(0).getName(), "TestObject1");
     }
@@ -134,7 +146,7 @@ public class GraphQLInterfaceTest {
         }
     }
 
-    static class Query {
+    public static class Query {
         @GraphQLDataFetcher(IfaceFetcher.class)
         @GraphQLField
         public TestIface iface;

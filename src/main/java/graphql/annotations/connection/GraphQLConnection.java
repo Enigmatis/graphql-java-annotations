@@ -14,7 +14,6 @@
  */
 package graphql.annotations.connection;
 
-import graphql.annotations.GraphQLField;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,7 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies that the annotated field or method (given it is also
- * annotated with {@link GraphQLField}) is a collection that will
+ * annotated with {@link graphql.annotations.annotationTypes.GraphQLField}) is a collection that will
  * be adhering <a href="https://facebook.github.io/relay/graphql/connections.htm">Relay Connection specification</a>
  *
  * At the moment, the only allowed type for such field is <code>List&lt;?&gt;</code>

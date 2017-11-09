@@ -17,6 +17,10 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.TypeResolutionEnvironment;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLTypeResolver;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
@@ -50,8 +54,8 @@ public class GraphQLFragmentTest {
     public void testInterfaceInlineFragment() throws Exception {
         // Given
         registry = new HashMap<>();
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
 
-        GraphQLInterfaceType iface = (GraphQLInterfaceType) GraphQLAnnotations.iface(MyInterface.class);
 
         GraphQLObjectType rootType = GraphQLAnnotations.object(RootObject.class);
 
@@ -62,6 +66,8 @@ public class GraphQLFragmentTest {
         GraphQLObjectType objectType = GraphQLAnnotations.object(MyObject.class);
 
         registry.put("MyObject", objectType);
+
+        GraphQLInterfaceType iface = (GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(MyInterface.class,GraphQLAnnotations.getInstance().getContainer());
 
         GraphQLSchema schema = GraphQLSchema.newSchema()
                 .query(rootType)

@@ -17,6 +17,9 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.TypeResolutionEnvironment;
+import graphql.annotations.annotationTypes.*;
+import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.strategies.EnhancedExecutionStrategy;
 import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLType;
@@ -75,7 +78,7 @@ public class RelayTest {
             return new Result(0);
         }
         @GraphQLField @GraphQLRelayMutation
-        public Result doSomethingElse(@GraphQLDescription("A") int a, int b) {
+        public Result doSomethingElse(@GraphQLName("a") @GraphQLDescription("A") int a, @GraphQLName("b") int b) {
             return new Result(a - b);
         }
         @GraphQLField @GraphQLRelayMutation

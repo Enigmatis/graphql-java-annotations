@@ -22,7 +22,8 @@ import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static graphql.annotations.ReflectionKit.constructNewInstance;
+import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
+
 
 public class ConnectionDataFetcher<T> implements DataFetcher<Connection<T>> {
     private final DataFetcher<?> actualDataFetcher;
