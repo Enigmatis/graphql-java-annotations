@@ -49,6 +49,12 @@ task signPom(type: Sign) {
     // create a new signature
 }
 
+ext {
+    pomFile = file("${project.buildDir}/generated-pom.xml")
+    isReleaseVersion = !(project.version =~ /-SNAPSHOT$/)
+}
+
+
 signing {
     sign configurations.archives
 }
