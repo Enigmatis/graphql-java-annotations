@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/graphql-java/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/yrashk/graphql-java-annotations)
-[![Maven Central](https://img.shields.io/maven-central/v/com.graphql-java/graphql-java-annotations.svg?maxAge=2592000)]()
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.graphql-java/graphql-java-annotations.svg?maxAge=2592000)]()
 # GraphQL Annotations for Java
 
 [GraphQL-Java](https://github.com/andimarek/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
