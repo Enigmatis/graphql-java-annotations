@@ -15,6 +15,7 @@
 package graphql.annotations.processor.retrievers.fieldBuilders.field;
 
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
+import graphql.annotations.annotationTypes.GraphQLTypeExtension;
 import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.dataFetchers.ExtensionDataFetcherWrapper;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
@@ -73,13 +74,13 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
         if (isaBoolean()) {
             actualDataFetcher = getBooleanDataFetcher(actualDataFetcher);
         } else if (checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
-            actualDataFetcher = wrapExtension(new PropertyDataFetcher(field.getName()));
+            actualDataFetcher = wrapExtension(new PropertyDataFetcher(field.getName()), field);
         } else{
             actualDataFetcher = getDataFetcherWithFluentGetter(actualDataFetcher);
         }
 
         if (actualDataFetcher == null) {
-            actualDataFetcher = wrapExtension(new FieldDataFetcher(field.getName()));
+            actualDataFetcher = wrapExtension(new PropertyDataFetcher(field.getName()), field);
         }
         return actualDataFetcher;
     }
@@ -103,14 +104,17 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
         return actualDataFetcher;
     }
 
-    private ExtensionDataFetcherWrapper wrapExtension(DataFetcher dataFetcher) {
-        return new ExtensionDataFetcherWrapper(field.getDeclaringClass(), dataFetcher);
+    private DataFetcher wrapExtension(DataFetcher dataFetcher, Field field) {
+        if (field.getDeclaringClass().isAnnotationPresent(GraphQLTypeExtension.class)) {
+            return new ExtensionDataFetcherWrapper(field.getDeclaringClass(), dataFetcher);
+        }
+        return dataFetcher;
     }
 
     private DataFetcher getBooleanDataFetcher(DataFetcher actualDataFetcher) {
         if (checkIfPrefixGetterExists(field.getDeclaringClass(), "is", field.getName()) ||
                 checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
-            actualDataFetcher = wrapExtension(new PropertyDataFetcher(field.getName()));
+            actualDataFetcher = wrapExtension(new PropertyDataFetcher(field.getName()), field);
         }
         return actualDataFetcher;
     }
