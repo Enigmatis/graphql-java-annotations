@@ -18,22 +18,14 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.Scalars;
 import graphql.annotations.annotationTypes.*;
-import graphql.annotations.dataFetchers.ExtensionDataFetcherWrapper;
+import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.GraphQLInputObjectRetriever;
 import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.*;
 
-import graphql.schema.GraphQLArgument;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.SchemaPrinter;
@@ -213,6 +205,9 @@ public class GraphQLObjectTest {
 
         assertEquals(fields.get(5).getName(), "privateTest");
         assertEquals(fields.get(6).getName(), "publicTest");
+
+        assertEquals(fields.get(5).getDataFetcher().getClass(), PropertyDataFetcher.class);
+        assertEquals(fields.get(6).getDataFetcher().getClass(), FieldDataFetcher.class);
 
         assertEquals(fields.get(7).getName(), "z_nonOptionalString");
         assertTrue(fields.get(7).getType() instanceof graphql.schema.GraphQLNonNull);

@@ -80,7 +80,7 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
         }
 
         if (actualDataFetcher == null) {
-            actualDataFetcher = wrapExtension(new PropertyDataFetcher(field.getName()), field);
+            actualDataFetcher = wrapExtension(new FieldDataFetcher(field.getName()), field);
         }
         return actualDataFetcher;
     }
