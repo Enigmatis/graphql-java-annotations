@@ -133,6 +133,43 @@ public class GraphQLObjectTest {
         }
     }
 
+    public static class TestMappedObject {
+        @GraphQLField
+        public String name;
+    }
+
+    public static class TestObjectDB{
+        public String name;
+
+        public TestObjectDB(String name) {
+            this.name = name;
+        }
+    }
+
+    public static class TestQuery{
+        @GraphQLField
+        @GraphQLDataFetcher(ObjectFetcher.class)
+        public TestMappedObject object;
+    }
+
+    public static class ObjectFetcher implements DataFetcher<TestObjectDB> {
+
+        @Override
+        public TestObjectDB get(DataFetchingEnvironment environment) {
+            return new TestObjectDB("test");
+        }
+    }
+
+    @Test
+    public void fetchTestMappedObject_assertNameIsMappedFromDBObject(){
+        GraphQLObjectType object = GraphQLAnnotations.object(TestQuery.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{object {name}}");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((LinkedHashMap)(((LinkedHashMap)result.getData()).get("object"))).get("name"), "test");
+    }
+
     @Test
     public void namedFields() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObjectNamedArgs.class);
