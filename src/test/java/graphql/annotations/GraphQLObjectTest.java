@@ -18,22 +18,14 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.Scalars;
 import graphql.annotations.annotationTypes.*;
-import graphql.annotations.dataFetchers.ExtensionDataFetcherWrapper;
+import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.GraphQLInputObjectRetriever;
 import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.*;
 
-import graphql.schema.GraphQLArgument;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.SchemaPrinter;
@@ -141,6 +133,43 @@ public class GraphQLObjectTest {
         }
     }
 
+    public static class TestMappedObject {
+        @GraphQLField
+        public String name;
+    }
+
+    public static class TestObjectDB{
+        public String name;
+
+        public TestObjectDB(String name) {
+            this.name = name;
+        }
+    }
+
+    public static class TestQuery{
+        @GraphQLField
+        @GraphQLDataFetcher(ObjectFetcher.class)
+        public TestMappedObject object;
+    }
+
+    public static class ObjectFetcher implements DataFetcher<TestObjectDB> {
+
+        @Override
+        public TestObjectDB get(DataFetchingEnvironment environment) {
+            return new TestObjectDB("test");
+        }
+    }
+
+    @Test
+    public void fetchTestMappedObject_assertNameIsMappedFromDBObject(){
+        GraphQLObjectType object = GraphQLAnnotations.object(TestQuery.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{object {name}}");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((LinkedHashMap)(((LinkedHashMap)result.getData()).get("object"))).get("name"), "test");
+    }
+
     @Test
     public void namedFields() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObjectNamedArgs.class);
@@ -214,8 +243,8 @@ public class GraphQLObjectTest {
         assertEquals(fields.get(5).getName(), "privateTest");
         assertEquals(fields.get(6).getName(), "publicTest");
 
-        assertEquals(fields.get(5).getDataFetcher().getClass(), ExtensionDataFetcherWrapper.class);
-        assertEquals(fields.get(6).getDataFetcher().getClass(), ExtensionDataFetcherWrapper.class);
+        assertEquals(fields.get(5).getDataFetcher().getClass(), PropertyDataFetcher.class);
+        assertEquals(fields.get(6).getDataFetcher().getClass(), FieldDataFetcher.class);
 
         assertEquals(fields.get(7).getName(), "z_nonOptionalString");
         assertTrue(fields.get(7).getType() instanceof graphql.schema.GraphQLNonNull);
