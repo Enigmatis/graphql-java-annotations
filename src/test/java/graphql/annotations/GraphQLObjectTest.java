@@ -244,7 +244,7 @@ public class GraphQLObjectTest {
         assertEquals(fields.get(6).getName(), "publicTest");
 
         assertEquals(fields.get(5).getDataFetcher().getClass(), PropertyDataFetcher.class);
-        assertEquals(fields.get(6).getDataFetcher().getClass(), FieldDataFetcher.class);
+        assertEquals(fields.get(6).getDataFetcher().getClass(), PropertyDataFetcher.class);
 
         assertEquals(fields.get(7).getName(), "z_nonOptionalString");
         assertTrue(fields.get(7).getType() instanceof graphql.schema.GraphQLNonNull);
