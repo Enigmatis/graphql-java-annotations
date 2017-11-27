@@ -136,13 +136,22 @@ public class GraphQLObjectTest {
     public static class TestMappedObject {
         @GraphQLField
         public String name;
+
+        @GraphQLField
+        public String aaa;
     }
 
     public static class TestObjectDB{
-        public String name;
+        public String aaa;
 
-        public TestObjectDB(String name) {
-            this.name = name;
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public TestObjectDB(String name, String aaa) {
+            this.name = name; this.aaa=aaa;
         }
     }
 
@@ -156,7 +165,7 @@ public class GraphQLObjectTest {
 
         @Override
         public TestObjectDB get(DataFetchingEnvironment environment) {
-            return new TestObjectDB("test");
+            return new TestObjectDB("test", "test");
         }
     }
 
@@ -165,9 +174,10 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestQuery.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{object {name}}");
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{object {name aaa}}");
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((LinkedHashMap)(((LinkedHashMap)result.getData()).get("object"))).get("name"), "test");
+        assertEquals(((LinkedHashMap)(((LinkedHashMap)result.getData()).get("object"))).get("aaa"), "test");
     }
 
     @Test
