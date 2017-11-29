@@ -16,6 +16,10 @@ package graphql.annotations.processor.searchAlgorithms;
 
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -23,9 +27,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 
+@Component(service = SearchAlgorithm.class, property = "type=method", immediate = true)
 public class BreadthFirstSearch implements SearchAlgorithm {
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
+
+    public BreadthFirstSearch() {
+    }
 
     public BreadthFirstSearch(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
@@ -75,5 +83,14 @@ public class BreadthFirstSearch implements SearchAlgorithm {
         else {
             return (Method)member;
         }
+    }
+
+    @Reference(policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
+        this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
+    }
+
+    public void unsetGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
+        this.graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
     }
 }

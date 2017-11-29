@@ -15,20 +15,17 @@
 package graphql.annotations.processor;
 
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.annotationTypes.GraphQLTypeExtension;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.graphQLProcessors.GraphQLAnnotationsProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
+import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
 import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.relay.Relay;
 import graphql.schema.GraphQLObjectType;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
-import java.util.HashSet;
 import java.util.Map;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
@@ -37,18 +34,20 @@ import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
  * A utility class for extracting GraphQL data structures from annotated
  * elements.
  */
-@Component
 public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private GraphQLObjectHandler graphQLObjectHandler;
+    private GraphQLExtensionsHandler graphQLExtensionsHandler;
+
     private ProcessingElementsContainer container;
 
     public GraphQLAnnotations() {
-        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new GraphQLObjectHandler());
+        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new GraphQLObjectHandler(), new GraphQLExtensionsHandler());
     }
 
-    public GraphQLAnnotations(TypeFunction defaultTypeFunction, GraphQLObjectHandler graphQLObjectHandler) {
+    public GraphQLAnnotations(TypeFunction defaultTypeFunction, GraphQLObjectHandler graphQLObjectHandler, GraphQLExtensionsHandler graphQLExtensionsHandler) {
         this.graphQLObjectHandler = graphQLObjectHandler;
+        this.graphQLExtensionsHandler = graphQLExtensionsHandler;
         this.container = new ProcessingElementsContainer(defaultTypeFunction);
     }
 
@@ -73,28 +72,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     public void registerTypeExtension(Class<?> objectClass) {
-        GraphQLTypeExtension typeExtension = objectClass.getAnnotation(GraphQLTypeExtension.class);
-        if (typeExtension == null) {
-            throw new GraphQLAnnotationsException("Class is not annotated with GraphQLTypeExtension", null);
-        } else {
-            Class<?> aClass = typeExtension.value();
-            if (!container.getExtensionsTypeRegistry().containsKey(aClass)) {
-                container.getExtensionsTypeRegistry().put(aClass, new HashSet<>());
-            }
-            container.getExtensionsTypeRegistry().get(aClass).add(objectClass);
-        }
-    }
-
-    public void unregisterTypeExtension(Class<?> objectClass) {
-        GraphQLTypeExtension typeExtension = objectClass.getAnnotation(GraphQLTypeExtension.class);
-        if (typeExtension == null) {
-            throw new GraphQLAnnotationsException("Class is not annotated with GraphQLTypeExtension", null);
-        } else {
-            Class<?> aClass = typeExtension.value();
-            if (container.getExtensionsTypeRegistry().containsKey(aClass)) {
-                container.getExtensionsTypeRegistry().get(aClass).remove(objectClass);
-            }
-        }
+        graphQLExtensionsHandler.registerTypeExtension(objectClass, container);
     }
 
     public void registerType(TypeFunction typeFunction) {
@@ -117,7 +95,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         this.container = container;
     }
 
-    @Reference(target = "(type=default)")
     public void setDefaultTypeFunction(TypeFunction function) {
         this.container.setDefaultTypeFunction(function);
     }

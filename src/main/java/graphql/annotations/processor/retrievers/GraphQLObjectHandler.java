@@ -14,12 +14,17 @@
  */
 package graphql.annotations.processor.retrievers;
 
-import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
+@Component(service = GraphQLObjectHandler.class, immediate = true)
 public class GraphQLObjectHandler {
 
     private GraphQLTypeRetriever typeRetriever;
@@ -40,4 +45,15 @@ public class GraphQLObjectHandler {
             throw new IllegalArgumentException("Object resolve to a " + type.getClass().getSimpleName());
         }
     }
+
+    @Reference(policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setTypeRetriever(GraphQLTypeRetriever typeRetriever) {
+        this.typeRetriever = typeRetriever;
+    }
+
+    public void unsetTypeRetriever(GraphQLTypeRetriever typeRetriever) {
+        this.typeRetriever = new GraphQLTypeRetriever();
+    }
+
+
 }

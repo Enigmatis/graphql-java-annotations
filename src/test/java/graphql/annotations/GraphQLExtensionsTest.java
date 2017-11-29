@@ -98,7 +98,6 @@ public class GraphQLExtensionsTest {
         instance.registerTypeExtension(TestObjectExtension.class);
         GraphQLObjectHandler graphQLObjectHandler = new GraphQLObjectHandler();
         GraphQLObjectType object = graphQLObjectHandler.getObject(GraphQLExtensionsTest.TestObject.class, instance.getContainer());
-        instance.unregisterTypeExtension(TestObjectExtension.class);
 
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 5);
@@ -118,7 +117,6 @@ public class GraphQLExtensionsTest {
         instance.registerTypeExtension(TestObjectExtension.class);
         GraphQLObjectHandler graphQLObjectHandler = new GraphQLObjectHandler();
         GraphQLObjectType object = graphQLObjectHandler.getObject(GraphQLExtensionsTest.TestObject.class, instance.getContainer());
-        instance.unregisterTypeExtension(TestObjectExtension.class);
 
         GraphQLSchema schema = newSchema().query(object).build();
         GraphQLSchema schemaInherited = newSchema().query(object).build();
@@ -139,6 +137,5 @@ public class GraphQLExtensionsTest {
         instance.registerTypeExtension(TestObjectExtensionInvalid.class);
         GraphQLAnnotationsException e = expectThrows(GraphQLAnnotationsException.class, () -> graphQLObjectHandler.getObject(TestObject.class,instance.getContainer()));
         assertTrue(e.getMessage().startsWith("Duplicate field"));
-        instance.unregisterTypeExtension(TestObjectExtensionInvalid.class);
     }
 }

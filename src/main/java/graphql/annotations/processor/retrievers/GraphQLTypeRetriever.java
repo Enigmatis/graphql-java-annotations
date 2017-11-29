@@ -21,23 +21,38 @@ import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
+import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
 import graphql.annotations.processor.typeBuilders.*;
 import graphql.schema.*;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 
+@Component(service = GraphQLTypeRetriever.class, immediate = true)
 public class GraphQLTypeRetriever {
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
+    private GraphQLInterfaceRetriever graphQLInterfaceRetriever;
     private GraphQLFieldRetriever graphQLFieldRetriever;
+    private SearchAlgorithm fieldSearchAlgorithm;
+    private SearchAlgorithm methodSearchAlgorithm;
+    private GraphQLExtensionsHandler extensionsHandler;
 
-    public GraphQLTypeRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLFieldRetriever graphQLFieldRetriever) {
+
+    public GraphQLTypeRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLInterfaceRetriever graphQLInterfaceRetriever, GraphQLFieldRetriever graphQLFieldRetriever, SearchAlgorithm fieldSearchAlgorithm, SearchAlgorithm methodSearchAlgorithm, GraphQLExtensionsHandler extensionsHandler) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
+        this.graphQLInterfaceRetriever = graphQLInterfaceRetriever;
         this.graphQLFieldRetriever = graphQLFieldRetriever;
+        this.fieldSearchAlgorithm = fieldSearchAlgorithm;
+        this.methodSearchAlgorithm = methodSearchAlgorithm;
+        this.extensionsHandler = extensionsHandler;
     }
 
     public GraphQLTypeRetriever() {
-        this(new GraphQLObjectInfoRetriever(), new GraphQLFieldRetriever());
+        this(new GraphQLObjectInfoRetriever(), new GraphQLInterfaceRetriever(), new GraphQLFieldRetriever(),  new ParentalSearch(new GraphQLObjectInfoRetriever()), new BreadthFirstSearch(new GraphQLObjectInfoRetriever()), new GraphQLExtensionsHandler());
     }
 
     /**
@@ -63,7 +78,6 @@ public class GraphQLTypeRetriever {
 
         if (isInput) {
             typeName = DEFAULT_INPUT_PREFIX + typeName;
-
         }
 
         if (container.getProcessing().contains(typeName)) {
@@ -77,19 +91,16 @@ public class GraphQLTypeRetriever {
         if (object.getAnnotation(GraphQLUnion.class) != null) {
             type = new UnionBuilder(graphQLObjectInfoRetriever).getUnionBuilder(object, container).build();
         } else if (object.isAnnotationPresent(GraphQLTypeResolver.class)) {
-            type = new InterfaceBuilder(graphQLObjectInfoRetriever, graphQLFieldRetriever).getInterfaceBuilder(object, container).build();
+            type = new InterfaceBuilder(graphQLObjectInfoRetriever, graphQLFieldRetriever, extensionsHandler).getInterfaceBuilder(object, container).build();
         } else if (Enum.class.isAssignableFrom(object)) {
             type = new EnumBuilder(graphQLObjectInfoRetriever).getEnumBuilder(object).build();
         } else {
-            ParentalSearch parentalSearch = new ParentalSearch(graphQLObjectInfoRetriever);
-            BreadthFirstSearch breadthFirstSearch = new BreadthFirstSearch(graphQLObjectInfoRetriever);
-
             if (isInput) {
-                type = new InputObjectBuilder(graphQLObjectInfoRetriever, parentalSearch,
-                        breadthFirstSearch, graphQLFieldRetriever).getInputObjectBuilder(object, container).build();
+                type = new InputObjectBuilder(graphQLObjectInfoRetriever, methodSearchAlgorithm, fieldSearchAlgorithm,
+                        graphQLFieldRetriever).getInputObjectBuilder(object, container).build();
             } else {
-                type = new OutputObjectBuilder(graphQLObjectInfoRetriever, parentalSearch,
-                        breadthFirstSearch, graphQLFieldRetriever, new GraphQLInterfaceRetriever()).getOutputObjectBuilder(object, container).build();
+                type = new OutputObjectBuilder(graphQLObjectInfoRetriever, methodSearchAlgorithm, fieldSearchAlgorithm,
+                        graphQLFieldRetriever, graphQLInterfaceRetriever, extensionsHandler).getOutputObjectBuilder(object, container).build();
             }
         }
 
@@ -99,4 +110,58 @@ public class GraphQLTypeRetriever {
         return type;
     }
 
+
+    @Reference(policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
+        this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
+    }
+
+    public void unsetGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
+        this.graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
+    }
+
+    @Reference(policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setGraphQLInterfaceRetriever(GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
+        this.graphQLInterfaceRetriever = graphQLInterfaceRetriever;
+    }
+
+    public void unsetGraphQLInterfaceRetriever(GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
+        this.graphQLInterfaceRetriever = new GraphQLInterfaceRetriever();
+    }
+
+    @Reference(policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setGraphQLFieldRetriever(GraphQLFieldRetriever graphQLFieldRetriever) {
+        this.graphQLFieldRetriever = graphQLFieldRetriever;
+    }
+
+    public void unsetGraphQLFieldRetriever(GraphQLFieldRetriever graphQLFieldRetriever) {
+        this.graphQLFieldRetriever = new GraphQLFieldRetriever();
+    }
+
+    @Reference(target = "(type=field)", policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setFieldSearchAlgorithm(SearchAlgorithm fieldSearchAlgorithm) {
+        this.fieldSearchAlgorithm = fieldSearchAlgorithm;
+    }
+
+    public void unsetFieldSearchAlgorithm(SearchAlgorithm fieldSearchAlgorithm) {
+        this.fieldSearchAlgorithm = new ParentalSearch(new GraphQLObjectInfoRetriever());
+    }
+
+    @Reference(target = "(type=method)", policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setMethodSearchAlgorithm(SearchAlgorithm methodSearchAlgorithm) {
+        this.methodSearchAlgorithm = methodSearchAlgorithm;
+    }
+
+    public void unsetMethodSearchAlgorithm(SearchAlgorithm methodSearchAlgorithm) {
+        this.methodSearchAlgorithm = new BreadthFirstSearch(new GraphQLObjectInfoRetriever());
+    }
+
+    @Reference(policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setExtensionsHandler(GraphQLExtensionsHandler extensionsHandler) {
+        this.extensionsHandler = extensionsHandler;
+    }
+
+    public void unsetExtensionsHandler(GraphQLExtensionsHandler extensionsHandler) {
+        this.extensionsHandler = new GraphQLExtensionsHandler();
+    }
 }

@@ -17,6 +17,7 @@ package graphql.annotations.processor.retrievers;
 
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
+import org.osgi.service.component.annotations.Component;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 
+@Component(service = GraphQLObjectInfoRetriever.class, immediate = true)
 public class GraphQLObjectInfoRetriever {
 
     public String getTypeName(Class<?> objectClass) {

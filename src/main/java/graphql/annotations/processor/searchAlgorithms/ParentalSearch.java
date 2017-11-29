@@ -16,13 +16,21 @@ package graphql.annotations.processor.searchAlgorithms;
 
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 
 
+@Component(service = SearchAlgorithm.class, property = "type=field", immediate = true)
 public class ParentalSearch implements SearchAlgorithm {
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
+
+    public ParentalSearch() {
+    }
 
     public ParentalSearch(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
@@ -56,5 +64,14 @@ public class ParentalSearch implements SearchAlgorithm {
             return (Field) member;
         }
 
+    }
+
+    @Reference(policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
+        this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
+    }
+
+    public void unsetGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
+        this.graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
     }
 }

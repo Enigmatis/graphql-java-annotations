@@ -21,9 +21,7 @@ import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
 public class DefaultTypeFunctionTestHelper {
     public static DefaultTypeFunction testedDefaultTypeFunction() {
         // wire up the ability
-        GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
         DefaultTypeFunction defaultTypeFunction = new DefaultTypeFunction(new GraphQLInputProcessor(),new GraphQLOutputProcessor());
-        defaultTypeFunction.setAnnotationsProcessor(graphQLAnnotations);
         return defaultTypeFunction;
     }
 }
