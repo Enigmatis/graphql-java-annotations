@@ -17,6 +17,7 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
@@ -58,6 +59,12 @@ public class GraphQLEnumTest {
             User user = new User(Foo.ONE);
             return user;
         }
+
+        @GraphQLField
+        public static User user(@GraphQLName("param") Foo param) {
+            User user = new User(param);
+            return user;
+        }
     }
 
     @Test
@@ -67,6 +74,15 @@ public class GraphQLEnumTest {
 
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
         assertEquals(result.getData().toString(), "{defaultUser={name=ONE}}");
+    }
+
+    @Test
+    public void testAsInput() throws IllegalAccessException, NoSuchMethodException, InstantiationException {
+        GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
+        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
+
+        ExecutionResult result = graphql.execute("{ user(param:TWO){ name } }");
+        assertEquals(result.getData().toString(), "{user={name=TWO}}");
     }
 
 
