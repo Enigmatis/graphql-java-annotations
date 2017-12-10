@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -108,7 +108,7 @@ public class GraphQLInputTest {
     public static class TestObjectRec {
         @GraphQLField
         public String value(@GraphQLName("input") RecursiveInputObject input) {
-            return (input.rec != null ? ("rec"+input.rec.key) : input.key) + "a";
+            return (input.rec != null ? ("rec" + input.rec.key) : input.key) + "a";
         }
     }
 
@@ -140,21 +140,27 @@ public class GraphQLInputTest {
         @GraphQLField
         public TestIface object() {
             return new TestObject();
-        };
+        }
+
+        ;
     }
 
     public static class QueryRecursion {
         @GraphQLField
         public TestObjectRec object() {
             return new TestObjectRec();
-        };
+        }
+
+        ;
     }
 
     public static class QueryList {
         @GraphQLField
         public TestObjectList object() {
             return new TestObjectList();
-        };
+        }
+
+        ;
     }
 
     public static class QueryIface {
@@ -219,5 +225,42 @@ public class GraphQLInputTest {
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("iface").get("value"), "testa");
     }
 
+    @GraphQLName("hero")
+    public class Hero {
+        @GraphQLField
+        int a;
+    }
+
+    @GraphQLName("hero")
+    public class HeroInput {
+        @GraphQLField
+        String b;
+
+        @GraphQLField
+        Skill skill;
+    }
+
+    public class Skill{
+        @GraphQLField
+        String c;
+    }
+
+    public class QueryInputAndOutput {
+        @GraphQLField
+        public Hero getHero() {
+            return null;
+        }
+
+        @GraphQLField
+        public String getString(HeroInput input) {
+            return "asdf";
+        }
+    }
+
+    @Test
+    public void testInputAndOutputWithSameName() {
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryInputAndOutput.class)).build();
+        int x =5;
+    }
 
 }

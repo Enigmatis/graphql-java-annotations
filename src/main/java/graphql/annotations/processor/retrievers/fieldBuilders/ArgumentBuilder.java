@@ -61,7 +61,8 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
                 map(parameter -> {
                     Class<?> t = parameter.getType();
-                    graphql.schema.GraphQLInputType graphQLType = graphQLInputObjectRetriever.getInputObject(finalTypeFunction.buildType(true, t, parameter.getAnnotatedType(), container), DEFAULT_INPUT_PREFIX, container.getTypeRegistry());
+                    graphql.schema.GraphQLInputType graphQLType = graphQLInputObjectRetriever.getInputObject(finalTypeFunction.buildType(true, t, parameter.getAnnotatedType(), container)
+                            , DEFAULT_INPUT_PREFIX, container.getTypeRegistry());
                     return getArgument(parameter, graphQLType);
                 }).collect(Collectors.toList());
 

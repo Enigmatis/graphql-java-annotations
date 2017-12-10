@@ -17,17 +17,18 @@ package graphql.annotations.processor.retrievers;
 
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.schema.GraphQLOutputType;
 
 public class GraphQLInterfaceRetriever {
 
-    private GraphQLOutputObjectRetriever graphQLOutputObjectRetriever;
+    private GraphQLTypeRetriever graphQLOutputObjectRetriever;
 
-    public GraphQLInterfaceRetriever(GraphQLOutputObjectRetriever graphQLOutputObjectRetriever) {
+    public GraphQLInterfaceRetriever(GraphQLTypeRetriever graphQLOutputObjectRetriever) {
         this.graphQLOutputObjectRetriever = graphQLOutputObjectRetriever;
     }
 
     public GraphQLInterfaceRetriever() {
-        this(new GraphQLOutputObjectRetriever());
+        this(new GraphQLTypeRetriever());
     }
 
     /**
@@ -39,6 +40,6 @@ public class GraphQLInterfaceRetriever {
      * @throws GraphQLAnnotationsException if the class cannot be examined
      */
     public graphql.schema.GraphQLOutputType getInterface(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
-        return graphQLOutputObjectRetriever.getOutputType(iface, container);
+        return (GraphQLOutputType) graphQLOutputObjectRetriever.getGraphQLType(iface, container, false);
     }
 }

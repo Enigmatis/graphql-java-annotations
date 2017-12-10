@@ -16,10 +16,9 @@ package graphql.annotations.processor.graphQLProcessors;
 
 
 import graphql.annotations.processor.retrievers.GraphQLInputObjectRetriever;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
-import graphql.annotations.processor.retrievers.GraphQLOutputObjectRetriever;
+import graphql.annotations.processor.retrievers.GraphQLTypeRetriever;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLType;
@@ -31,17 +30,17 @@ public class GraphQLInputProcessor {
     private static final String DEFAULT_INPUT_PREFIX = "Input";
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
-    private GraphQLOutputObjectRetriever graphQLOutputObjectRetriever;
+    private GraphQLTypeRetriever graphQLOutputObjectRetriever;
     private GraphQLInputObjectRetriever graphQLInputObjectRetriever;
 
-    public GraphQLInputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLOutputObjectRetriever graphQLOutputObjectRetriever, GraphQLInputObjectRetriever graphQLInputObjectRetriever) {
+    public GraphQLInputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLTypeRetriever graphQLOutputObjectRetriever, GraphQLInputObjectRetriever graphQLInputObjectRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.graphQLOutputObjectRetriever = graphQLOutputObjectRetriever;
         this.graphQLInputObjectRetriever = graphQLInputObjectRetriever;
     }
 
     public GraphQLInputProcessor() {
-        this(new GraphQLObjectInfoRetriever(), new GraphQLOutputObjectRetriever(), new GraphQLInputObjectRetriever());
+        this(new GraphQLObjectInfoRetriever(), new GraphQLTypeRetriever(), new GraphQLInputObjectRetriever());
     }
 
     /**
@@ -59,7 +58,7 @@ public class GraphQLInputProcessor {
         if (typeRegistry.containsKey(typeName)) {
             return (GraphQLInputObjectType) container.getTypeRegistry().get(typeName);
         } else {
-            graphql.schema.GraphQLType graphQLType = graphQLOutputObjectRetriever.getOutputType(object, container);
+            graphql.schema.GraphQLType graphQLType = graphQLOutputObjectRetriever.getGraphQLType(object, container, true);
             GraphQLInputType inputObject = graphQLInputObjectRetriever.getInputObject(graphQLType, DEFAULT_INPUT_PREFIX, typeRegistry);
             typeRegistry.put(inputObject.getName(), inputObject);
             return inputObject;

@@ -18,23 +18,23 @@ package graphql.annotations.processor.graphQLProcessors;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
-import graphql.annotations.processor.retrievers.GraphQLOutputObjectRetriever;
+import graphql.annotations.processor.retrievers.GraphQLTypeRetriever;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
 
 public class GraphQLOutputProcessor {
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
-    private GraphQLOutputObjectRetriever outputObjectRetriever;
+    private GraphQLTypeRetriever outputObjectRetriever;
 
 
-    public GraphQLOutputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLOutputObjectRetriever outputObjectRetriever) {
+    public GraphQLOutputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLTypeRetriever outputObjectRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.outputObjectRetriever = outputObjectRetriever;
     }
 
     public GraphQLOutputProcessor() {
-        this(new GraphQLObjectInfoRetriever(), new GraphQLOutputObjectRetriever());
+        this(new GraphQLObjectInfoRetriever(), new GraphQLTypeRetriever());
     }
 
     /**
@@ -55,7 +55,7 @@ public class GraphQLOutputProcessor {
             return new GraphQLTypeReference(typeName);
         }
 
-        return outputObjectRetriever.getOutputType(object, container);
+        return (GraphQLOutputType) outputObjectRetriever.getGraphQLType(object, container, false);
     }
 
 }
