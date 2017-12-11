@@ -25,7 +25,10 @@ import graphql.annotations.processor.typeBuilders.EnumBuilder;
 import graphql.annotations.processor.typeBuilders.InterfaceBuilder;
 import graphql.annotations.processor.typeBuilders.ObjectBuilder;
 import graphql.annotations.processor.typeBuilders.UnionBuilder;
+import graphql.annotations.processor.util.InputPropertiesUtil;
 import graphql.schema.*;
+
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 
 public class GraphQLTypeRetriever {
 
@@ -62,7 +65,7 @@ public class GraphQLTypeRetriever {
         String typeName = graphQLObjectInfoRetriever.getTypeName(object);
         GraphQLType type;
         if (isInput) {
-            String typeNameWithPrefix = "Input" + typeName;
+            String typeNameWithPrefix = DEFAULT_INPUT_PREFIX + typeName;
             type = container.getTypeRegistry().get(typeNameWithPrefix);
             if (type != null) return type;
         } else {
@@ -83,7 +86,7 @@ public class GraphQLTypeRetriever {
             type = new ObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever), new BreadthFirstSearch(graphQLObjectInfoRetriever), graphQLFieldRetriever, new GraphQLInterfaceRetriever()).getObjectBuilder(object, container).build();
         }
 
-        if (isInput) typeName = "Input" + typeName;
+        if (isInput) typeName = DEFAULT_INPUT_PREFIX + typeName;
         container.getTypeRegistry().put(typeName, type);
         container.getProcessing().pop();
 

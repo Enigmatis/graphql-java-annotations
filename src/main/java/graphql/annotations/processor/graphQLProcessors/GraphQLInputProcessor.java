@@ -25,9 +25,10 @@ import graphql.schema.GraphQLType;
 
 import java.util.Map;
 
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
+
 public class GraphQLInputProcessor {
 
-    private static final String DEFAULT_INPUT_PREFIX = "Input";
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private GraphQLTypeRetriever graphQLOutputObjectRetriever;
