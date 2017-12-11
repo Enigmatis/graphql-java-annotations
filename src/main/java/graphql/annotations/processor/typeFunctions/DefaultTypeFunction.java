@@ -55,6 +55,11 @@ public class DefaultTypeFunction implements TypeFunction {
         typeFunctions.add(new FloatFunction());
         typeFunctions.add(new IntegerFunction());
         typeFunctions.add(new LongFunction());
+        typeFunctions.add(new ByteFunction());
+        typeFunctions.add(new ShortFunction());
+        typeFunctions.add(new BigIntegerFunction());
+        typeFunctions.add(new BigDecimalFunction());
+        typeFunctions.add(new CharFunction());
         typeFunctions.add(new IterableFunction(DefaultTypeFunction.this));
         typeFunctions.add(new StreamFunction(DefaultTypeFunction.this));
         typeFunctions.add(new OptionalFunction(DefaultTypeFunction.this));
