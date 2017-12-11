@@ -54,14 +54,14 @@ public class GraphQLTypeRetriever {
      * @throws graphql.annotations.processor.exceptions.GraphQLAnnotationsException if the object class cannot be examined
      * @throws graphql.annotations.processor.exceptions.CannotCastMemberException   if the object class cannot be examined
      */
-    public GraphQLType getGraphQLType(Class<?> object, ProcessingElementsContainer container, boolean isInputHirerarchy) throws GraphQLAnnotationsException, CannotCastMemberException {
+    public GraphQLType getGraphQLType(Class<?> object, ProcessingElementsContainer container, boolean isInput) throws GraphQLAnnotationsException, CannotCastMemberException {
         // because the TypeFunction can call back to this processor and
         // Java classes can be circular, we need to protect against
         // building the same type twice because graphql-java 3.x requires
         // all type instances to be unique singletons
         String typeName = graphQLObjectInfoRetriever.getTypeName(object);
         GraphQLType type;
-        if (isInputHirerarchy) {
+        if (isInput) {
             String typeNameWithPrefix = "Input" + typeName;
             type = container.getTypeRegistry().get(typeNameWithPrefix);
             if (type != null) return type;
@@ -83,7 +83,7 @@ public class GraphQLTypeRetriever {
             type = new ObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever), new BreadthFirstSearch(graphQLObjectInfoRetriever), graphQLFieldRetriever, new GraphQLInterfaceRetriever()).getObjectBuilder(object, container).build();
         }
 
-        if (isInputHirerarchy) typeName = "Input" + typeName;
+        if (isInput) typeName = "Input" + typeName;
         container.getTypeRegistry().put(typeName, type);
         container.getProcessing().pop();
 

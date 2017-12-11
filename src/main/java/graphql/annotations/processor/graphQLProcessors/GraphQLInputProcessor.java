@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,18 +52,26 @@ public class GraphQLInputProcessor {
      */
 
     public GraphQLInputType getInputType(Class<?> object, ProcessingElementsContainer container) {
-        String typeName = DEFAULT_INPUT_PREFIX + graphQLObjectInfoRetriever.getTypeName(object);
+        boolean considerAsInput = true;
+        if (Enum.class.isAssignableFrom(object)) {
+            considerAsInput = false;
+        }
+
+        String typeName = graphQLObjectInfoRetriever.getTypeName(object);
+
+        if (considerAsInput)
+            typeName = DEFAULT_INPUT_PREFIX + typeName;
+
         Map<String, GraphQLType> typeRegistry = container.getTypeRegistry();
 
         if (typeRegistry.containsKey(typeName)) {
-            return (GraphQLInputObjectType) container.getTypeRegistry().get(typeName);
+            return (GraphQLInputType) container.getTypeRegistry().get(typeName);
         } else {
-            graphql.schema.GraphQLType graphQLType = graphQLOutputObjectRetriever.getGraphQLType(object, container, true);
+
+            graphql.schema.GraphQLType graphQLType = graphQLOutputObjectRetriever.getGraphQLType(object, container, considerAsInput);
             GraphQLInputType inputObject = graphQLInputObjectRetriever.getInputObject(graphQLType, DEFAULT_INPUT_PREFIX, typeRegistry);
             typeRegistry.put(inputObject.getName(), inputObject);
             return inputObject;
         }
     }
-
-
 }
