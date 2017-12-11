@@ -16,32 +16,32 @@ package graphql.annotations.processor.graphQLProcessors;
 
 
 import graphql.annotations.processor.retrievers.GraphQLInputObjectRetriever;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
-import graphql.annotations.processor.retrievers.GraphQLOutputObjectRetriever;
+import graphql.annotations.processor.retrievers.GraphQLTypeRetriever;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLType;
 
 import java.util.Map;
 
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
+
 public class GraphQLInputProcessor {
 
-    private static final String DEFAULT_INPUT_PREFIX = "Input";
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
-    private GraphQLOutputObjectRetriever graphQLOutputObjectRetriever;
+    private GraphQLTypeRetriever graphQLOutputObjectRetriever;
     private GraphQLInputObjectRetriever graphQLInputObjectRetriever;
 
-    public GraphQLInputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLOutputObjectRetriever graphQLOutputObjectRetriever, GraphQLInputObjectRetriever graphQLInputObjectRetriever) {
+    public GraphQLInputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLTypeRetriever graphQLOutputObjectRetriever, GraphQLInputObjectRetriever graphQLInputObjectRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.graphQLOutputObjectRetriever = graphQLOutputObjectRetriever;
         this.graphQLInputObjectRetriever = graphQLInputObjectRetriever;
     }
 
     public GraphQLInputProcessor() {
-        this(new GraphQLObjectInfoRetriever(), new GraphQLOutputObjectRetriever(), new GraphQLInputObjectRetriever());
+        this(new GraphQLObjectInfoRetriever(), new GraphQLTypeRetriever(), new GraphQLInputObjectRetriever());
     }
 
     /**
@@ -53,18 +53,26 @@ public class GraphQLInputProcessor {
      */
 
     public GraphQLInputType getInputType(Class<?> object, ProcessingElementsContainer container) {
-        String typeName = DEFAULT_INPUT_PREFIX + graphQLObjectInfoRetriever.getTypeName(object);
+        boolean considerAsInput = true;
+        if (Enum.class.isAssignableFrom(object)) {
+            considerAsInput = false;
+        }
+
+        String typeName = graphQLObjectInfoRetriever.getTypeName(object);
+
+        if (considerAsInput)
+            typeName = DEFAULT_INPUT_PREFIX + typeName;
+
         Map<String, GraphQLType> typeRegistry = container.getTypeRegistry();
 
         if (typeRegistry.containsKey(typeName)) {
-            return (GraphQLInputObjectType) container.getTypeRegistry().get(typeName);
+            return (GraphQLInputType) container.getTypeRegistry().get(typeName);
         } else {
-            graphql.schema.GraphQLType graphQLType = graphQLOutputObjectRetriever.getOutputType(object, container);
+
+            graphql.schema.GraphQLType graphQLType = graphQLOutputObjectRetriever.getGraphQLType(object, container, considerAsInput);
             GraphQLInputType inputObject = graphQLInputObjectRetriever.getInputObject(graphQLType, DEFAULT_INPUT_PREFIX, typeRegistry);
             typeRegistry.put(inputObject.getName(), inputObject);
             return inputObject;
         }
     }
-
-
 }

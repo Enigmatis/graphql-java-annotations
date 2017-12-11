@@ -35,6 +35,7 @@ public class GraphQLInputObjectRetriever {
      */
 
     public GraphQLInputType getInputObject(graphql.schema.GraphQLType graphQLType, String newNamePrefix, Map<String, graphql.schema.GraphQLType> typeRegistry) {
+
         if (graphQLType instanceof GraphQLObjectType) {
             return handleGraphQLObjectType((GraphQLObjectType) graphQLType, newNamePrefix, typeRegistry);
         } else if (graphQLType instanceof GraphQLList) {

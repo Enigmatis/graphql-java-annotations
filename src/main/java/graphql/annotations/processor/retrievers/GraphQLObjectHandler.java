@@ -22,18 +22,18 @@ import graphql.schema.GraphQLOutputType;
 
 public class GraphQLObjectHandler {
 
-    private GraphQLOutputObjectRetriever outputObjectRetriever;
+    private GraphQLTypeRetriever outputObjectRetriever;
 
-    public GraphQLObjectHandler(GraphQLOutputObjectRetriever outputObjectRetriever) {
+    public GraphQLObjectHandler(GraphQLTypeRetriever outputObjectRetriever) {
         this.outputObjectRetriever = outputObjectRetriever;
     }
 
     public GraphQLObjectHandler() {
-        this(new GraphQLOutputObjectRetriever());
+        this(new GraphQLTypeRetriever());
     }
 
     public GraphQLObjectType getObject(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException, CannotCastMemberException {
-        GraphQLOutputType type = outputObjectRetriever.getOutputType(object, container);
+        GraphQLOutputType type = (GraphQLOutputType) outputObjectRetriever.getGraphQLType(object, container, false);
         if (type instanceof GraphQLObjectType) {
             return (GraphQLObjectType) type;
         } else {

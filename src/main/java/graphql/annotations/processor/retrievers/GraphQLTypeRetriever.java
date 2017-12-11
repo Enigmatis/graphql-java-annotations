@@ -25,24 +25,27 @@ import graphql.annotations.processor.typeBuilders.EnumBuilder;
 import graphql.annotations.processor.typeBuilders.InterfaceBuilder;
 import graphql.annotations.processor.typeBuilders.ObjectBuilder;
 import graphql.annotations.processor.typeBuilders.UnionBuilder;
+import graphql.annotations.processor.util.InputPropertiesUtil;
 import graphql.schema.*;
 
-public class GraphQLOutputObjectRetriever {
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
+
+public class GraphQLTypeRetriever {
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private GraphQLFieldRetriever graphQLFieldRetriever;
 
-    public GraphQLOutputObjectRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLFieldRetriever graphQLFieldRetriever) {
+    public GraphQLTypeRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLFieldRetriever graphQLFieldRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.graphQLFieldRetriever = graphQLFieldRetriever;
     }
 
-    public GraphQLOutputObjectRetriever() {
+    public GraphQLTypeRetriever() {
         this(new GraphQLObjectInfoRetriever(), new GraphQLFieldRetriever());
     }
 
     /**
-     * This will examine the object and will return a {@link GraphQLOutputType} based on the class type and annotationTypes.
+     * This will examine the object and will return a {@link GraphQLType} based on the class type and annotationTypes.
      * - If its annotated with {@link graphql.annotations.annotationTypes.GraphQLUnion} it will return a {@link GraphQLUnionType}
      * - If its annotated with {@link graphql.annotations.annotationTypes.GraphQLTypeResolver} it will return a {@link GraphQLInterfaceType}
      * - It it's an Enum it will return a {@link GraphQLEnumType},
@@ -50,20 +53,26 @@ public class GraphQLOutputObjectRetriever {
      *
      * @param object    the object class to examine*
      * @param container a class that hold several members that are required in order to build schema
-     * @return a {@link GraphQLOutputType} that represents that object class
+     * @return a {@link GraphQLType} that represents that object class
      * @throws graphql.annotations.processor.exceptions.GraphQLAnnotationsException if the object class cannot be examined
      * @throws graphql.annotations.processor.exceptions.CannotCastMemberException   if the object class cannot be examined
      */
-    public GraphQLOutputType getOutputType(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException, CannotCastMemberException {
+    public GraphQLType getGraphQLType(Class<?> object, ProcessingElementsContainer container, boolean isInput) throws GraphQLAnnotationsException, CannotCastMemberException {
         // because the TypeFunction can call back to this processor and
         // Java classes can be circular, we need to protect against
         // building the same type twice because graphql-java 3.x requires
         // all type instances to be unique singletons
         String typeName = graphQLObjectInfoRetriever.getTypeName(object);
-
-        GraphQLOutputType type = (GraphQLOutputType) container.getTypeRegistry().get(typeName);
-        if (type != null) { // type already exists, do not build a new new one
-            return type;
+        GraphQLType type;
+        if (isInput) {
+            String typeNameWithPrefix = DEFAULT_INPUT_PREFIX + typeName;
+            type = container.getTypeRegistry().get(typeNameWithPrefix);
+            if (type != null) return type;
+        } else {
+            type = container.getTypeRegistry().get(typeName);
+            if (type != null) { // type already exists, do not build a new new one
+                return type;
+            }
         }
 
         container.getProcessing().push(typeName);
@@ -77,6 +86,7 @@ public class GraphQLOutputObjectRetriever {
             type = new ObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever), new BreadthFirstSearch(graphQLObjectInfoRetriever), graphQLFieldRetriever, new GraphQLInterfaceRetriever()).getObjectBuilder(object, container).build();
         }
 
+        if (isInput) typeName = DEFAULT_INPUT_PREFIX + typeName;
         container.getTypeRegistry().put(typeName, type);
         container.getProcessing().pop();
 

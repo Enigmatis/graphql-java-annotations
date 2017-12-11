@@ -667,7 +667,8 @@ public class GraphQLObjectTest {
     public void inputObject() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
         GraphQLInputObjectRetriever graphQLInputObjectRetrieve=new GraphQLInputObjectRetriever();
-        GraphQLInputObjectType inputObjectType = (GraphQLInputObjectType) graphQLInputObjectRetrieve.getInputObject(object, "input",GraphQLAnnotations.getInstance().getContainer().getTypeRegistry());
+        GraphQLInputObjectType inputObjectType = (GraphQLInputObjectType) graphQLInputObjectRetrieve.getInputObject(object, "input",
+                GraphQLAnnotations.getInstance().getContainer().getTypeRegistry());
         assertEquals(inputObjectType.getFields().size(), object.getFieldDefinitions().size());
     }
 
@@ -732,7 +733,8 @@ public class GraphQLObjectTest {
     public void optionalInput() {
         GraphQLObjectType object = GraphQLAnnotations.object(OptionalTest.class);
         GraphQLInputObjectRetriever graphQLInputObjectRetriever=new GraphQLInputObjectRetriever();
-        GraphQLInputObjectType inputObject = (GraphQLInputObjectType) graphQLInputObjectRetriever.getInputObject(object, "input",GraphQLAnnotations.getInstance().getTypeRegistry());
+        GraphQLInputObjectType inputObject = (GraphQLInputObjectType) graphQLInputObjectRetriever.getInputObject(object, "input",
+                GraphQLAnnotations.getInstance().getTypeRegistry());
         GraphQLObjectType mutation = GraphQLObjectType.newObject().name("mut").field(newFieldDefinition().name("test").type(object).
                 argument(GraphQLArgument.newArgument().type(inputObject).name("input").build()).dataFetcher(environment -> {
             Map<String, String> input = environment.getArgument("input");
