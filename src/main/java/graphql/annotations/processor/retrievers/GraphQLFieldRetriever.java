@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -104,7 +104,7 @@ public class GraphQLFieldRetriever {
         GraphQLFieldDefinition.Builder builder = newFieldDefinition();
         TypeFunction typeFunction = getTypeFunction(method, container);
         builder.name(new MethodNameBuilder(method).build());
-        GraphQLOutputType outputType = new MethodTypeBuilder(method, typeFunction, container).build();
+        GraphQLOutputType outputType = (GraphQLOutputType) new MethodTypeBuilder(method, typeFunction, container, false).build();
 
         boolean isConnection = ConnectionUtil.isConnection(method, outputType);
         if (isConnection) {
@@ -120,12 +120,46 @@ public class GraphQLFieldRetriever {
         return new GraphQLFieldDefinitionWrapper(builder.build());
     }
 
+    public GraphQLFieldDefinition getField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
+        GraphQLFieldDefinition.Builder builder = newFieldDefinition();
+        builder.name(new FieldNameBuilder(field).build());
+        TypeFunction typeFunction = getTypeFunction(field, container);
+
+        graphql.schema.GraphQLType outputType = typeFunction.buildType(field.getType(), field.getAnnotatedType(), container);
+        boolean isConnection = ConnectionUtil.isConnection(field, outputType);
+        if (isConnection) {
+            outputType = getGraphQLConnection(field, outputType, container.getRelay(), container.getTypeRegistry());
+            builder.argument(container.getRelay().getConnectionFieldArguments());
+        }
+
+        builder.type((GraphQLOutputType) outputType).description(new DescriptionBuilder(field).build())
+                .deprecate(new DeprecateBuilder(field).build())
+                .dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, isConnection).build());
+
+        return new GraphQLFieldDefinitionWrapper(builder.build());
+    }
+
+    public GraphQLInputObjectField getInputField(Method method, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
+        GraphQLInputObjectField.Builder builder = newInputObjectField();
+        builder.name(new MethodNameBuilder(method).build());
+        TypeFunction typeFunction = getTypeFunction(method, container);
+        GraphQLInputType inputType = (GraphQLInputType) new MethodTypeBuilder(method, typeFunction, container, true).build();
+        return builder.type(inputType).description(new DescriptionBuilder(method).build()).build();
+    }
+
+    public GraphQLInputObjectField getInputField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
+        GraphQLInputObjectField.Builder builder = newInputObjectField();
+        builder.name(new FieldNameBuilder(field).build());
+        TypeFunction typeFunction = getTypeFunction(field, container);
+        graphql.schema.GraphQLType graphQLType = typeFunction.buildType(true,field.getType(), field.getAnnotatedType(), container);
+        return builder.type((GraphQLInputType) graphQLType).description(new DescriptionBuilder(field).build()).build();
+    }
+
     private GraphQLFieldDefinition handleRelayArguments(Method method, ProcessingElementsContainer container, GraphQLFieldDefinition.Builder builder, GraphQLOutputType outputType, List<GraphQLArgument> args) {
         GraphQLFieldDefinition relayFieldDefinition = null;
         if (method.isAnnotationPresent(GraphQLRelayMutation.class)) {
             relayFieldDefinition = buildRelayMutation(method, container, builder, outputType, args);
-        }
-        else {
+        } else {
             builder.argument(args);
         }
         return relayFieldDefinition;
@@ -166,24 +200,6 @@ public class GraphQLFieldRetriever {
         return relayFieldDefinition;
     }
 
-    public GraphQLFieldDefinition getField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
-        GraphQLFieldDefinition.Builder builder = newFieldDefinition();
-        builder.name(new FieldNameBuilder(field).build());
-        TypeFunction typeFunction = getTypeFunction(field, container);
-
-        GraphQLOutputType outputType = (GraphQLOutputType) typeFunction.buildType(field.getType(), field.getAnnotatedType(), container);
-        boolean isConnection = ConnectionUtil.isConnection(field, outputType);
-        if (isConnection) {
-            outputType = getGraphQLConnection(field, outputType, container.getRelay(), container.getTypeRegistry());
-            builder.argument(container.getRelay().getConnectionFieldArguments());
-        }
-
-        builder.type(outputType).description(new DescriptionBuilder(field).build())
-                .deprecate(new DeprecateBuilder(field).build())
-                .dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, isConnection).build());
-
-        return new GraphQLFieldDefinitionWrapper(builder.build());
-    }
 
     private TypeFunction getTypeFunction(Field field, ProcessingElementsContainer container) {
         GraphQLType annotation = field.getAnnotation(GraphQLType.class);
@@ -196,7 +212,7 @@ public class GraphQLFieldRetriever {
         return typeFunction;
     }
 
-    private GraphQLOutputType getGraphQLConnection(AccessibleObject field, GraphQLOutputType type, Relay relay, Map<String, graphql.schema.GraphQLType> typeRegistry) {
+    private GraphQLOutputType getGraphQLConnection(AccessibleObject field, graphql.schema.GraphQLType type, Relay relay, Map<String, graphql.schema.GraphQLType> typeRegistry) {
         if (type instanceof GraphQLNonNull) {
             GraphQLList listType = (GraphQLList) ((GraphQLNonNull) type).getWrappedType();
             return new GraphQLNonNull(internalGetGraphQLConnection(field, listType, relay, typeRegistry));
@@ -230,6 +246,5 @@ public class GraphQLFieldRetriever {
         }
         return type;
     }
-
 
 }

@@ -20,33 +20,36 @@ import graphql.annotations.processor.retrievers.fieldBuilders.Builder;
 import graphql.annotations.processor.typeFunctions.BatchedTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLType;
 
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 
-public class MethodTypeBuilder implements Builder<GraphQLOutputType> {
+public class MethodTypeBuilder implements Builder<GraphQLType> {
     private Method method;
     private TypeFunction typeFunction;
     private ProcessingElementsContainer container;
+    private boolean isInput;
 
-    public MethodTypeBuilder(Method method, TypeFunction typeFunction, ProcessingElementsContainer container) {
+    public MethodTypeBuilder(Method method, TypeFunction typeFunction, ProcessingElementsContainer container, boolean isInput) {
         this.method = method;
         this.typeFunction = typeFunction;
         this.container = container;
+        this.isInput = isInput;
     }
 
     @Override
-    public GraphQLOutputType build() {
+    public GraphQLType build() {
         AnnotatedType annotatedReturnType = method.getAnnotatedReturnType();
 
-        TypeFunction outputTypeFunction;
+        TypeFunction typeFunction;
         if (method.getAnnotation(GraphQLBatched.class) != null) {
-            outputTypeFunction = new BatchedTypeFunction(typeFunction);
+            typeFunction = new BatchedTypeFunction(this.typeFunction);
         } else {
-            outputTypeFunction = typeFunction;
+            typeFunction = this.typeFunction;
         }
 
-        return (GraphQLOutputType) outputTypeFunction.buildType(method.getReturnType(), annotatedReturnType, container);
+        return typeFunction.buildType(isInput,method.getReturnType(), annotatedReturnType, container);
     }
 
 }

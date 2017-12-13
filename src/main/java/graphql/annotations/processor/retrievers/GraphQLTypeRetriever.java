@@ -21,11 +21,7 @@ import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
-import graphql.annotations.processor.typeBuilders.EnumBuilder;
-import graphql.annotations.processor.typeBuilders.InterfaceBuilder;
-import graphql.annotations.processor.typeBuilders.ObjectBuilder;
-import graphql.annotations.processor.typeBuilders.UnionBuilder;
-import graphql.annotations.processor.util.InputPropertiesUtil;
+import graphql.annotations.processor.typeBuilders.*;
 import graphql.schema.*;
 
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
@@ -65,15 +61,12 @@ public class GraphQLTypeRetriever {
         String typeName = graphQLObjectInfoRetriever.getTypeName(object);
         GraphQLType type;
         if (isInput) {
-            String typeNameWithPrefix = DEFAULT_INPUT_PREFIX + typeName;
-            type = container.getTypeRegistry().get(typeNameWithPrefix);
-            if (type != null) return type;
-        } else {
-            type = container.getTypeRegistry().get(typeName);
-            if (type != null) { // type already exists, do not build a new new one
-                return type;
-            }
+            typeName = DEFAULT_INPUT_PREFIX + typeName;
+
         }
+
+        type = container.getTypeRegistry().get(typeName);
+        if (type != null) return type;
 
         container.getProcessing().push(typeName);
         if (object.getAnnotation(GraphQLUnion.class) != null) {
@@ -83,11 +76,20 @@ public class GraphQLTypeRetriever {
         } else if (Enum.class.isAssignableFrom(object)) {
             type = new EnumBuilder(graphQLObjectInfoRetriever).getEnumBuilder(object).build();
         } else {
-            type = new ObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever), new BreadthFirstSearch(graphQLObjectInfoRetriever), graphQLFieldRetriever, new GraphQLInterfaceRetriever()).getObjectBuilder(object, container).build();
+            ParentalSearch parentalSearch = new ParentalSearch(graphQLObjectInfoRetriever);
+            BreadthFirstSearch breadthFirstSearch = new BreadthFirstSearch(graphQLObjectInfoRetriever);
+
+            if (isInput) {
+                type = new InputObjectBuilder(graphQLObjectInfoRetriever, parentalSearch,
+                        breadthFirstSearch, graphQLFieldRetriever).getInputObjectBuilder(object, container).build();
+            }
+            else{
+                type = new OutputObjectBuilder(graphQLObjectInfoRetriever, parentalSearch,
+                        breadthFirstSearch, graphQLFieldRetriever, new GraphQLInterfaceRetriever()).getOutputObjectBuilder(object, container).build();
+            }
         }
 
-        if (isInput) typeName = DEFAULT_INPUT_PREFIX + typeName;
-        container.getTypeRegistry().put(typeName, type);
+        container.getTypeRegistry().put(type.getName(), type);
         container.getProcessing().pop();
 
         return type;

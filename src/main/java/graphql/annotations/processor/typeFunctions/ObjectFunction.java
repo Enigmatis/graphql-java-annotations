@@ -50,7 +50,7 @@ class ObjectFunction implements TypeFunction {
     @Override
     public GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType, ProcessingElementsContainer container) {
         if (inputType) {
-            return graphQLInputProcessor.getInputType(aClass, container);
+            return graphQLInputProcessor.getInputTypeOrRef(aClass, container);
         } else {
             return graphQLOutputProcessor.getOutputTypeOrRef(aClass,container);
         }

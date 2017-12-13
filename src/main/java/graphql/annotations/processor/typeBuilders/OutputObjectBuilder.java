@@ -38,14 +38,14 @@ import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
 import static graphql.schema.GraphQLObjectType.newObject;
 
 
-public class ObjectBuilder {
+public class OutputObjectBuilder {
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private BreadthFirstSearch breadthFirstSearch;
     private ParentalSearch parentalSearch;
     private GraphQLFieldRetriever graphQLFieldRetriever;
     private GraphQLInterfaceRetriever graphQLInterfaceRetriever;
 
-    public ObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, ParentalSearch parentalSearch, BreadthFirstSearch breadthFirstSearch,GraphQLFieldRetriever graphQLFieldRetriever,GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
+    public OutputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, ParentalSearch parentalSearch, BreadthFirstSearch breadthFirstSearch, GraphQLFieldRetriever graphQLFieldRetriever, GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.breadthFirstSearch=breadthFirstSearch;
         this.parentalSearch=parentalSearch;
@@ -62,7 +62,7 @@ public class ObjectBuilder {
      * @throws GraphQLAnnotationsException if the object class cannot be examined
      */
 
-    public GraphQLObjectType.Builder getObjectBuilder(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
+    public GraphQLObjectType.Builder getOutputObjectBuilder(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLObjectType.Builder builder = newObject();
         builder.name(graphQLObjectInfoRetriever.getTypeName(object));
         GraphQLDescription description = object.getAnnotation(GraphQLDescription.class);
