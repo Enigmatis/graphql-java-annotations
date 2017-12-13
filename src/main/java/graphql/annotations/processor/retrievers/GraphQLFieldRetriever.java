@@ -59,20 +59,18 @@ public class GraphQLFieldRetriever {
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private BreadthFirstSearch breadthFirstSearch;
     private ParentalSearch parentalSearch;
-    private GraphQLInputObjectRetriever graphQLInputObjectRetriever;
     private DataFetcherConstructor dataFetcherConstructor;
 
     public GraphQLFieldRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, BreadthFirstSearch breadthFirstSearch, ParentalSearch parentalSearch,
-                                 GraphQLInputObjectRetriever graphQLInputObjectRetriever, DataFetcherConstructor dataFetcherConstructor) {
+                                  DataFetcherConstructor dataFetcherConstructor) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.breadthFirstSearch = breadthFirstSearch;
         this.parentalSearch = parentalSearch;
-        this.graphQLInputObjectRetriever = graphQLInputObjectRetriever;
         this.dataFetcherConstructor = dataFetcherConstructor;
     }
 
     public GraphQLFieldRetriever() {
-        this(new GraphQLObjectInfoRetriever(), new BreadthFirstSearch(new GraphQLObjectInfoRetriever()), new ParentalSearch(new GraphQLObjectInfoRetriever()), new GraphQLInputObjectRetriever(), new DataFetcherConstructor());
+        this(new GraphQLObjectInfoRetriever(), new BreadthFirstSearch(new GraphQLObjectInfoRetriever()), new ParentalSearch(new GraphQLObjectInfoRetriever()), new DataFetcherConstructor());
     }
 
     public List<GraphQLFieldDefinition> getExtensionFields(Class<?> object, List<String> fieldsDefined, ProcessingElementsContainer container) throws CannotCastMemberException {
@@ -112,7 +110,7 @@ public class GraphQLFieldRetriever {
         }
         builder.type(outputType);
         handleConnectionArgument(container, builder, isConnection);
-        List<GraphQLArgument> args = new ArgumentBuilder(method, typeFunction, graphQLInputObjectRetriever, builder, container, outputType).build();
+        List<GraphQLArgument> args = new ArgumentBuilder(method, typeFunction, builder, container, outputType).build();
         GraphQLFieldDefinition relayFieldDefinition = handleRelayArguments(method, container, builder, outputType, args);
         builder.description(new DescriptionBuilder(method).build())
                 .deprecate(new DeprecateBuilder(method).build())

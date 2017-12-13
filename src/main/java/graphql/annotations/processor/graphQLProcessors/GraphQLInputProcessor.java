@@ -15,7 +15,6 @@
 package graphql.annotations.processor.graphQLProcessors;
 
 
-import graphql.annotations.processor.retrievers.GraphQLInputObjectRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.retrievers.GraphQLTypeRetriever;
@@ -33,13 +32,13 @@ public class GraphQLInputProcessor {
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private GraphQLTypeRetriever graphQLTypeRetriever;
 
-    public GraphQLInputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLTypeRetriever graphQLTypeRetriever, GraphQLInputObjectRetriever graphQLInputObjectRetriever) {
+    public GraphQLInputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLTypeRetriever graphQLTypeRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.graphQLTypeRetriever = graphQLTypeRetriever;
     }
 
     public GraphQLInputProcessor() {
-        this(new GraphQLObjectInfoRetriever(), new GraphQLTypeRetriever(), new GraphQLInputObjectRetriever());
+        this(new GraphQLObjectInfoRetriever(), new GraphQLTypeRetriever());
     }
 
     /**

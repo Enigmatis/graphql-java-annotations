@@ -4,7 +4,6 @@ import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
-import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
