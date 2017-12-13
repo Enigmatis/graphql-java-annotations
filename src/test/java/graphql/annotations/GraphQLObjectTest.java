@@ -744,9 +744,6 @@ public class GraphQLObjectTest {
     @Test
     public void optionalInput() {
         GraphQLObjectType object = GraphQLAnnotations.object(OptionalTest.class);
-//        GraphQLInputObjectRetriever graphQLInputObjectRetriever=new GraphQLInputObjectRetriever();
-//        GraphQLInputObjectType inputObject = (GraphQLInputObjectType) graphQLInputObjectRetriever.getInputObject(object, "input",
-//                GraphQLAnnotations.getInstance().getTypeRegistry());
         GraphQLObjectInfoRetriever graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
         GraphQLInputObjectType inputObject = new InputObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever),
                 new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
