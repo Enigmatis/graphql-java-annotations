@@ -50,11 +50,6 @@ public class GraphQLOutputProcessor {
      */
 
     public GraphQLOutputType getOutputTypeOrRef(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
-        String typeName = graphQLObjectInfoRetriever.getTypeName(object);
-        if (container.getProcessing().contains(typeName)) {
-            return new GraphQLTypeReference(typeName);
-        }
-
         return (GraphQLOutputType) graphQLTypeRetriever.getGraphQLType(object, container, false);
     }
 

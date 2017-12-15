@@ -69,14 +69,14 @@ public class OutputObjectBuilder {
         if (description != null) {
             builder.description(description.value());
         }
-        List<String> fieldsDefined = new ArrayList<>();
+        List<String> definedFields = new ArrayList<>();
         for (Method method : graphQLObjectInfoRetriever.getOrderedMethods(object)) {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
             if (breadthFirstSearch.isFound(method)) {
                 GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method,container);
-                fieldsDefined.add(gqlField.getName());
+                definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
         }
@@ -87,7 +87,7 @@ public class OutputObjectBuilder {
             }
             if (parentalSearch.isFound(field)) {
                 GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field,container);
-                fieldsDefined.add(gqlField.getName());
+                definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
         }
@@ -100,11 +100,11 @@ public class OutputObjectBuilder {
                 } else {
                     builder.withInterface((GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(iface,container));
                 }
-                builder.fields(graphQLFieldRetriever.getExtensionFields(iface, fieldsDefined,container));
+                builder.fields(graphQLFieldRetriever.getExtensionFields(iface, definedFields,container));
             }
         }
 
-        builder.fields(graphQLFieldRetriever.getExtensionFields(object, fieldsDefined,container));
+        builder.fields(graphQLFieldRetriever.getExtensionFields(object, definedFields,container));
 
         return builder;
     }

@@ -63,7 +63,7 @@ public class InputObjectBuilder {
             builder.description(description.value());
         }
 
-        List<String> fieldsDefined = new ArrayList<>();
+        List<String> definedFields = new ArrayList<>();
 
         for (Method method : graphQLObjectInfoRetriever.getOrderedMethods(object)) {
             if (method.isBridge() || method.isSynthetic()) {
@@ -71,7 +71,7 @@ public class InputObjectBuilder {
             }
             if (breadthFirstSearch.isFound(method)) {
                 GraphQLInputObjectField gqlField = graphQLFieldRetriever.getInputField(method,container);
-                fieldsDefined.add(gqlField.getName());
+                definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
         }
@@ -82,7 +82,7 @@ public class InputObjectBuilder {
             }
             if (parentalSearch.isFound(field)) {
                 GraphQLInputObjectField gqlField = graphQLFieldRetriever.getInputField(field,container);
-                fieldsDefined.add(gqlField.getName());
+                definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
         }

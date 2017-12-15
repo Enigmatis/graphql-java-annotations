@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,9 +60,14 @@ public class GraphQLTypeRetriever {
         // all type instances to be unique singletons
         String typeName = graphQLObjectInfoRetriever.getTypeName(object);
         GraphQLType type;
+
         if (isInput) {
             typeName = DEFAULT_INPUT_PREFIX + typeName;
 
+        }
+
+        if (container.getProcessing().contains(typeName)) {
+            return new GraphQLTypeReference(typeName);
         }
 
         type = container.getTypeRegistry().get(typeName);
@@ -82,8 +87,7 @@ public class GraphQLTypeRetriever {
             if (isInput) {
                 type = new InputObjectBuilder(graphQLObjectInfoRetriever, parentalSearch,
                         breadthFirstSearch, graphQLFieldRetriever).getInputObjectBuilder(object, container).build();
-            }
-            else{
+            } else {
                 type = new OutputObjectBuilder(graphQLObjectInfoRetriever, parentalSearch,
                         breadthFirstSearch, graphQLFieldRetriever, new GraphQLInterfaceRetriever()).getOutputObjectBuilder(object, container).build();
             }
