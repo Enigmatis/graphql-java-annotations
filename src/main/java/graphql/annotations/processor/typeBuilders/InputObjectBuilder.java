@@ -15,18 +15,14 @@
 package graphql.annotations.processor.typeBuilders;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
-import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
-import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
+import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
-import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInterfaceType;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLTypeReference;
+import graphql.schema.GraphQLInputObjectField;
+import graphql.schema.GraphQLInputObjectType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -34,49 +30,48 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
-import static graphql.schema.GraphQLObjectType.newObject;
 
-
-public class ObjectBuilder {
+public class InputObjectBuilder {
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private BreadthFirstSearch breadthFirstSearch;
     private ParentalSearch parentalSearch;
     private GraphQLFieldRetriever graphQLFieldRetriever;
-    private GraphQLInterfaceRetriever graphQLInterfaceRetriever;
 
-    public ObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, ParentalSearch parentalSearch, BreadthFirstSearch breadthFirstSearch,GraphQLFieldRetriever graphQLFieldRetriever,GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
+    public InputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, ParentalSearch parentalSearch, BreadthFirstSearch breadthFirstSearch, GraphQLFieldRetriever graphQLFieldRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.breadthFirstSearch=breadthFirstSearch;
         this.parentalSearch=parentalSearch;
         this.graphQLFieldRetriever=graphQLFieldRetriever;
-        this.graphQLInterfaceRetriever=graphQLInterfaceRetriever;
     }
 
     /**
-     * This will examine the object class and return a {@link GraphQLObjectType.Builder} ready for further definition
+     * This will examine the object class and return a {@link graphql.schema.GraphQLInputObjectType.Builder} ready for further definition
      *
      * @param object the object class to examine
      * @param container a class that hold several members that are required in order to build schema
-     * @return a {@link GraphQLObjectType.Builder} that represents that object class
+     * @return a {@link GraphQLInputObjectType.Builder} that represents that object class
      * @throws GraphQLAnnotationsException if the object class cannot be examined
      */
 
-    public GraphQLObjectType.Builder getObjectBuilder(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
-        GraphQLObjectType.Builder builder = newObject();
-        builder.name(graphQLObjectInfoRetriever.getTypeName(object));
+    public GraphQLInputObjectType.Builder getInputObjectBuilder(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
+        GraphQLInputObjectType.Builder builder = GraphQLInputObjectType.newInputObject();
+        builder.name(DEFAULT_INPUT_PREFIX + graphQLObjectInfoRetriever.getTypeName(object));
         GraphQLDescription description = object.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());
         }
-        List<String> fieldsDefined = new ArrayList<>();
+
+        List<String> definedFields = new ArrayList<>();
+
         for (Method method : graphQLObjectInfoRetriever.getOrderedMethods(object)) {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
             if (breadthFirstSearch.isFound(method)) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method,container);
-                fieldsDefined.add(gqlField.getName());
+                GraphQLInputObjectField gqlField = graphQLFieldRetriever.getInputField(method,container);
+                definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
         }
@@ -86,28 +81,12 @@ public class ObjectBuilder {
                 continue;
             }
             if (parentalSearch.isFound(field)) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field,container);
-                fieldsDefined.add(gqlField.getName());
+                GraphQLInputObjectField gqlField = graphQLFieldRetriever.getInputField(field,container);
+                definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
         }
-
-        for (Class<?> iface : object.getInterfaces()) {
-            if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
-                String ifaceName = graphQLObjectInfoRetriever.getTypeName(iface);
-                if (container.getProcessing().contains(ifaceName)) {
-                    builder.withInterface(new GraphQLTypeReference(ifaceName));
-                } else {
-                    builder.withInterface((GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(iface,container));
-                }
-                builder.fields(graphQLFieldRetriever.getExtensionFields(iface, fieldsDefined,container));
-            }
-        }
-
-        builder.fields(graphQLFieldRetriever.getExtensionFields(object, fieldsDefined,container));
-
         return builder;
     }
-
 
 }

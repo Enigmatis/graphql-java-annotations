@@ -25,12 +25,12 @@ import graphql.schema.GraphQLTypeReference;
 public class GraphQLOutputProcessor {
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
-    private GraphQLTypeRetriever outputObjectRetriever;
+    private GraphQLTypeRetriever graphQLTypeRetriever;
 
 
-    public GraphQLOutputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLTypeRetriever outputObjectRetriever) {
+    public GraphQLOutputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLTypeRetriever graphQLTypeRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
-        this.outputObjectRetriever = outputObjectRetriever;
+        this.graphQLTypeRetriever = graphQLTypeRetriever;
     }
 
     public GraphQLOutputProcessor() {
@@ -50,12 +50,7 @@ public class GraphQLOutputProcessor {
      */
 
     public GraphQLOutputType getOutputTypeOrRef(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
-        String typeName = graphQLObjectInfoRetriever.getTypeName(object);
-        if (container.getProcessing().contains(typeName)) {
-            return new GraphQLTypeReference(typeName);
-        }
-
-        return (GraphQLOutputType) outputObjectRetriever.getGraphQLType(object, container, false);
+        return (GraphQLOutputType) graphQLTypeRetriever.getGraphQLType(object, container, false);
     }
 
 }

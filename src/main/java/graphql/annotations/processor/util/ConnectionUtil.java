@@ -27,11 +27,11 @@ import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 public class ConnectionUtil {
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
 
-    public static boolean isConnection(AccessibleObject obj, GraphQLOutputType type) {
+    public static boolean isConnection(AccessibleObject obj, GraphQLType type) {
         if (type instanceof graphql.schema.GraphQLNonNull) {
-            type = (GraphQLOutputType) ((GraphQLNonNull) type).getWrappedType();
+            type =  ((GraphQLNonNull) type).getWrappedType();
         }
-        final GraphQLOutputType actualType = type;
+        final GraphQLType actualType = type;
         boolean isValidGraphQLTypeForConnection = obj.isAnnotationPresent(GraphQLConnection.class) &&
                 actualType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass ->
                 aClass.isInstance(((GraphQLList) actualType).getWrappedType()));
