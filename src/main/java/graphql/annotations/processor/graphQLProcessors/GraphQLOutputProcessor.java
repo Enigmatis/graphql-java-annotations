@@ -29,15 +29,6 @@ public class GraphQLOutputProcessor {
 
     private GraphQLTypeRetriever graphQLTypeRetriever;
 
-
-    public GraphQLOutputProcessor(GraphQLTypeRetriever graphQLTypeRetriever) {
-        this.graphQLTypeRetriever = graphQLTypeRetriever;
-    }
-
-    public GraphQLOutputProcessor() {
-        this(new GraphQLTypeRetriever());
-    }
-
     /**
      * This will examine the object class and return a {@link GraphQLOutputType} representation
      * which may be a {@link GraphQLOutputType} or a {@link graphql.schema.GraphQLTypeReference}
@@ -59,6 +50,6 @@ public class GraphQLOutputProcessor {
     }
 
     public void unsetGraphQLTypeRetriever(GraphQLTypeRetriever graphQLTypeRetriever) {
-        this.graphQLTypeRetriever = new GraphQLTypeRetriever();
+        this.graphQLTypeRetriever = null;
     }
 }

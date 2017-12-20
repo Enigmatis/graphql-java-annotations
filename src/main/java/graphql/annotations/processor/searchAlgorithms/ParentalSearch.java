@@ -72,6 +72,6 @@ public class ParentalSearch implements SearchAlgorithm {
     }
 
     public void unsetGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
-        this.graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
+        this.graphQLObjectInfoRetriever = null;
     }
 }

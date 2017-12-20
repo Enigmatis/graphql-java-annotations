@@ -19,10 +19,12 @@ import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.graphQLProcessors.GraphQLAnnotationsProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
-import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
+import graphql.annotations.processor.retrievers.*;
+import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
+import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
+import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
 import graphql.schema.GraphQLObjectType;
 
@@ -42,7 +44,38 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     private ProcessingElementsContainer container;
 
     public GraphQLAnnotations() {
-        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new GraphQLObjectHandler(), new GraphQLExtensionsHandler());
+        GraphQLObjectHandler objectHandler = new GraphQLObjectHandler();
+        GraphQLTypeRetriever typeRetriever = new GraphQLTypeRetriever();
+        GraphQLObjectInfoRetriever objectInfoRetriever = new GraphQLObjectInfoRetriever();
+        GraphQLInterfaceRetriever interfaceRetriever = new GraphQLInterfaceRetriever();
+        GraphQLFieldRetriever fieldRetriever = new GraphQLFieldRetriever();
+        GraphQLInputProcessor inputProcessor = new GraphQLInputProcessor();
+        GraphQLOutputProcessor outputProcessor = new GraphQLOutputProcessor();
+        BreadthFirstSearch methodSearchAlgorithm = new BreadthFirstSearch(objectInfoRetriever);
+        ParentalSearch fieldSearchAlgorithm = new ParentalSearch(objectInfoRetriever);
+        DataFetcherConstructor dataFetcherConstructor = new DataFetcherConstructor();
+        GraphQLExtensionsHandler extensionsHandler = new GraphQLExtensionsHandler();
+        DefaultTypeFunction defaultTypeFunction = new DefaultTypeFunction(inputProcessor, outputProcessor);
+
+        objectHandler.setTypeRetriever(typeRetriever);
+        typeRetriever.setGraphQLObjectInfoRetriever(objectInfoRetriever);
+        typeRetriever.setGraphQLInterfaceRetriever(interfaceRetriever);
+        typeRetriever.setMethodSearchAlgorithm(methodSearchAlgorithm);
+        typeRetriever.setFieldSearchAlgorithm(fieldSearchAlgorithm);
+        typeRetriever.setExtensionsHandler(extensionsHandler);
+        typeRetriever.setGraphQLFieldRetriever(fieldRetriever);
+        interfaceRetriever.setGraphQLTypeRetriever(typeRetriever);
+        fieldRetriever.setDataFetcherConstructor(dataFetcherConstructor);
+        inputProcessor.setGraphQLTypeRetriever(typeRetriever);
+        outputProcessor.setGraphQLTypeRetriever(typeRetriever);
+        extensionsHandler.setGraphQLObjectInfoRetriever(objectInfoRetriever);
+        extensionsHandler.setFieldSearchAlgorithm(fieldSearchAlgorithm);
+        extensionsHandler.setMethodSearchAlgorithm(methodSearchAlgorithm);
+        extensionsHandler.setFieldRetriever(fieldRetriever);
+
+        this.graphQLObjectHandler = objectHandler;
+        this.graphQLExtensionsHandler = extensionsHandler;
+        this.container = new ProcessingElementsContainer(defaultTypeFunction);
     }
 
     public GraphQLAnnotations(TypeFunction defaultTypeFunction, GraphQLObjectHandler graphQLObjectHandler, GraphQLExtensionsHandler graphQLExtensionsHandler) {
@@ -85,6 +118,14 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {
         return container.getTypeRegistry();
+    }
+
+    public GraphQLObjectHandler getObjectHandler() {
+        return graphQLObjectHandler;
+    }
+
+    public GraphQLExtensionsHandler getExtensionsHandler() {
+        return graphQLExtensionsHandler;
     }
 
     public ProcessingElementsContainer getContainer() {

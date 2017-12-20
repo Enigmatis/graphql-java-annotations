@@ -29,14 +29,6 @@ public class GraphQLObjectHandler {
 
     private GraphQLTypeRetriever typeRetriever;
 
-    public GraphQLObjectHandler(GraphQLTypeRetriever typeRetriever) {
-        this.typeRetriever = typeRetriever;
-    }
-
-    public GraphQLObjectHandler() {
-        this(new GraphQLTypeRetriever());
-    }
-
     public GraphQLObjectType getObject(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException, CannotCastMemberException {
         GraphQLOutputType type = (GraphQLOutputType) typeRetriever.getGraphQLType(object, container, false);
         if (type instanceof GraphQLObjectType) {
@@ -46,13 +38,17 @@ public class GraphQLObjectHandler {
         }
     }
 
+    public GraphQLTypeRetriever getTypeRetriever() {
+        return typeRetriever;
+    }
+
     @Reference(policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
     public void setTypeRetriever(GraphQLTypeRetriever typeRetriever) {
         this.typeRetriever = typeRetriever;
     }
 
     public void unsetTypeRetriever(GraphQLTypeRetriever typeRetriever) {
-        this.typeRetriever = new GraphQLTypeRetriever();
+        this.typeRetriever = null;
     }
 
 

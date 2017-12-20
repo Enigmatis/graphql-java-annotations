@@ -44,17 +44,6 @@ public class GraphQLExtensionsHandler {
     private SearchAlgorithm methodSearchAlgorithm;
     private GraphQLFieldRetriever fieldRetriever;
 
-    public GraphQLExtensionsHandler() {
-        this(new GraphQLObjectInfoRetriever(), new ParentalSearch(new GraphQLObjectInfoRetriever()), new BreadthFirstSearch(new GraphQLObjectInfoRetriever()), new GraphQLFieldRetriever());
-    }
-
-    public GraphQLExtensionsHandler(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm fieldSearchAlgorithm, SearchAlgorithm methodSearchAlgorithm, GraphQLFieldRetriever fieldRetriever) {
-        this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
-        this.fieldSearchAlgorithm = fieldSearchAlgorithm;
-        this.methodSearchAlgorithm = methodSearchAlgorithm;
-        this.fieldRetriever = fieldRetriever;
-    }
-
     public List<GraphQLFieldDefinition> getExtensionFields(Class<?> object, List<String> definedFields, ProcessingElementsContainer container) throws CannotCastMemberException {
         List<GraphQLFieldDefinition> fields = new ArrayList<>();
         if (container.getExtensionsTypeRegistry().containsKey(object)) {
@@ -109,7 +98,7 @@ public class GraphQLExtensionsHandler {
     }
 
     public void unsetGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
-        this.graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
+        this.graphQLObjectInfoRetriever = null;
     }
 
 
@@ -119,7 +108,7 @@ public class GraphQLExtensionsHandler {
     }
 
     public void unsetFieldSearchAlgorithm(SearchAlgorithm fieldSearchAlgorithm) {
-        this.fieldSearchAlgorithm = new ParentalSearch(new GraphQLObjectInfoRetriever());
+        this.fieldSearchAlgorithm = null;
     }
 
     @Reference(target = "(type=method)", policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
@@ -128,7 +117,7 @@ public class GraphQLExtensionsHandler {
     }
 
     public void unsetMethodSearchAlgorithm(SearchAlgorithm methodSearchAlgorithm) {
-        this.methodSearchAlgorithm = new BreadthFirstSearch(new GraphQLObjectInfoRetriever());
+        this.methodSearchAlgorithm = null;
     }
 
     @Reference(policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
@@ -137,6 +126,6 @@ public class GraphQLExtensionsHandler {
     }
 
     public void unsetFieldRetriever(GraphQLFieldRetriever fieldRetriever) {
-        this.fieldRetriever = new GraphQLFieldRetriever();
+        this.fieldRetriever = null;
     }
 }

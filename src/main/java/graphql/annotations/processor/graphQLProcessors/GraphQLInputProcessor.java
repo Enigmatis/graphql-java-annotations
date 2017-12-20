@@ -27,14 +27,6 @@ public class GraphQLInputProcessor {
 
     private GraphQLTypeRetriever graphQLTypeRetriever;
 
-    public GraphQLInputProcessor(GraphQLTypeRetriever graphQLTypeRetriever) {
-        this.graphQLTypeRetriever = graphQLTypeRetriever;
-    }
-
-    public GraphQLInputProcessor() {
-        this(new GraphQLTypeRetriever());
-    }
-
     /**
      * This will examine the object class and return a {@link GraphQLInputType} representation
      *
@@ -56,7 +48,7 @@ public class GraphQLInputProcessor {
     }
 
     public void unsetGraphQLTypeRetriever(GraphQLTypeRetriever graphQLTypeRetriever) {
-        this.graphQLTypeRetriever = new GraphQLTypeRetriever();
+        this.graphQLTypeRetriever = null;
     }
 
 }

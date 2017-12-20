@@ -40,7 +40,7 @@ public class InputObjectBuilder {
     private SearchAlgorithm methodSearchAlgorithm;
     private GraphQLFieldRetriever graphQLFieldRetriever;
 
-    public InputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm methodSearchAlgorithm, SearchAlgorithm fieldSearchAlgorithm, GraphQLFieldRetriever graphQLFieldRetriever) {
+    public InputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm fieldSearchAlgorithm, SearchAlgorithm methodSearchAlgorithm, GraphQLFieldRetriever graphQLFieldRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.methodSearchAlgorithm = methodSearchAlgorithm;
         this.fieldSearchAlgorithm = fieldSearchAlgorithm;

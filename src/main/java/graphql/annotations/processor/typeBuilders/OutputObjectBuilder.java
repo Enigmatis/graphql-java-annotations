@@ -46,7 +46,7 @@ public class OutputObjectBuilder {
     private GraphQLInterfaceRetriever graphQLInterfaceRetriever;
     private GraphQLExtensionsHandler extensionsHandler;
 
-    public OutputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm methodSearchAlgorithm, SearchAlgorithm fieldSearchAlgorithm, GraphQLFieldRetriever graphQLFieldRetriever, GraphQLInterfaceRetriever graphQLInterfaceRetriever, GraphQLExtensionsHandler extensionsHandler) {
+    public OutputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm fieldSearchAlgorithm, SearchAlgorithm methodSearchAlgorithm, GraphQLFieldRetriever graphQLFieldRetriever, GraphQLInterfaceRetriever graphQLInterfaceRetriever, GraphQLExtensionsHandler extensionsHandler) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.methodSearchAlgorithm = methodSearchAlgorithm;
         this.fieldSearchAlgorithm = fieldSearchAlgorithm;

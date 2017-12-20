@@ -91,6 +91,6 @@ public class BreadthFirstSearch implements SearchAlgorithm {
     }
 
     public void unsetGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
-        this.graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
+        this.graphQLObjectInfoRetriever = null;
     }
 }

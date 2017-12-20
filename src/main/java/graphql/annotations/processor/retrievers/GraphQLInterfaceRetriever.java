@@ -28,14 +28,6 @@ public class GraphQLInterfaceRetriever {
 
     private GraphQLTypeRetriever graphQLTypeRetriever;
 
-    public GraphQLInterfaceRetriever(GraphQLTypeRetriever graphQLTypeRetriever) {
-        this.graphQLTypeRetriever = graphQLTypeRetriever;
-    }
-
-    public GraphQLInterfaceRetriever() {
-        this(new GraphQLTypeRetriever());
-    }
-
     /**
      * This will examine the class and return a {@link graphql.schema.GraphQLOutputType} ready for further definition
      *
@@ -54,6 +46,6 @@ public class GraphQLInterfaceRetriever {
     }
 
     public void unsetGraphQLTypeRetriever(GraphQLTypeRetriever graphQLOutputObjectRetriever) {
-        this.graphQLTypeRetriever = new GraphQLTypeRetriever();
+        this.graphQLTypeRetriever = null;
     }
 }
