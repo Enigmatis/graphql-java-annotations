@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 
 import static graphql.annotations.processor.util.RelayKit.EMPTY_CONNECTION;
 import static graphql.schema.GraphQLSchema.newSchema;
+import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -306,6 +307,22 @@ public class GraphQLConnectionTest {
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
 
         assertEquals(data.get("nullObj").get("edges").size(), 0);
+    }
+
+    @Test
+    public void emptyListData() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ objStreamWithParam(first: 1, filter:\"hel\") { edges { cursor node { id, val } } } }",
+                new TestConnections(emptyList()));
+        assertTrue(result.getErrors().isEmpty());
+
+        Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
+        List<Map<String, Map<String, Object>>> edges = data.get("objStreamWithParam").get("edges");
+
+        assertEquals(edges.size(), 0);
     }
 
     @Test
