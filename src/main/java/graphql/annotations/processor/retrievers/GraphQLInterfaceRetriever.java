@@ -18,18 +18,15 @@ package graphql.annotations.processor.retrievers;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.schema.GraphQLOutputType;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
+@Component(service = GraphQLInterfaceRetriever.class, immediate = true)
 public class GraphQLInterfaceRetriever {
 
-    private GraphQLTypeRetriever graphQLOutputObjectRetriever;
-
-    public GraphQLInterfaceRetriever(GraphQLTypeRetriever graphQLOutputObjectRetriever) {
-        this.graphQLOutputObjectRetriever = graphQLOutputObjectRetriever;
-    }
-
-    public GraphQLInterfaceRetriever() {
-        this(new GraphQLTypeRetriever());
-    }
+    private GraphQLTypeRetriever graphQLTypeRetriever;
 
     /**
      * This will examine the class and return a {@link graphql.schema.GraphQLOutputType} ready for further definition
@@ -40,6 +37,15 @@ public class GraphQLInterfaceRetriever {
      * @throws GraphQLAnnotationsException if the class cannot be examined
      */
     public graphql.schema.GraphQLOutputType getInterface(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
-        return (GraphQLOutputType) graphQLOutputObjectRetriever.getGraphQLType(iface, container, false);
+        return (GraphQLOutputType) graphQLTypeRetriever.getGraphQLType(iface, container, false);
+    }
+
+    @Reference(policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setGraphQLTypeRetriever(GraphQLTypeRetriever graphQLTypeRetriever) {
+        this.graphQLTypeRetriever = graphQLTypeRetriever;
+    }
+
+    public void unsetGraphQLTypeRetriever(GraphQLTypeRetriever graphQLOutputObjectRetriever) {
+        this.graphQLTypeRetriever = null;
     }
 }

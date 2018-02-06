@@ -27,13 +27,6 @@ public interface GraphQLAnnotationsProcessor {
     void registerTypeExtension(Class<?> objectClass);
 
     /**
-     * Unregister a type extension class.
-     *
-     * @param objectClass The extension class to unregister
-     */
-    void unregisterTypeExtension(Class<?> objectClass);
-
-    /**
      * Allows you to set a custom relay object
      *
      * @param relay The extension class to register

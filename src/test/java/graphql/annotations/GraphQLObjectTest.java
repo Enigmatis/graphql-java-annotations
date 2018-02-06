@@ -544,7 +544,7 @@ public class GraphQLObjectTest {
     @Test
     public void recursiveTypes() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectType object = new GraphQLObjectHandler().getObject(Class1.class,graphQLAnnotations.getContainer());
+        GraphQLObjectType object = graphQLAnnotations.getObjectHandler().getObject(Class1.class,graphQLAnnotations.getContainer());
         GraphQLSchema schema = newSchema().query(object).build();
 
         Class1 class1 = new Class1();

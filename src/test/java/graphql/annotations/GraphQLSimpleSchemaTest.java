@@ -74,7 +74,7 @@ public class GraphQLSimpleSchemaTest {
     @Test
     public void detachedCall() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectHandler graphQLObjectHandler=new GraphQLObjectHandler();
+        GraphQLObjectHandler graphQLObjectHandler = graphQLAnnotations.getObjectHandler();
         GraphQLObjectType queryObject = graphQLObjectHandler.getObject(Query.class,graphQLAnnotations.getContainer());
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
@@ -86,7 +86,7 @@ public class GraphQLSimpleSchemaTest {
     @Test
     public void staticCall() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectHandler graphQLObjectHandler=new GraphQLObjectHandler();
+        GraphQLObjectHandler graphQLObjectHandler = graphQLAnnotations.getObjectHandler();
         GraphQLObjectType queryObject = graphQLObjectHandler.getObject(Query.class,graphQLAnnotations.getContainer());
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 

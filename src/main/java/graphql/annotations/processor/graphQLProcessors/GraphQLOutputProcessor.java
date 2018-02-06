@@ -17,25 +17,17 @@ package graphql.annotations.processor.graphQLProcessors;
 
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.retrievers.GraphQLTypeRetriever;
 import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLTypeReference;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
+@Component(service = GraphQLOutputProcessor.class, immediate = true)
 public class GraphQLOutputProcessor {
 
-    private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private GraphQLTypeRetriever graphQLTypeRetriever;
-
-
-    public GraphQLOutputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLTypeRetriever graphQLTypeRetriever) {
-        this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
-        this.graphQLTypeRetriever = graphQLTypeRetriever;
-    }
-
-    public GraphQLOutputProcessor() {
-        this(new GraphQLObjectInfoRetriever(), new GraphQLTypeRetriever());
-    }
 
     /**
      * This will examine the object class and return a {@link GraphQLOutputType} representation
@@ -48,9 +40,16 @@ public class GraphQLOutputProcessor {
      *
      * @throws GraphQLAnnotationsException if the object class cannot be examined
      */
-
     public GraphQLOutputType getOutputTypeOrRef(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         return (GraphQLOutputType) graphQLTypeRetriever.getGraphQLType(object, container, false);
     }
 
+    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    public void setGraphQLTypeRetriever(GraphQLTypeRetriever graphQLTypeRetriever) {
+        this.graphQLTypeRetriever = graphQLTypeRetriever;
+    }
+
+    public void unsetGraphQLTypeRetriever(GraphQLTypeRetriever graphQLTypeRetriever) {
+        this.graphQLTypeRetriever = null;
+    }
 }

@@ -54,7 +54,7 @@ public class GraphQLFragmentTest {
     public void testInterfaceInlineFragment() throws Exception {
         // Given
         registry = new HashMap<>();
-        GraphQLInterfaceRetriever graphQLInterfaceRetriever=new GraphQLInterfaceRetriever();
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever=GraphQLAnnotations.getInstance().getObjectHandler().getTypeRetriever().getGraphQLInterfaceRetriever();
 
 
         GraphQLObjectType rootType = GraphQLAnnotations.object(RootObject.class);
