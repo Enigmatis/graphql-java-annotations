@@ -18,6 +18,8 @@ import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * A package level helper in calling reflective methods and turning them into
@@ -26,8 +28,16 @@ import java.lang.reflect.InvocationTargetException;
 public class ReflectionKit {
     public static <T> T newInstance(Class<T> clazz) throws GraphQLAnnotationsException {
         try {
+            try {
+                Method getInstance = clazz.getMethod("getInstance", new Class<?>[0]);
+                if (Modifier.isStatic(getInstance.getModifiers()) && clazz.isAssignableFrom(getInstance.getReturnType())) {
+                    return (T) getInstance.invoke(null);
+                }
+            } catch (NoSuchMethodException e) {
+                // ignore, just call the constructor
+            }
             return clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
             throw new GraphQLAnnotationsException("Unable to instantiate class : " + clazz, e);
         }
     }
