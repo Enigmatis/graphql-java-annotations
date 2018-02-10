@@ -19,6 +19,7 @@ import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
@@ -50,11 +51,14 @@ public class InterfaceBuilder {
 
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private GraphQLFieldRetriever graphQLFieldRetriever;
+    private GraphQLExtensionsHandler extensionsHandler;
 
-    public InterfaceBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever,GraphQLFieldRetriever graphQLFieldRetriever) {
+    public InterfaceBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLFieldRetriever graphQLFieldRetriever, GraphQLExtensionsHandler extensionsHandler) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.graphQLFieldRetriever=graphQLFieldRetriever;
+        this.extensionsHandler = extensionsHandler;
     }
+
     public GraphQLInterfaceType.Builder getInterfaceBuilder(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException,
             IllegalArgumentException, CannotCastMemberException {
         if (!iface.isInterface()) {
@@ -77,7 +81,7 @@ public class InterfaceBuilder {
                 builder.field(gqlField);
             }
         }
-        builder.fields(graphQLFieldRetriever.getExtensionFields(iface, definedFields,container));
+        builder.fields(extensionsHandler.getExtensionFields(iface, definedFields,container));
 
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
         builder.typeResolver(newInstance(typeResolver.value()));

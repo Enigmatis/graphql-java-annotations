@@ -17,6 +17,7 @@ package graphql.annotations.processor.util;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.schema.DataFetcher;
+import org.osgi.service.component.annotations.Component;
 
 import java.lang.reflect.Constructor;
 import java.util.stream.Stream;
@@ -25,6 +26,7 @@ import static graphql.annotations.processor.util.ReflectionKit.constructNewInsta
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 import static java.util.Arrays.stream;
 
+@Component(service = DataFetcherConstructor.class)
 public class DataFetcherConstructor {
     public DataFetcher constructDataFetcher(String fieldName, GraphQLDataFetcher annotatedDataFetcher) {
         final String[] args;

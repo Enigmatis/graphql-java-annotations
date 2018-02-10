@@ -52,6 +52,9 @@ public class PaginatedDataConnectionFetcher<T> implements ConnectionFetcher<T> {
     }
 
     private PageInfo getPageInfo(List<Edge<T>> edges, PaginatedData<T> paginatedData) {
+        if (edges.isEmpty()) {
+            return new DefaultPageInfo(null,null,false,false);
+        }
         ConnectionCursor firstCursor = edges.get(0).getCursor();
         ConnectionCursor lastCursor = edges.get(edges.size() - 1).getCursor();
         return new DefaultPageInfo(

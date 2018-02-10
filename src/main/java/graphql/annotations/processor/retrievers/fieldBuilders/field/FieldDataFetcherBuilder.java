@@ -35,12 +35,12 @@ import static java.util.Objects.nonNull;
 public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
     private Field field;
     private DataFetcherConstructor dataFetcherConstructor;
-    private GraphQLOutputType outputType;
+    private GraphQLType outputType;
     private TypeFunction typeFunction;
     private ProcessingElementsContainer container;
     private boolean isConnection;
 
-    public FieldDataFetcherBuilder(Field field, DataFetcherConstructor dataFetcherConstructor, GraphQLOutputType outputType, TypeFunction typeFunction, ProcessingElementsContainer container, boolean isConnection) {
+    public FieldDataFetcherBuilder(Field field, DataFetcherConstructor dataFetcherConstructor, GraphQLType outputType, TypeFunction typeFunction, ProcessingElementsContainer container, boolean isConnection) {
         this.field = field;
         this.dataFetcherConstructor = dataFetcherConstructor;
         this.outputType = outputType;

@@ -14,30 +14,42 @@
  */
 package graphql.annotations.processor.retrievers;
 
-import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
+@Component(service = GraphQLObjectHandler.class, immediate = true)
 public class GraphQLObjectHandler {
 
-    private GraphQLOutputObjectRetriever outputObjectRetriever;
-
-    public GraphQLObjectHandler(GraphQLOutputObjectRetriever outputObjectRetriever) {
-        this.outputObjectRetriever = outputObjectRetriever;
-    }
-
-    public GraphQLObjectHandler() {
-        this(new GraphQLOutputObjectRetriever());
-    }
+    private GraphQLTypeRetriever typeRetriever;
 
     public GraphQLObjectType getObject(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException, CannotCastMemberException {
-        GraphQLOutputType type = outputObjectRetriever.getOutputType(object, container);
+        GraphQLOutputType type = (GraphQLOutputType) typeRetriever.getGraphQLType(object, container, false);
         if (type instanceof GraphQLObjectType) {
             return (GraphQLObjectType) type;
         } else {
             throw new IllegalArgumentException("Object resolve to a " + type.getClass().getSimpleName());
         }
     }
+
+    public GraphQLTypeRetriever getTypeRetriever() {
+        return typeRetriever;
+    }
+
+    @Reference(policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    public void setTypeRetriever(GraphQLTypeRetriever typeRetriever) {
+        this.typeRetriever = typeRetriever;
+    }
+
+    public void unsetTypeRetriever(GraphQLTypeRetriever typeRetriever) {
+        this.typeRetriever = null;
+    }
+
+
 }

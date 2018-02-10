@@ -14,34 +14,18 @@
  */
 package graphql.annotations.processor.graphQLProcessors;
 
-
-import graphql.annotations.processor.retrievers.GraphQLInputObjectRetriever;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
-import graphql.schema.GraphQLInputObjectType;
+import graphql.annotations.processor.retrievers.GraphQLTypeRetriever;
 import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLType;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-import java.util.Map;
-
+@Component(service = GraphQLInputProcessor.class)
 public class GraphQLInputProcessor {
 
-    private static final String DEFAULT_INPUT_PREFIX = "Input";
-
-    private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
-    private GraphQLObjectHandler graphQLObjectHandler;
-    private GraphQLInputObjectRetriever graphQLInputObjectRetriever;
-
-    public GraphQLInputProcessor(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLObjectHandler graphQLObjectHandler, GraphQLInputObjectRetriever graphQLInputObjectRetriever) {
-        this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
-        this.graphQLObjectHandler = graphQLObjectHandler;
-        this.graphQLInputObjectRetriever = graphQLInputObjectRetriever;
-    }
-
-    public GraphQLInputProcessor() {
-        this(new GraphQLObjectInfoRetriever(), new GraphQLObjectHandler(), new GraphQLInputObjectRetriever());
-    }
+    private GraphQLTypeRetriever graphQLTypeRetriever;
 
     /**
      * This will examine the object class and return a {@link GraphQLInputType} representation
@@ -50,20 +34,21 @@ public class GraphQLInputProcessor {
      * @param container a class that hold several members that are required in order to build schema
      * @return a {@link GraphQLInputType} that represents that object class
      */
-
-    public GraphQLInputObjectType getInputObject(Class<?> object, ProcessingElementsContainer container) {
-        String typeName = DEFAULT_INPUT_PREFIX + graphQLObjectInfoRetriever.getTypeName(object);
-        Map<String, GraphQLType> typeRegistry = container.getTypeRegistry();
-
-        if (typeRegistry.containsKey(typeName)) {
-            return (GraphQLInputObjectType) container.getTypeRegistry().get(typeName);
-        } else {
-            graphql.schema.GraphQLType graphQLType = graphQLObjectHandler.getObject(object, container);
-            GraphQLInputObjectType inputObject = (GraphQLInputObjectType) graphQLInputObjectRetriever.getInputObject(graphQLType, DEFAULT_INPUT_PREFIX, typeRegistry);
-            typeRegistry.put(inputObject.getName(), inputObject);
-            return inputObject;
+    public GraphQLInputType getInputTypeOrRef(Class<?> object, ProcessingElementsContainer container) {
+        boolean considerAsInput = true;
+        if (Enum.class.isAssignableFrom(object)) {
+            considerAsInput = false;
         }
+        return (GraphQLInputType) graphQLTypeRetriever.getGraphQLType(object, container, considerAsInput);
     }
 
+    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    public void setGraphQLTypeRetriever(GraphQLTypeRetriever graphQLTypeRetriever) {
+        this.graphQLTypeRetriever = graphQLTypeRetriever;
+    }
+
+    public void unsetGraphQLTypeRetriever(GraphQLTypeRetriever graphQLTypeRetriever) {
+        this.graphQLTypeRetriever = null;
+    }
 
 }

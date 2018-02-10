@@ -21,8 +21,12 @@ import graphql.annotations.annotationTypes.*;
 import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.processor.retrievers.GraphQLInputObjectRetriever;
+import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
 import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
+import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
+import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
+import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
+import graphql.annotations.processor.typeBuilders.InputObjectBuilder;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.*;
 
@@ -540,7 +544,7 @@ public class GraphQLObjectTest {
     @Test
     public void recursiveTypes() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectType object = new GraphQLObjectHandler().getObject(Class1.class,graphQLAnnotations.getContainer());
+        GraphQLObjectType object = graphQLAnnotations.getObjectHandler().getObject(Class1.class,graphQLAnnotations.getContainer());
         GraphQLSchema schema = newSchema().query(object).build();
 
         Class1 class1 = new Class1();
@@ -634,6 +638,13 @@ public class GraphQLObjectTest {
         }
     }
 
+    public static class InputObject{
+        @GraphQLField
+        int a;
+
+        @GraphQLField
+        int b;
+    }
 
     @Test
     public void inputObjectArgument() {
@@ -665,10 +676,12 @@ public class GraphQLObjectTest {
 
     @Test
     public void inputObject() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestObjectInput.class);
-        GraphQLInputObjectRetriever graphQLInputObjectRetrieve=new GraphQLInputObjectRetriever();
-        GraphQLInputObjectType inputObjectType = (GraphQLInputObjectType) graphQLInputObjectRetrieve.getInputObject(object, "input",GraphQLAnnotations.getInstance().getContainer().getTypeRegistry());
-        assertEquals(inputObjectType.getFields().size(), object.getFieldDefinitions().size());
+        GraphQLObjectInfoRetriever graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
+        GraphQLInputObjectType type = new InputObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever),
+                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
+                getInputObjectBuilder(InputObject.class, GraphQLAnnotations.getInstance().getContainer()).build();
+
+        assertEquals(type.getFields().size(), InputObject.class.getDeclaredFields().length);
     }
 
     public static class UUIDTypeFunction implements TypeFunction {
@@ -731,8 +744,11 @@ public class GraphQLObjectTest {
     @Test
     public void optionalInput() {
         GraphQLObjectType object = GraphQLAnnotations.object(OptionalTest.class);
-        GraphQLInputObjectRetriever graphQLInputObjectRetriever=new GraphQLInputObjectRetriever();
-        GraphQLInputObjectType inputObject = (GraphQLInputObjectType) graphQLInputObjectRetriever.getInputObject(object, "input",GraphQLAnnotations.getInstance().getTypeRegistry());
+        GraphQLObjectInfoRetriever graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
+        GraphQLInputObjectType inputObject = new InputObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever),
+                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
+                getInputObjectBuilder(OptionalTest.class, GraphQLAnnotations.getInstance().getContainer()).build();
+
         GraphQLObjectType mutation = GraphQLObjectType.newObject().name("mut").field(newFieldDefinition().name("test").type(object).
                 argument(GraphQLArgument.newArgument().type(inputObject).name("input").build()).dataFetcher(environment -> {
             Map<String, String> input = environment.getArgument("input");
