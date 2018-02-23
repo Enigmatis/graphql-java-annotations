@@ -21,12 +21,10 @@ import graphql.schema.DataFetchingEnvironment;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 
-public class ConnectionDataFetcher<T> implements DataFetcher<CompletableFuture<graphql.relay.Connection<T>>> {
+public class ConnectionDataFetcher<T> implements DataFetcher<graphql.relay.Connection<T>> {
     private final DataFetcher<?> actualDataFetcher;
     private final Constructor<ConnectionFetcher<T>> constructor;
 
@@ -46,8 +44,8 @@ public class ConnectionDataFetcher<T> implements DataFetcher<CompletableFuture<g
     }
 
     @Override
-    public CompletableFuture<graphql.relay.Connection<T>> get(DataFetchingEnvironment environment) {
+    public graphql.relay.Connection<T> get(DataFetchingEnvironment environment) {
         ConnectionFetcher<T> conn = constructNewInstance(constructor, actualDataFetcher);
-        return supplyAsync(() -> conn.get(environment));
+        return conn.get(environment);
     }
 }

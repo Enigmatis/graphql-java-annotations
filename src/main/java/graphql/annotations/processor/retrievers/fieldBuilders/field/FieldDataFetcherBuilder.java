@@ -19,17 +19,20 @@ import graphql.annotations.annotationTypes.GraphQLTypeExtension;
 import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.dataFetchers.ExtensionDataFetcherWrapper;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
-import graphql.annotations.dataFetchers.connection.ConnectionDataFetcher;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.fieldBuilders.Builder;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.DataFetcherConstructor;
-import graphql.schema.*;
+import graphql.schema.DataFetcher;
+import graphql.schema.GraphQLNonNull;
+import graphql.schema.GraphQLType;
+import graphql.schema.PropertyDataFetcher;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import static graphql.Scalars.GraphQLBoolean;
+import static graphql.annotations.processor.util.ConnectionUtil.getConnectionDataFetcher;
 import static java.util.Objects.nonNull;
 
 public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
@@ -61,9 +64,8 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
             actualDataFetcher = handleNullCase(actualDataFetcher);
         }
 
-
         if (isConnection) {
-            actualDataFetcher = new ConnectionDataFetcher(field.getAnnotation(GraphQLConnection.class).connection(), actualDataFetcher);
+            actualDataFetcher = getConnectionDataFetcher(field.getAnnotation(GraphQLConnection.class), actualDataFetcher);
         }
         return actualDataFetcher;
     }
@@ -75,7 +77,7 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
             actualDataFetcher = getBooleanDataFetcher(actualDataFetcher);
         } else if (checkIfPrefixGetterExists(field.getDeclaringClass(), "get", field.getName())) {
             actualDataFetcher = wrapExtension(new PropertyDataFetcher(field.getName()), field);
-        } else{
+        } else {
             actualDataFetcher = getDataFetcherWithFluentGetter(actualDataFetcher);
         }
 
