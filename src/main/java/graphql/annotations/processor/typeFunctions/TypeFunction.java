@@ -59,6 +59,7 @@ public interface TypeFunction {
      * @param input is InputType
      * @param aClass The java type to build the type name for
      * @param annotatedType The {@link AnnotatedType} of the java type, which may be a {link AnnotatedParameterizedType}
+     * @param container a class that hold several members that are required in order to build schema
      * @return The built {@link GraphQLType}
      */
 

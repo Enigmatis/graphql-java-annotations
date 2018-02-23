@@ -14,39 +14,40 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.annotations.processor.graphQLProcessors.GraphQLAnnotationsProcessor;
 import graphql.annotations.annotationTypes.GraphQLNonNull;
+import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
-import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.schema.GraphQLType;
 import org.osgi.service.component.annotations.*;
 
 import java.lang.reflect.AnnotatedType;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@Component(property = "type=default")
+@Component(property = "type=default", immediate = true)
 public class DefaultTypeFunction implements TypeFunction {
-
-    protected List<TypeFunction> otherFunctions = new ArrayList<>();
 
     private CopyOnWriteArrayList<TypeFunction> typeFunctions;
 
-    GraphQLAnnotationsProcessor annotationsProcessor;
+    private GraphQLInputProcessor graphQLInputProcessor;
+    private GraphQLOutputProcessor graphQLOutputProcessor;
 
     @Override
     public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
         return getTypeFunction(aClass, annotatedType) != null;
     }
 
-    public void setAnnotationsProcessor(GraphQLAnnotationsProcessor annotationsProcessor) {
-        this.annotationsProcessor = annotationsProcessor;
+    public DefaultTypeFunction() {
     }
 
-
     public DefaultTypeFunction(GraphQLInputProcessor graphQLInputProcessor, GraphQLOutputProcessor graphQLOutputProcessor) {
+        this.graphQLInputProcessor = graphQLInputProcessor;
+        this.graphQLOutputProcessor = graphQLOutputProcessor;
+        activate();
+    }
+
+    @Activate
+    public void activate() {
         typeFunctions = new CopyOnWriteArrayList<>();
 
         typeFunctions.add(new IDFunction());
@@ -71,18 +72,11 @@ public class DefaultTypeFunction implements TypeFunction {
             service = TypeFunction.class,
             target = "(!(type=default))")
     void addFunction(TypeFunction function) {
-        this.otherFunctions.add(function);
+        register(function);
     }
 
     void removeFunction(TypeFunction function) {
-        this.otherFunctions.remove(function);
-    }
-
-    @Activate
-    protected void activate() {
-        for (TypeFunction function : otherFunctions) {
-            register(function);
-        }
+        this.typeFunctions.remove(function);
     }
 
     public Class<DefaultTypeFunction> register(TypeFunction function) {
@@ -121,4 +115,23 @@ public class DefaultTypeFunction implements TypeFunction {
         }
         return null;
     }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    public void setGraphQLInputProcessor(GraphQLInputProcessor graphQLInputProcessor) {
+        this.graphQLInputProcessor = graphQLInputProcessor;
+    }
+
+    public void unsetGraphQLInputProcessor(GraphQLInputProcessor graphQLInputProcessor) {
+        this.graphQLInputProcessor = null;
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    public void setGraphQLOutputProcessor(GraphQLOutputProcessor graphQLOutputProcessor) {
+        this.graphQLOutputProcessor = graphQLOutputProcessor;
+    }
+
+    public void unsetGraphQLOutputProcessor(GraphQLOutputProcessor graphQLOutputProcessor) {
+        this.graphQLOutputProcessor = null;
+    }
+
 }

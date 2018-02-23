@@ -18,11 +18,11 @@ import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
 import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
-import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
-import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
+import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
@@ -40,17 +40,19 @@ import static graphql.schema.GraphQLObjectType.newObject;
 
 public class OutputObjectBuilder {
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
-    private BreadthFirstSearch breadthFirstSearch;
-    private ParentalSearch parentalSearch;
+    private SearchAlgorithm methodSearchAlgorithm;
+    private SearchAlgorithm fieldSearchAlgorithm;
     private GraphQLFieldRetriever graphQLFieldRetriever;
     private GraphQLInterfaceRetriever graphQLInterfaceRetriever;
+    private GraphQLExtensionsHandler extensionsHandler;
 
-    public OutputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, ParentalSearch parentalSearch, BreadthFirstSearch breadthFirstSearch, GraphQLFieldRetriever graphQLFieldRetriever, GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
+    public OutputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm fieldSearchAlgorithm, SearchAlgorithm methodSearchAlgorithm, GraphQLFieldRetriever graphQLFieldRetriever, GraphQLInterfaceRetriever graphQLInterfaceRetriever, GraphQLExtensionsHandler extensionsHandler) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
-        this.breadthFirstSearch=breadthFirstSearch;
-        this.parentalSearch=parentalSearch;
-        this.graphQLFieldRetriever=graphQLFieldRetriever;
-        this.graphQLInterfaceRetriever=graphQLInterfaceRetriever;
+        this.methodSearchAlgorithm = methodSearchAlgorithm;
+        this.fieldSearchAlgorithm = fieldSearchAlgorithm;
+        this.graphQLFieldRetriever = graphQLFieldRetriever;
+        this.graphQLInterfaceRetriever = graphQLInterfaceRetriever;
+        this.extensionsHandler = extensionsHandler;
     }
 
     /**
@@ -74,7 +76,7 @@ public class OutputObjectBuilder {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
-            if (breadthFirstSearch.isFound(method)) {
+            if (methodSearchAlgorithm.isFound(method)) {
                 GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method,container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
@@ -85,7 +87,7 @@ public class OutputObjectBuilder {
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
-            if (parentalSearch.isFound(field)) {
+            if (fieldSearchAlgorithm.isFound(field)) {
                 GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field,container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
@@ -98,13 +100,13 @@ public class OutputObjectBuilder {
                 if (container.getProcessing().contains(ifaceName)) {
                     builder.withInterface(new GraphQLTypeReference(ifaceName));
                 } else {
-                    builder.withInterface((GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(iface,container));
+                    builder.withInterface((GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(iface, container));
                 }
-                builder.fields(graphQLFieldRetriever.getExtensionFields(iface, definedFields,container));
+                builder.fields(extensionsHandler.getExtensionFields(iface, definedFields, container));
             }
         }
 
-        builder.fields(graphQLFieldRetriever.getExtensionFields(object, definedFields,container));
+        builder.fields(extensionsHandler.getExtensionFields(object, definedFields, container));
 
         return builder;
     }

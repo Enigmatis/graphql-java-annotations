@@ -21,6 +21,7 @@ import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
+import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
 import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
 
@@ -35,15 +36,15 @@ import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
 
 public class InputObjectBuilder {
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
-    private BreadthFirstSearch breadthFirstSearch;
-    private ParentalSearch parentalSearch;
+    private SearchAlgorithm fieldSearchAlgorithm;
+    private SearchAlgorithm methodSearchAlgorithm;
     private GraphQLFieldRetriever graphQLFieldRetriever;
 
-    public InputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, ParentalSearch parentalSearch, BreadthFirstSearch breadthFirstSearch, GraphQLFieldRetriever graphQLFieldRetriever) {
+    public InputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm fieldSearchAlgorithm, SearchAlgorithm methodSearchAlgorithm, GraphQLFieldRetriever graphQLFieldRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
-        this.breadthFirstSearch=breadthFirstSearch;
-        this.parentalSearch=parentalSearch;
-        this.graphQLFieldRetriever=graphQLFieldRetriever;
+        this.methodSearchAlgorithm = methodSearchAlgorithm;
+        this.fieldSearchAlgorithm = fieldSearchAlgorithm;
+        this.graphQLFieldRetriever = graphQLFieldRetriever;
     }
 
     /**
@@ -69,7 +70,7 @@ public class InputObjectBuilder {
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
-            if (breadthFirstSearch.isFound(method)) {
+            if (methodSearchAlgorithm.isFound(method)) {
                 GraphQLInputObjectField gqlField = graphQLFieldRetriever.getInputField(method,container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
@@ -80,7 +81,7 @@ public class InputObjectBuilder {
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
-            if (parentalSearch.isFound(field)) {
+            if (fieldSearchAlgorithm.isFound(field)) {
                 GraphQLInputObjectField gqlField = graphQLFieldRetriever.getInputField(field,container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);

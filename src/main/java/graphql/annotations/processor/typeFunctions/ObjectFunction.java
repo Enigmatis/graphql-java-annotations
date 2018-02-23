@@ -15,9 +15,9 @@
 package graphql.annotations.processor.typeFunctions;
 
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
-import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.schema.GraphQLType;
 
 import java.lang.reflect.AnnotatedType;
@@ -25,14 +25,14 @@ import java.lang.reflect.AnnotatedType;
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 
 
-class ObjectFunction implements TypeFunction {
+public class ObjectFunction implements TypeFunction {
 
-    GraphQLInputProcessor graphQLInputProcessor;
-    GraphQLOutputProcessor graphQLOutputProcessor;
+    private GraphQLInputProcessor graphQLInputProcessor;
+    private GraphQLOutputProcessor graphQLOutputProcessor;
 
-    public ObjectFunction(GraphQLInputProcessor graphQLInputProcessor,GraphQLOutputProcessor graphQLOutputProcessor) {
+    public ObjectFunction(GraphQLInputProcessor graphQLInputProcessor, GraphQLOutputProcessor graphQLOutputProcessor) {
         this.graphQLInputProcessor = graphQLInputProcessor;
-        this.graphQLOutputProcessor=graphQLOutputProcessor;
+        this.graphQLOutputProcessor = graphQLOutputProcessor;
     }
 
 
@@ -52,7 +52,7 @@ class ObjectFunction implements TypeFunction {
         if (inputType) {
             return graphQLInputProcessor.getInputTypeOrRef(aClass, container);
         } else {
-            return graphQLOutputProcessor.getOutputTypeOrRef(aClass,container);
+            return graphQLOutputProcessor.getOutputTypeOrRef(aClass, container);
         }
     }
 
