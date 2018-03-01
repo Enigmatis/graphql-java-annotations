@@ -16,6 +16,8 @@ package graphql.annotations.processor.util;
 
 import graphql.annotations.connection.ConnectionValidator;
 import graphql.annotations.connection.GraphQLConnection;
+import graphql.annotations.dataFetchers.connection.AsyncConnectionDataFetcher;
+import graphql.annotations.dataFetchers.connection.ConnectionDataFetcher;
 import graphql.schema.*;
 
 import java.lang.reflect.AccessibleObject;
@@ -43,6 +45,14 @@ public class ConnectionUtil {
         } else {
             return false;
         }
+    }
+
+    public static DataFetcher getConnectionDataFetcher(GraphQLConnection connectionAnnotation, DataFetcher actualDataFetcher) {
+        actualDataFetcher = new ConnectionDataFetcher(connectionAnnotation.connection(), actualDataFetcher);
+        if (connectionAnnotation.async()) {
+            actualDataFetcher = new AsyncConnectionDataFetcher((ConnectionDataFetcher) actualDataFetcher);
+        }
+        return actualDataFetcher;
     }
 
 }
