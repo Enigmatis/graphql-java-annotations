@@ -70,17 +70,25 @@ public class GraphQLFieldRetriever {
         builder.name(new MethodNameBuilder(method).build());
         GraphQLOutputType outputType = (GraphQLOutputType) new MethodTypeBuilder(method, typeFunction, container, false).build();
 
+        TypesConnectionChecker typesConnectionChecker = new TypesConnectionChecker();
         boolean isConnection = ConnectionUtil.isConnection(method, outputType);
         if (isConnection) {
+            typesConnectionChecker.setConnection(true);
             outputType = getGraphQLConnection(method, outputType, container.getRelay(), container.getTypeRegistry());
+            builder.argument(container.getRelay().getConnectionFieldArguments());
         }
+        boolean isSimpleConnection = ConnectionUtil.isSimpleConnection(method, outputType);
+        if (isSimpleConnection) {
+            typesConnectionChecker.setSimpleConnection(true);
+            builder.argument(container.getRelay().getConnectionFieldArguments());
+        }
+
         builder.type(outputType);
-        handleConnectionArgument(container, builder, isConnection);
         List<GraphQLArgument> args = new ArgumentBuilder(method, typeFunction, builder, container, outputType).build();
         GraphQLFieldDefinition relayFieldDefinition = handleRelayArguments(method, container, builder, outputType, args);
         builder.description(new DescriptionBuilder(method).build())
                 .deprecate(new DeprecateBuilder(method).build())
-                .dataFetcher(new MethodDataFetcherBuilder(method, outputType, typeFunction, container, relayFieldDefinition, args, dataFetcherConstructor, isConnection).build());
+                .dataFetcher(new MethodDataFetcherBuilder(method, outputType, typeFunction, container, relayFieldDefinition, args, dataFetcherConstructor, typesConnectionChecker).build());
         return new GraphQLFieldDefinitionWrapper(builder.build());
     }
 
@@ -91,8 +99,8 @@ public class GraphQLFieldRetriever {
 
         GraphQLType outputType = typeFunction.buildType(field.getType(), field.getAnnotatedType(), container);
 
-        boolean isConnection = ConnectionUtil.isConnection(field, outputType);
         TypesConnectionChecker typesConnectionChecker = new TypesConnectionChecker();
+        boolean isConnection = ConnectionUtil.isConnection(field, outputType);
         if (isConnection) {
             typesConnectionChecker.setConnection(true);
             outputType = getGraphQLConnection(field, outputType, container.getRelay(), container.getTypeRegistry());
@@ -135,12 +143,6 @@ public class GraphQLFieldRetriever {
             builder.argument(args);
         }
         return relayFieldDefinition;
-    }
-
-    private void handleConnectionArgument(ProcessingElementsContainer container, GraphQLFieldDefinition.Builder builder, boolean isConnection) {
-        if (isConnection) {
-            builder.argument(container.getRelay().getConnectionFieldArguments());
-        }
     }
 
     private TypeFunction getTypeFunction(Method method, ProcessingElementsContainer container) {
