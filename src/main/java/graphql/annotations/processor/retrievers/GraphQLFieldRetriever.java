@@ -18,6 +18,7 @@ package graphql.annotations.processor.retrievers;
 import graphql.annotations.GraphQLFieldDefinitionWrapper;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.connection.GraphQLConnection;
+import graphql.annotations.connection.GraphQLSimpleConnection;
 import graphql.annotations.connection.TypesConnectionChecker;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -53,6 +54,7 @@ import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
+import static graphql.schema.GraphQLObjectType.newObject;
 
 @Component(service = GraphQLFieldRetriever.class, immediate = true)
 public class GraphQLFieldRetriever {
@@ -83,6 +85,7 @@ public class GraphQLFieldRetriever {
         boolean isSimpleConnection = ConnectionUtil.isSimpleConnection(method, outputType);
         if (isSimpleConnection) {
             typesConnectionChecker.setSimpleConnection(true);
+            outputType = getGraphQLSimpleConnection(method, outputType, container.getTypeRegistry());
             builder.argument(container.getRelay().getConnectionFieldArguments());
         }
 
@@ -112,6 +115,7 @@ public class GraphQLFieldRetriever {
         boolean isSimpleConnection = ConnectionUtil.isSimpleConnection(field, outputType);
         if (isSimpleConnection) {
             typesConnectionChecker.setSimpleConnection(true);
+            outputType = getGraphQLSimpleConnection(field, outputType, container.getTypeRegistry());
             builder.argument(getArgumentsForSimpleConnection());
         }
 
@@ -229,6 +233,35 @@ public class GraphQLFieldRetriever {
         connectionName = connectionName.isEmpty() ? wrappedType.getName() : connectionName;
         GraphQLObjectType edgeType = getActualType(relay.edgeType(connectionName, wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList()), typeRegistry);
         return getActualType(relay.connectionType(connectionName, edgeType, Collections.emptyList()), typeRegistry);
+    }
+
+    private GraphQLOutputType getGraphQLSimpleConnection(AccessibleObject field, graphql.schema.GraphQLType type, Map<String, graphql.schema.GraphQLType> typeRegistry) {
+        if (type instanceof GraphQLNonNull) {
+            GraphQLList listType = (GraphQLList) ((GraphQLNonNull) type).getWrappedType();
+            return new GraphQLNonNull(internalGetGraphQLSimpleConnection(field, listType, typeRegistry));
+        } else {
+            return internalGetGraphQLSimpleConnection(field, (GraphQLList) type, typeRegistry);
+        }
+    }
+
+    private GraphQLOutputType internalGetGraphQLSimpleConnection(AccessibleObject field, GraphQLList listType, Map<String, graphql.schema.GraphQLType> typeRegistry) {
+        GraphQLOutputType wrappedType = (GraphQLOutputType) listType.getWrappedType();
+        String connectionName = field.getAnnotation(GraphQLSimpleConnection.class).name();
+        connectionName = connectionName.isEmpty() ? wrappedType.getName() + "Chunk" : connectionName;
+
+        GraphQLObjectType simpleConnectionType = newObject()
+                .name(connectionName)
+                .field(newFieldDefinition()
+                        .name("overAllCount")
+                        .type(GraphQLInt)
+                        .build())
+                .field(newFieldDefinition()
+                        .name("data")
+                        .type(listType)
+                        .build())
+                .build();
+
+        return getActualType(simpleConnectionType, typeRegistry);
     }
 
     private GraphQLObjectType getActualType(GraphQLObjectType type, Map<String, graphql.schema.GraphQLType> typeRegistry) {

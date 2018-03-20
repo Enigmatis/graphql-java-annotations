@@ -5,7 +5,10 @@ import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.schema.*;
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -14,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static graphql.schema.GraphQLSchema.newSchema;
-import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.assertEquals;
 
@@ -30,9 +33,9 @@ public class GraphQLSimpleConnectionTest {
         GraphQLObjectType object = GraphQLAnnotations.object(MainConnection.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        GraphQLOutputType objsType = schema.getQueryType().getFieldDefinition("objs").getType();
+        String objsTypeName = schema.getQueryType().getFieldDefinition("objs").getType().getName();
 
-        assertThat(objsType, instanceOf(GraphQLList.class));
+        assertThat(objsTypeName, is("ObjChunk"));
     }
 
     @Test(expectedExceptions = GraphQLConnectionException.class)
@@ -46,17 +49,17 @@ public class GraphQLSimpleConnectionTest {
     }
 
     @Test
-    public void simpleConnection_queryForFirstObject_getOneObject() {
+    public void simpleConnection_queryForOverAll_getCorrectAnswer() {
         GraphQLObjectType object = GraphQLAnnotations.object(MainConnection.class);
         GraphQLSchema schema = newSchema().query(object).build();
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
 
-        ExecutionResult executionResult = graphQL.execute("{ objs(first: 1) {id,val}}");
+        ExecutionResult executionResult = graphQL.execute("{ objs(first: 1) {overAllCount}}");
 
-        List data = (List) ((HashMap) executionResult.getData()).get("objs");
+        int overAllCount = (Integer) ((HashMap) ((HashMap) executionResult.getData()).get("objs")).get("overAllCount");
 
-        assertEquals(data.size(), 1);
+        assertEquals(overAllCount, 5);
     }
 
     @Test
@@ -66,9 +69,9 @@ public class GraphQLSimpleConnectionTest {
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
 
-        ExecutionResult executionResult = graphQL.execute("{ objs(first: 2) {id,val}}");
+        ExecutionResult executionResult = graphQL.execute("{ objs(first: 2){data{id,val}}}");
 
-        List data = (List) ((HashMap) executionResult.getData()).get("objs");
+        List data = (List) ((HashMap) ((HashMap) executionResult.getData()).get("objs")).get("data");
 
         assertEquals(data.size(), 2);
     }

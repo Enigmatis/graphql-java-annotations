@@ -2,15 +2,15 @@ package graphql.annotations.connection;
 
 public class SimplePaginatedDataImpl<T> extends AbstractSimplePaginatedData<T> {
 
-    private long overAll;
+    private long overAllCount;
 
-    public SimplePaginatedDataImpl(Iterable<T> data, long overAll) {
+    public SimplePaginatedDataImpl(Iterable<T> data, long overAllCount) {
         super(data);
-        this.overAll = overAll;
+        this.overAllCount = overAllCount;
     }
 
     @Override
-    public long getOverAll() {
-        return overAll;
+    public long getOverAllCount() {
+        return overAllCount;
     }
 }

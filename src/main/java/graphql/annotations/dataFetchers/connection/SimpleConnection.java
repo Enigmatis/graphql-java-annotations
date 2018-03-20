@@ -22,5 +22,5 @@ public interface SimpleConnection<T> {
      *
      * @return The amount of entities
      */
-    long getOverAll();
+    long getOverAllCount();
 }
