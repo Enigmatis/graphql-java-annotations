@@ -42,12 +42,15 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static graphql.Scalars.GraphQLInt;
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
+import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 
@@ -109,7 +112,7 @@ public class GraphQLFieldRetriever {
         boolean isSimpleConnection = ConnectionUtil.isSimpleConnection(field, outputType);
         if (isSimpleConnection) {
             typesConnectionChecker.setSimpleConnection(true);
-            builder.argument(container.getRelay().getConnectionFieldArguments());
+            builder.argument(getArgumentsForSimpleConnection());
         }
 
         builder.type((GraphQLOutputType) outputType).description(new DescriptionBuilder(field).build())
@@ -184,6 +187,31 @@ public class GraphQLFieldRetriever {
             typeFunction = newInstance(annotation.value());
         }
         return typeFunction;
+    }
+
+    private List<GraphQLArgument> getArgumentsForSimpleConnection() {
+        List<GraphQLArgument> args = new ArrayList<>();
+        args.add(newArgument()
+                .name("before")
+                .description("fetching only nodes before this node (exclusive)")
+                .type(GraphQLInt)
+                .build());
+        args.add(newArgument()
+                .name("after")
+                .description("fetching only nodes after this node (exclusive)")
+                .type(GraphQLInt)
+                .build());
+        args.add(newArgument()
+                .name("first")
+                .description("fetching only the first certain number of nodes")
+                .type(GraphQLInt)
+                .build());
+        args.add(newArgument()
+                .name("last")
+                .description("fetching only the last certain number of nodes")
+                .type(GraphQLInt)
+                .build());
+        return args;
     }
 
     private GraphQLOutputType getGraphQLConnection(AccessibleObject field, graphql.schema.GraphQLType type, Relay relay, Map<String, graphql.schema.GraphQLType> typeRegistry) {
