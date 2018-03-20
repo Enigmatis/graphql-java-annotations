@@ -21,13 +21,18 @@ import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.schema.*;
+import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.TypeResolver;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
@@ -35,6 +40,11 @@ import static org.testng.Assert.assertTrue;
 
 @SuppressWarnings("unchecked")
 public class GraphQLInputTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     public static class Resolver implements TypeResolver {
 
