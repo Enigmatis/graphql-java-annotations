@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,8 @@ package graphql.annotations.processor.retrievers.fieldBuilders.field;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLTypeExtension;
 import graphql.annotations.connection.GraphQLConnection;
+import graphql.annotations.connection.GraphQLSimpleConnection;
+import graphql.annotations.connection.TypesConnectionChecker;
 import graphql.annotations.dataFetchers.ExtensionDataFetcherWrapper;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.processor.ProcessingElementsContainer;
@@ -33,23 +35,25 @@ import java.lang.reflect.Method;
 
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.annotations.processor.util.ConnectionUtil.getConnectionDataFetcher;
+import static graphql.annotations.processor.util.ConnectionUtil.getSimpleConnectionDataFetcher;
 import static java.util.Objects.nonNull;
 
+@SuppressWarnings("ALL")
 public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
     private Field field;
     private DataFetcherConstructor dataFetcherConstructor;
     private GraphQLType outputType;
     private TypeFunction typeFunction;
     private ProcessingElementsContainer container;
-    private boolean isConnection;
+    private TypesConnectionChecker typesConnectionChecker;
 
-    public FieldDataFetcherBuilder(Field field, DataFetcherConstructor dataFetcherConstructor, GraphQLType outputType, TypeFunction typeFunction, ProcessingElementsContainer container, boolean isConnection) {
+    public FieldDataFetcherBuilder(Field field, DataFetcherConstructor dataFetcherConstructor, GraphQLType outputType, TypeFunction typeFunction, ProcessingElementsContainer container, TypesConnectionChecker typesConnectionChecker) {
         this.field = field;
         this.dataFetcherConstructor = dataFetcherConstructor;
         this.outputType = outputType;
         this.typeFunction = typeFunction;
         this.container = container;
-        this.isConnection = isConnection;
+        this.typesConnectionChecker = typesConnectionChecker;
     }
 
     @Override
@@ -64,9 +68,13 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
             actualDataFetcher = handleNullCase(actualDataFetcher);
         }
 
-        if (isConnection) {
+        if (typesConnectionChecker.isConnection()) {
             actualDataFetcher = getConnectionDataFetcher(field.getAnnotation(GraphQLConnection.class), actualDataFetcher);
         }
+        if (typesConnectionChecker.isSimpleConnection()) {
+            actualDataFetcher = getSimpleConnectionDataFetcher(field.getAnnotation(GraphQLSimpleConnection.class), actualDataFetcher);
+        }
+
         return actualDataFetcher;
     }
 
@@ -84,6 +92,7 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
         if (actualDataFetcher == null) {
             actualDataFetcher = wrapExtension(new PropertyDataFetcher(field.getName()), field);
         }
+
         return actualDataFetcher;
     }
 
@@ -97,7 +106,7 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
         try {
             fluentMethod = field.getDeclaringClass().getMethod(fluentGetter);
             hasFluentGetter = true;
-        } catch (NoSuchMethodException x) {
+        } catch (NoSuchMethodException ignored) {
         }
 
         if (hasFluentGetter) {
@@ -110,6 +119,7 @@ public class FieldDataFetcherBuilder implements Builder<DataFetcher> {
         if (field.getDeclaringClass().isAnnotationPresent(GraphQLTypeExtension.class)) {
             return new ExtensionDataFetcherWrapper(field.getDeclaringClass(), dataFetcher);
         }
+
         return dataFetcher;
     }
 
