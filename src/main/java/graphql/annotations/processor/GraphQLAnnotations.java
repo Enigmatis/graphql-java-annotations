@@ -104,7 +104,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             GraphQLAnnotations instance = getInstance();
             return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
         } finally {
-            instance.getContainer().getTypeRegistry().clear();
             instance.getContainer().getProcessing().clear();
         }
     }
