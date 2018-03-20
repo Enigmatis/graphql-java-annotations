@@ -85,7 +85,7 @@ public class ConnectionUtil {
     }
 
     public static DataFetcher getSimpleConnectionDataFetcher(GraphQLSimpleConnection connectionAnnotation, DataFetcher actualDataFetcher) {
-        actualDataFetcher = new SimpleConnectionDataFetcher(actualDataFetcher, connectionAnnotation.connection());
+        actualDataFetcher = new SimpleConnectionDataFetcher(connectionAnnotation.connection(), actualDataFetcher);
         if (connectionAnnotation.async()) {
             actualDataFetcher = new AsyncSimpleConnectionDataFetcher((SimpleConnectionDataFetcher) actualDataFetcher);
         }
