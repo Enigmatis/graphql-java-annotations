@@ -14,20 +14,19 @@
  */
 package graphql.annotations.dataFetchers;
 
-import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.*;
-import graphql.schema.GraphQLType;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
+import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 
 public class MethodDataFetcher<T> implements DataFetcher<T> {

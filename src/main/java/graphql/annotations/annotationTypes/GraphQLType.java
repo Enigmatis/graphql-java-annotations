@@ -14,8 +14,8 @@
  */
 package graphql.annotations.annotationTypes;
 
-import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
+import graphql.annotations.processor.typeFunctions.TypeFunction;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

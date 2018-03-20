@@ -15,8 +15,8 @@
 package graphql.annotations.processor.graphQLProcessors;
 
 
-import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLTypeRetriever;
 import graphql.schema.GraphQLOutputType;
 import org.osgi.service.component.annotations.Component;

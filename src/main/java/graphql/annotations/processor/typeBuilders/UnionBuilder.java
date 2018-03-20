@@ -19,16 +19,15 @@ import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLType;
 import graphql.annotations.annotationTypes.GraphQLUnion;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.processor.util.ReflectionKit;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
+import graphql.annotations.processor.typeFunctions.TypeFunction;
+import graphql.annotations.processor.util.ReflectionKit;
 import graphql.annotations.typeResolvers.UnionTypeResolver;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLUnionType;
 
 import java.util.Arrays;
-import java.util.function.Function;
 
 import static graphql.schema.GraphQLUnionType.newUnionType;
 

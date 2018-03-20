@@ -16,8 +16,9 @@ package graphql.annotations.typeResolvers;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.schema.*;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLType;
+import graphql.schema.TypeResolver;
 
 import java.util.Arrays;
 import java.util.HashMap;

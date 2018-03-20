@@ -18,8 +18,6 @@ import graphql.annotations.annotationTypes.GraphQLTypeExtension;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
-import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
 import graphql.schema.GraphQLFieldDefinition;
 import org.osgi.service.component.annotations.Component;

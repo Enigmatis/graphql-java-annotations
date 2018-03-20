@@ -15,13 +15,7 @@
 package graphql.annotations.dataFetchers.connection;
 
 import graphql.annotations.processor.util.Base64;
-import graphql.relay.ConnectionCursor;
-import graphql.relay.DefaultConnection;
-import graphql.relay.DefaultConnectionCursor;
-import graphql.relay.DefaultEdge;
-import graphql.relay.DefaultPageInfo;
-import graphql.relay.Edge;
-import graphql.relay.PageInfo;
+import graphql.relay.*;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 
