@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package graphql.annotations.processor.retrievers;
 import graphql.annotations.GraphQLFieldDefinitionWrapper;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.connection.GraphQLConnection;
+import graphql.annotations.connection.TypesConnectionChecker;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.fieldBuilders.ArgumentBuilder;
@@ -89,15 +90,23 @@ public class GraphQLFieldRetriever {
         TypeFunction typeFunction = getTypeFunction(field, container);
 
         GraphQLType outputType = typeFunction.buildType(field.getType(), field.getAnnotatedType(), container);
+
         boolean isConnection = ConnectionUtil.isConnection(field, outputType);
+        TypesConnectionChecker typesConnectionChecker = new TypesConnectionChecker();
         if (isConnection) {
+            typesConnectionChecker.setConnection(true);
             outputType = getGraphQLConnection(field, outputType, container.getRelay(), container.getTypeRegistry());
+            builder.argument(container.getRelay().getConnectionFieldArguments());
+        }
+        boolean isSimpleConnection = ConnectionUtil.isSimpleConnection(field, outputType);
+        if (isSimpleConnection) {
+            typesConnectionChecker.setSimpleConnection(true);
             builder.argument(container.getRelay().getConnectionFieldArguments());
         }
 
         builder.type((GraphQLOutputType) outputType).description(new DescriptionBuilder(field).build())
                 .deprecate(new DeprecateBuilder(field).build())
-                .dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, isConnection).build());
+                .dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, typesConnectionChecker).build());
 
         return new GraphQLFieldDefinitionWrapper(builder.build());
     }
