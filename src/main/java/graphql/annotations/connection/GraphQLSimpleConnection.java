@@ -14,6 +14,7 @@ public @interface GraphQLSimpleConnection {
     /**
      * By default, wrapped type's name is used for naming TypeConnection, but can be overridden
      * using this property
+     *
      * @return the wrapped type's name
      */
     String name() default "";
@@ -23,6 +24,7 @@ public @interface GraphQLSimpleConnection {
      * this property allows for more efficient fetching procedures (limiting database queries, etc.)
      * NOTE: if you override this, you should also override the validator field, and specify
      * your own connection validator
+     *
      * @return a connection class
      */
     Class<? extends SimpleConnectionFetcher> connection() default SimplePaginatedDataConnectionFetcher.class;
@@ -30,13 +32,15 @@ public @interface GraphQLSimpleConnection {
     /**
      * By default, the the validator validates a simple paginated data connection.
      * Can be overridden (and should be) if you are using a custom connection
+     *
      * @return a connection validator
      */
-    Class <? extends ConnectionValidator> validator() default SimplePaginatedDataConnectionTypeValidator.class;
+    Class<? extends ConnectionValidator> validator() default SimplePaginatedDataConnectionTypeValidator.class;
 
     /**
      * By default, the simple paginated data is fetched synchronously. If explicitly specified, asynchronous data fetching
      * will be used.
+     *
      * @return if async fetching to be used.
      */
     boolean async() default false;

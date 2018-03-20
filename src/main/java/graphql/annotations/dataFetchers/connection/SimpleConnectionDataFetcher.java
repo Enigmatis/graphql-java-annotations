@@ -15,7 +15,7 @@ public class SimpleConnectionDataFetcher<T> implements SimpleConnectionFetcher<T
 
     @SuppressWarnings("unchecked")
     public SimpleConnectionDataFetcher(DataFetcher<?> actualDataFetcher, Class<? extends SimpleConnectionFetcher<T>> connection) {
-        this.actualDataFetcher =  actualDataFetcher;
+        this.actualDataFetcher = actualDataFetcher;
         Optional<Constructor<SimpleConnectionFetcher<T>>> constructor =
                 Arrays.stream(connection.getConstructors()).
                         filter(c -> c.getParameterCount() == 1).

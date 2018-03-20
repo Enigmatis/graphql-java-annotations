@@ -6,7 +6,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-public class SimplePaginatedDataConnectionTypeValidator implements ConnectionValidator{
+public class SimplePaginatedDataConnectionTypeValidator implements ConnectionValidator {
 
     @Override
     public void validate(AccessibleObject field) {

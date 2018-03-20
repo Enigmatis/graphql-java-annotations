@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class AbstractSimplePaginatedData<T> implements SimplePaginatedData<T>{
+public abstract class AbstractSimplePaginatedData<T> implements SimplePaginatedData<T> {
     private Iterable<T> data;
 
     public AbstractSimplePaginatedData(Iterable<T> data) {
