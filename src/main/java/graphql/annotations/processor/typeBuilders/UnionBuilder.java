@@ -69,13 +69,8 @@ public class UnionBuilder {
         }
 
         TypeFunction finalTypeFunction = typeFunction;
-        Arrays.asList(unionAnnotation.possibleTypes()).stream()
-                .map(new Function<Class<?>, graphql.schema.GraphQLType>() {
-                    @Override
-                    public graphql.schema.GraphQLType apply(Class<?> aClass) {
-                        return finalTypeFunction.buildType(aClass, null, container);
-                    }
-                })
+        Arrays.stream(unionAnnotation.possibleTypes())
+                .map(aClass -> finalTypeFunction.buildType(aClass, null, container))
                 .map(v -> (GraphQLObjectType) v)
                 .forEach(builder::possibleType);
 

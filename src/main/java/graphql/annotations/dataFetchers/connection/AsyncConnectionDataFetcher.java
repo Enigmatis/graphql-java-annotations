@@ -22,10 +22,10 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class AsyncConnectionDataFetcher<T> implements DataFetcher<CompletableFuture<graphql.relay.Connection<T>>> {
-    private final ConnectionDataFetcher connectionDataFetcher;
+    private final ConnectionDataFetcher<T> connectionDataFetcher;
 
     @SuppressWarnings("unchecked")
-    public AsyncConnectionDataFetcher(ConnectionDataFetcher connectionFetcher) {
+    public AsyncConnectionDataFetcher(ConnectionDataFetcher<T> connectionFetcher) {
         this.connectionDataFetcher = connectionFetcher;
     }
 

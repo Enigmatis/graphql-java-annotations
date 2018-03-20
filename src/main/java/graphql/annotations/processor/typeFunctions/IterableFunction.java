@@ -25,7 +25,7 @@ import java.lang.reflect.ParameterizedType;
 /**
  * Support for the Iterable things like Lists / Sets / Collections and so on..
  */
-class  IterableFunction implements TypeFunction {
+class IterableFunction implements TypeFunction {
 
     private DefaultTypeFunction defaultTypeFunction;
 

@@ -24,7 +24,7 @@ import java.util.Optional;
 
 import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 
-public class ConnectionDataFetcher<T> implements DataFetcher<graphql.relay.Connection<T>> {
+public class ConnectionDataFetcher<T> implements ConnectionFetcher<T> {
     private final DataFetcher<?> actualDataFetcher;
     private final Constructor<ConnectionFetcher<T>> constructor;
 
