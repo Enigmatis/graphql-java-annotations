@@ -34,7 +34,6 @@ public class GraphQLObjectHandler {
         if (type instanceof GraphQLObjectType) {
             return (GraphQLObjectType) type;
         } else {
-            container.getProcessing().clear();
             throw new IllegalArgumentException("Object resolve to a " + type.getClass().getSimpleName());
         }
     }
