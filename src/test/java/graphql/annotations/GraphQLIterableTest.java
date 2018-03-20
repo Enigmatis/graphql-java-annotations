@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,7 +41,7 @@ public class GraphQLIterableTest {
         GraphQLAnnotations.getInstance().getTypeRegistry().clear();
     }
 
-    public static class TestMappedObject {
+    static class TestMappedObject {
         @GraphQLField
         public String name;
 
@@ -49,18 +49,10 @@ public class GraphQLIterableTest {
         public String foo;
     }
 
-    public static class TestObjectDB {
+    static class TestObjectDB {
         private String foo;
 
         private String name;
-
-        public String getName() {
-            return name;
-        }
-
-        public String getFoo() {
-            return foo;
-        }
 
         TestObjectDB(String name, String foo) {
             this.name = name;
@@ -76,6 +68,10 @@ public class GraphQLIterableTest {
         @GraphQLField
         @GraphQLDataFetcher(ListFetcher.class)
         public List<TestMappedObject> list;
+
+        @GraphQLField
+        @GraphQLDataFetcher(ArrayWithinArrayFetcher.class)
+        public TestMappedObject[][] arrayWithinArray;
     }
 
     public static class ArrayFetcher implements DataFetcher<TestObjectDB[]> {
@@ -90,7 +86,18 @@ public class GraphQLIterableTest {
 
         @Override
         public List<TestObjectDB> get(DataFetchingEnvironment environment) {
-            return Collections.singletonList(new TestObjectDB("test", "test"));
+            return Collections.singletonList(new TestObjectDB("test name", "test foo"));
+        }
+    }
+
+    public static class ArrayWithinArrayFetcher implements DataFetcher<TestObjectDB[][]> {
+
+        @Override
+        public TestObjectDB[][] get(DataFetchingEnvironment environment) {
+            return new TestObjectDB[][]{
+                    {new TestObjectDB("hello", "world")},
+                    {new TestObjectDB("a", "b"), new TestObjectDB("c", "d")}
+            };
         }
     }
 
@@ -101,8 +108,8 @@ public class GraphQLIterableTest {
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{array {name foo}}");
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((LinkedHashMap) ((ArrayList) (((LinkedHashMap) result.getData()).get("array"))).get(0)).get("name"), "hello");
-        assertEquals(((LinkedHashMap) ((ArrayList) (((LinkedHashMap) result.getData()).get("array"))).get(0)).get("foo"), "world");
+        assertEquals(((LinkedHashMap) getQueryResultAtIndex(result, "array", 0)).get("name"), "hello");
+        assertEquals(((LinkedHashMap) getQueryResultAtIndex(result, "array", 0)).get("foo"), "world");
     }
 
     @Test
@@ -112,7 +119,30 @@ public class GraphQLIterableTest {
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{list {name foo}}");
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((LinkedHashMap) ((ArrayList) (((LinkedHashMap) result.getData()).get("list"))).get(0)).get("name"), "test");
-        assertEquals(((LinkedHashMap) ((ArrayList) (((LinkedHashMap) result.getData()).get("list"))).get(0)).get("foo"), "test");
+        assertEquals(((LinkedHashMap) getQueryResultAtIndex(result, "list", 0)).get("name"), "test name");
+        assertEquals(((LinkedHashMap) getQueryResultAtIndex(result, "list", 0)).get("foo"), "test foo");
+    }
+
+    @Test
+    public void queryWithArrayWithinAnArray() {
+        GraphQLObjectType object = GraphQLAnnotations.object(IterableTestQuery.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{arrayWithinArray {name foo}}");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((LinkedHashMap) getQueryResultAtCell(result, "arrayWithinArray", 0, 0)).get("name"), "hello");
+        assertEquals(((LinkedHashMap) getQueryResultAtCell(result, "arrayWithinArray", 0, 0)).get("foo"), "world");
+        assertEquals(((LinkedHashMap) getQueryResultAtCell(result, "arrayWithinArray", 1, 0)).get("name"), "a");
+        assertEquals(((LinkedHashMap) getQueryResultAtCell(result, "arrayWithinArray", 1, 0)).get("foo"), "b");
+        assertEquals(((LinkedHashMap) getQueryResultAtCell(result, "arrayWithinArray", 1, 1)).get("name"), "c");
+        assertEquals(((LinkedHashMap) getQueryResultAtCell(result, "arrayWithinArray", 1, 1)).get("foo"), "d");
+    }
+
+    private Object getQueryResultAtIndex(ExecutionResult result, String queryName, int index) {
+        return ((ArrayList) (((LinkedHashMap) result.getData()).get(queryName))).get(index);
+    }
+
+    private Object getQueryResultAtCell(ExecutionResult result, String queryName, int rowIndex, int columnIndex) {
+        return (((ArrayList) (getQueryResultAtIndex(result, queryName, rowIndex))).get(columnIndex));
     }
 }
