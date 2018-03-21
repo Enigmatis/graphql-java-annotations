@@ -18,7 +18,7 @@ import java.util.Iterator;
 
 public abstract class AbstractPaginatedData<T> implements PaginatedData<T> {
 
-    Iterable<T> data;
+    protected Iterable<T> data;
     private boolean hasPreviousPage;
     private boolean hasNextPage;
 
