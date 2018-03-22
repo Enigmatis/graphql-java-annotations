@@ -69,6 +69,10 @@ public class GraphQLInterfaceTest {
 
     public static class Resolver implements TypeResolver {
 
+        public static Resolver getInstance() {
+            return new Resolver();
+        }
+
         @Override
         public GraphQLObjectType getType(TypeResolutionEnvironment env) {
             try {

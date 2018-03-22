@@ -34,17 +34,25 @@ GraphQLObjectType object = GraphQLAnnotations.object(SomeObject.class);
 
 ## Defining Interfaces
 
-This is very similar to defining objects:
+This is very similar to defining objects, with the addition of type resolver : 
 
 ```java
+@GraphQLTypeResolver(MyTypeResolver.class)
 public interface SomeInterface {
   @GraphQLField
   String field();
 }
 
+public class MyTypeResolver implements TypeResolver {
+  GraphQLObjectType getType(TypeResolutionEnvironment env) { ... }
+}
+
 // ...
 GraphQLInterfaceType object = GraphQLAnnotations.iface(SomeInterface.class);
 ```
+
+An instance of the type resolver will be created from the specified class. If a `getInstance` method is present on the
+class, it will be used instead of the default constructor.
 
 ## Fields
 
@@ -108,10 +116,21 @@ public String field(@GraphQLDefaultValue(DefaultValue.class) String value) {
 }
 ```
 
+The `DefaultValue` class can define a `getInstance` method that will be called instead of the default constructor.
+
 `@GraphQLDeprecate` and Java's `@Deprecated` can be used to specify a deprecated
 field.
 
-You can specify a custom data fetcher for a field with `@GraphQLDataFetcher`
+### Custom data fetcher
+
+You can specify a custom data fetcher for a field with `@GraphQLDataFetcher`. The annotation will reference a class name, 
+which will be used as data fetcher. 
+
+An instance of the data fetcher will be created. The `args` attribute on the annotation can be used to specify a list of 
+String arguments to pass to the construcor, allowing to reuse the same class on different fields, with different parameter. 
+The `firstArgIsTargetName` attribute can also be set on `@GraphQLDataFetcher` to pass the field name as a single parameter of the constructor.
+
+If no argument is needed and a `getInstance` method is present, this method will be called instead of the constructor.
 
 ## Type extensions
 
