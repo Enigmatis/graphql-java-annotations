@@ -77,12 +77,12 @@ public class GraphQLEnhancedConnectionTest {
 
     public static class TestListField {
         @GraphQLField
-        @GraphQLConnection(connection = PaginatedDataConnectionFetcher.class)
+        @GraphQLConnection
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
         public PaginatedData<Obj> objs;
 
         @GraphQLField
-        @GraphQLConnection(connection = PaginatedDataConnectionFetcher.class, async = true)
+        @GraphQLConnection(async = true)
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
         public PaginatedData<Obj> objsAsync;
 

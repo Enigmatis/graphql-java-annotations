@@ -21,6 +21,7 @@ import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.schema.*;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -31,6 +32,11 @@ import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.*;
 
 public class GraphQLExtensionsTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     @GraphQLDescription("TestObject object")
     @GraphQLName("TestObject")

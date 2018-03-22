@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@ import graphql.annotations.annotationTypes.GraphQLBatched;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.connection.GraphQLConnection;
+import graphql.annotations.connection.GraphQLSimpleConnection;
+import graphql.annotations.connection.TypesConnectionChecker;
 import graphql.annotations.dataFetchers.BatchedMethodDataFetcher;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.dataFetchers.RelayMutationMethodDataFetcher;
@@ -34,6 +36,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static graphql.annotations.processor.util.ConnectionUtil.getConnectionDataFetcher;
+import static graphql.annotations.processor.util.ConnectionUtil.getSimpleConnectionDataFetcher;
 
 public class MethodDataFetcherBuilder implements Builder<DataFetcher> {
     private Method method;
@@ -43,11 +46,11 @@ public class MethodDataFetcherBuilder implements Builder<DataFetcher> {
     private GraphQLFieldDefinition relayFieldDefinition;
     private List<GraphQLArgument> args;
     private DataFetcherConstructor dataFetcherConstructor;
-    private boolean isConnection;
+    private TypesConnectionChecker typesConnectionChecker;
 
     public MethodDataFetcherBuilder(Method method, GraphQLOutputType outputType, TypeFunction typeFunction,
                                     ProcessingElementsContainer container, GraphQLFieldDefinition relayFieldDefinition,
-                                    List<GraphQLArgument> args, DataFetcherConstructor dataFetcherConstructor, boolean isConnection) {
+                                    List<GraphQLArgument> args, DataFetcherConstructor dataFetcherConstructor, TypesConnectionChecker typesConnectionChecker) {
         this.method = method;
         this.outputType = outputType;
         this.typeFunction = typeFunction;
@@ -55,7 +58,7 @@ public class MethodDataFetcherBuilder implements Builder<DataFetcher> {
         this.relayFieldDefinition = relayFieldDefinition;
         this.args = args;
         this.dataFetcherConstructor = dataFetcherConstructor;
-        this.isConnection = isConnection;
+        this.typesConnectionChecker = typesConnectionChecker;
     }
 
     @Override
@@ -74,9 +77,14 @@ public class MethodDataFetcherBuilder implements Builder<DataFetcher> {
             actualDataFetcher = new RelayMutationMethodDataFetcher(method, args, relayFieldDefinition.getArgument("input").getType(), relayFieldDefinition.getType());
         }
 
-        if (isConnection){
+        if (typesConnectionChecker.isConnection()) {
             actualDataFetcher = getConnectionDataFetcher(method.getAnnotation(GraphQLConnection.class), actualDataFetcher);
         }
+
+        if (typesConnectionChecker.isSimpleConnection()) {
+            actualDataFetcher = getSimpleConnectionDataFetcher(method.getAnnotation(GraphQLSimpleConnection.class), actualDataFetcher);
+        }
+
         return actualDataFetcher;
     }
 }

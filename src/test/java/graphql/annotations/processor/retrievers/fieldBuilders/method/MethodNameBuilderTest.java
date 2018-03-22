@@ -15,6 +15,8 @@
 package graphql.annotations.processor.retrievers.fieldBuilders.method;
 
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.processor.GraphQLAnnotations;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
@@ -22,6 +24,11 @@ import java.lang.reflect.Method;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class MethodNameBuilderTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     @GraphQLName("testName")
     public void testMethod1() {
@@ -40,6 +47,7 @@ public class MethodNameBuilderTest {
     public void test(){
 
     }
+
 
     @Test
     public void build_graphQLNameAnnotationExists_returnAnnotatedName() throws NoSuchMethodException {

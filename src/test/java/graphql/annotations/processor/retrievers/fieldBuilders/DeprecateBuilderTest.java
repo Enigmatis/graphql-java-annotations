@@ -15,6 +15,8 @@
 package graphql.annotations.processor.retrievers.fieldBuilders;
 
 import graphql.annotations.annotationTypes.GraphQLDeprecate;
+import graphql.annotations.processor.GraphQLAnnotations;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
@@ -23,6 +25,11 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNull;
 
 public class DeprecateBuilderTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     @GraphQLDeprecate("test deprecated")
     public int testMethod() {

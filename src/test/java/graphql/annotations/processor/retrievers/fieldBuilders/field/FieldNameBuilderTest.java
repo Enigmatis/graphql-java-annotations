@@ -15,6 +15,8 @@
 package graphql.annotations.processor.retrievers.fieldBuilders.field;
 
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.processor.GraphQLAnnotations;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
@@ -27,6 +29,11 @@ public class FieldNameBuilderTest {
 
     @GraphQLName("test1")
     public int test2;
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     @Test
     public void build_fieldWithGraphQLNameAnnotation_returnAnnotationValue() throws NoSuchFieldException{

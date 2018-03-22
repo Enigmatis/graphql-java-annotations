@@ -15,6 +15,8 @@
 package graphql.annotations.processor.retrievers.fieldBuilders;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.processor.GraphQLAnnotations;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
@@ -24,6 +26,11 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNull;
 
 public class DescriptionBuilderTest {
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
 
     @GraphQLDescription("test description")
     public int testField;

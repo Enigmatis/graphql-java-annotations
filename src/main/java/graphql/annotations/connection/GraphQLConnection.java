@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,7 +51,7 @@ public @interface GraphQLConnection {
      * Can be overridden (and should be) if you are using a custom connection
      * @return a connection validator
      */
-    Class <? extends ConnectionValidator> validator() default PaginatedDataConnectionTypeValidator.class;
+    Class<? extends ConnectionValidator> validator() default PaginatedDataConnectionTypeValidator.class;
 
     /**
      * By default, the paginated data is fetched synchronously. If explicitly specified, asynchronous data fetching
