@@ -14,13 +14,16 @@
  */
 package graphql.annotations;
 
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetcherFactories;
 import graphql.schema.GraphQLFieldDefinition;
 
 public  class GraphQLFieldDefinitionWrapper extends GraphQLFieldDefinition {
 
     public GraphQLFieldDefinitionWrapper(GraphQLFieldDefinition fieldDefinition) {
         super(fieldDefinition.getName(), fieldDefinition.getDescription(), fieldDefinition.getType(),
-                fieldDefinition.getDataFetcher(), fieldDefinition.getArguments(), fieldDefinition.getDeprecationReason());
+                DataFetcherFactories.useDataFetcher((DataFetcher<?>)fieldDefinition.getDataFetcher()), fieldDefinition.getArguments(), fieldDefinition.getDeprecationReason(),
+                fieldDefinition.getDefinition());
     }
 
     @Override
