@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,12 @@ import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
 
-import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
 
 /**
- * Support for the Iterable things like Lists / Sets / Collections / Arrays and so on..
+ * Support for the Iterable things like Lists / Sets / Collections and so on..
  */
 class IterableFunction implements TypeFunction {
 
@@ -36,24 +35,16 @@ class IterableFunction implements TypeFunction {
 
     @Override
     public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
-        return Iterable.class.isAssignableFrom(aClass) || aClass.isArray();
+        return Iterable.class.isAssignableFrom(aClass);
     }
 
     @Override
     public GraphQLType buildType(boolean input, Class<?> aClass, AnnotatedType annotatedType, ProcessingElementsContainer container) {
-        if (!(annotatedType instanceof AnnotatedParameterizedType || annotatedType instanceof AnnotatedArrayType)) {
-            throw new IllegalArgumentException("List or array type parameter should be specified");
+        if (!(annotatedType instanceof AnnotatedParameterizedType)) {
+            throw new IllegalArgumentException("List type parameter should be specified");
         }
-
-        AnnotatedType arg;
-        if (annotatedType instanceof AnnotatedParameterizedType) {
-            AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
-            arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
-        } else {
-            AnnotatedArrayType parameterizedType = (AnnotatedArrayType) annotatedType;
-            arg = parameterizedType.getAnnotatedGenericComponentType();
-        }
-
+        AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
+        AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
         Class<?> klass;
         if (arg.getType() instanceof ParameterizedType) {
             klass = (Class<?>) ((ParameterizedType) (arg.getType())).getRawType();
