@@ -61,7 +61,9 @@ repositories {
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
-        options.compilerArgs << "-parameters"
+        doLast {
+            options.compilerArgs += "-parameters"
+        }
     }
 }
 
