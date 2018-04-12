@@ -19,6 +19,7 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;

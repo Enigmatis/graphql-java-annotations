@@ -19,6 +19,7 @@ import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLNonNull;
+import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.util.CustomRelay;

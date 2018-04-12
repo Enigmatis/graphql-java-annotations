@@ -16,6 +16,7 @@ package graphql.annotations.connection;
 
 
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
+import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
