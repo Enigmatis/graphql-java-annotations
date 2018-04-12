@@ -30,16 +30,17 @@ import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static graphql.annotations.processor.util.RelayKit.EMPTY_CONNECTION;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static java.util.Collections.emptyList;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 @SuppressWarnings("unchecked")
 public class GraphQLConnectionTest {
@@ -366,7 +367,7 @@ public class GraphQLConnectionTest {
         }
 
         @GraphQLField
-        @GraphQLConnection(connection = CustomConnection.class)
+        @GraphQLConnection(connectionFetcher = CustomConnection.class)
         public PaginatedData<Obj> getObjs() {
             return new AbstractPaginatedData<Obj>(true, false, objs) {
                 @Override

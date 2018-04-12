@@ -19,9 +19,7 @@ import graphql.schema.*;
 
 import java.util.List;
 
-import static graphql.Scalars.GraphQLBoolean;
-import static graphql.Scalars.GraphQLInt;
-import static graphql.Scalars.GraphQLString;
+import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 
@@ -74,4 +72,10 @@ public class CustomRelay extends Relay {
                         .type(GraphQLInt))
                 .fields(connectionFields)
                 .build();
-    }}
+    }
+
+    @Override
+    public GraphQLObjectType edgeType(String name, GraphQLOutputType nodeType, GraphQLInterfaceType nodeInterface, List<GraphQLFieldDefinition> edgeFields) {
+        return null;
+    }
+}

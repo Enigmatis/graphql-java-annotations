@@ -11,7 +11,6 @@ buildscript {
     }
 }
 plugins {
-    id "com.github.hierynomus.license" version "0.12.1"
     id "com.jfrog.bintray" version "1.7"
     id 'net.researchgate.release' version '2.3.4'
 }
@@ -76,6 +75,7 @@ dependencies {
     compileOnly 'biz.aQute.bnd:biz.aQute.bndlib:3.2.0'
 
     testCompile 'org.testng:testng:6.9.10'
+    testCompile 'org.hamcrest:hamcrest-core:1.3'
 }
 
 test.useTestNG()

@@ -28,7 +28,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
@@ -77,12 +80,12 @@ public class GraphQLEnhancedConnectionTest {
 
     public static class TestListField {
         @GraphQLField
-        @GraphQLConnection(connection = PaginatedDataConnectionFetcher.class)
+        @GraphQLConnection(connectionFetcher = PaginatedDataConnectionFetcher.class)
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
         public PaginatedData<Obj> objs;
 
         @GraphQLField
-        @GraphQLConnection(connection = PaginatedDataConnectionFetcher.class, async = true)
+        @GraphQLConnection(connectionFetcher = PaginatedDataConnectionFetcher.class, async = true)
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
         public PaginatedData<Obj> objsAsync;
 
