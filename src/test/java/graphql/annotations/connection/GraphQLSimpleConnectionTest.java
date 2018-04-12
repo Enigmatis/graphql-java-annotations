@@ -4,7 +4,10 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 import graphql.annotations.connection.simple.SimplePaginatedData;
+import graphql.annotations.connection.simple.SimplePaginatedDataConnectionTypeValidator;
+import graphql.annotations.connection.simple.SimplePaginatedDataImpl;
 import graphql.annotations.connection.simple.SimpleRelay;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
@@ -57,7 +60,7 @@ public class GraphQLSimpleConnectionTest {
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
 
-        ExecutionResult executionResult = graphQL.execute("{ objs(first: 1) {overAllCount}}");
+        ExecutionResult executionResult = graphQL.execute("{ objs(first: 1) {totalCount}}");
 
         int overAllCount = (Integer) ((HashMap) ((HashMap) executionResult.getData()).get("objs")).get("overAllCount");
 
@@ -102,7 +105,7 @@ public class GraphQLSimpleConnectionTest {
 
     public static class TestConnectionNotGoodReturnType {
         @GraphQLField
-        @GraphQLSimpleConnection
+        @GraphQLConnection(connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
         @GraphQLDataFetcher(ObjsSimpleConnectionFetcher.class)
         public List<Obj> objs;
 
@@ -113,7 +116,7 @@ public class GraphQLSimpleConnectionTest {
 
     public static class MainConnection {
         @GraphQLField
-        @GraphQLSimpleConnection
+        @GraphQLConnection(connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
         @GraphQLDataFetcher(ObjsSimpleConnectionFetcher.class)
         public SimplePaginatedData<Obj> objs;
     }
