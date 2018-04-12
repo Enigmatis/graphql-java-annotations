@@ -5,10 +5,7 @@ import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.connection.exceptions.GraphQLConnectionException;
-import graphql.annotations.connection.simple.SimplePaginatedData;
-import graphql.annotations.connection.simple.SimplePaginatedDataConnectionTypeValidator;
-import graphql.annotations.connection.simple.SimplePaginatedDataImpl;
-import graphql.annotations.connection.simple.SimpleRelay;
+import graphql.annotations.connection.simple.*;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -62,7 +59,7 @@ public class GraphQLSimpleConnectionTest {
 
         ExecutionResult executionResult = graphQL.execute("{ objs(first: 1) {totalCount}}");
 
-        int overAllCount = (Integer) ((HashMap) ((HashMap) executionResult.getData()).get("objs")).get("overAllCount");
+        int overAllCount = (Integer) ((HashMap) ((HashMap) executionResult.getData()).get("objs")).get("totalCount");
 
         assertEquals(overAllCount, 5);
     }
@@ -95,7 +92,7 @@ public class GraphQLSimpleConnectionTest {
 
     public static class TestConnectionOnField {
         @GraphQLField
-        @GraphQLConnection(connectionType = SimpleRelay.class)
+        @GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
         public SimplePaginatedData<Obj> objs;
 
         public TestConnectionOnField(List<Obj> objs) {
@@ -105,7 +102,7 @@ public class GraphQLSimpleConnectionTest {
 
     public static class TestConnectionNotGoodReturnType {
         @GraphQLField
-        @GraphQLConnection(connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
+        @GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
         @GraphQLDataFetcher(ObjsSimpleConnectionFetcher.class)
         public List<Obj> objs;
 
@@ -116,7 +113,7 @@ public class GraphQLSimpleConnectionTest {
 
     public static class MainConnection {
         @GraphQLField
-        @GraphQLConnection(connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
+        @GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
         @GraphQLDataFetcher(ObjsSimpleConnectionFetcher.class)
         public SimplePaginatedData<Obj> objs;
     }
