@@ -1,5 +1,6 @@
 package graphql.annotations.connection.simple;
 
+import graphql.relay.Connection;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 
@@ -29,7 +30,7 @@ public class SimpleConnectionDataFetcher<T> implements SimpleConnectionFetcher<T
     }
 
     @Override
-    public SimpleConnection<T> get(DataFetchingEnvironment environment) {
+    public Connection<T> get(DataFetchingEnvironment environment) {
         SimpleConnectionFetcher<T> conn = constructNewInstance(constructor, actualDataFetcher);
         return conn.get(environment);
     }

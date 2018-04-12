@@ -1,6 +1,6 @@
 package graphql.annotations.connection.simple;
 
-import graphql.schema.DataFetcher;
+import graphql.annotations.connection.ConnectionFetcher;
 
-public interface SimpleConnectionFetcher<T> extends DataFetcher<SimpleConnection<T>> {
+public interface SimpleConnectionFetcher<T> extends ConnectionFetcher<T> {
 }

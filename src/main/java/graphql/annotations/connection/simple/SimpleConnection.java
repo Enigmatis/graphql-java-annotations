@@ -1,5 +1,8 @@
 package graphql.annotations.connection.simple;
 
+
+import graphql.relay.Connection;
+
 import java.util.List;
 
 /**
@@ -8,7 +11,7 @@ import java.util.List;
  *
  * @param <T> The type of the entities
  */
-public interface SimpleConnection<T> {
+public interface SimpleConnection<T> extends Connection<T> {
 
     /**
      * Get the list of the entities
@@ -22,5 +25,5 @@ public interface SimpleConnection<T> {
      *
      * @return The amount of entities
      */
-    long getOverAllCount();
+    long getTotalCount();
 }
