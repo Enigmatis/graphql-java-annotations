@@ -28,6 +28,7 @@ public class GraphQLSimpleConnectionTest {
     @BeforeMethod
     public void init() {
         GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        GraphQLAnnotations.getInstance().getContainer().getProcessing().clear();
     }
 
     @Test
