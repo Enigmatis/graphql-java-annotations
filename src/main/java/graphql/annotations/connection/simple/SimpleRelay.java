@@ -21,7 +21,7 @@ public class SimpleRelay extends Relay {
     @Override
     public GraphQLObjectType edgeType(String name, GraphQLOutputType nodeType, GraphQLInterfaceType nodeInterface, List<GraphQLFieldDefinition> edgeFields) {
         return newObject()
-                .name(name + "Connection")
+                .name(name + "Chunk")
                 .field(newFieldDefinition()
                         .name("totalCount")
                         .description("The total number of the elements")
