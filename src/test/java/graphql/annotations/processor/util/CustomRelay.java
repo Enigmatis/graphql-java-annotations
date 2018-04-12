@@ -15,7 +15,10 @@
 package graphql.annotations.processor.util;
 
 import graphql.relay.Relay;
-import graphql.schema.*;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNonNull;
+import graphql.schema.GraphQLObjectType;
 
 import java.util.List;
 
@@ -72,10 +75,5 @@ public class CustomRelay extends Relay {
                         .type(GraphQLInt))
                 .fields(connectionFields)
                 .build();
-    }
-
-    @Override
-    public GraphQLObjectType edgeType(String name, GraphQLOutputType nodeType, GraphQLInterfaceType nodeInterface, List<GraphQLFieldDefinition> edgeFields) {
-        return null;
     }
 }
