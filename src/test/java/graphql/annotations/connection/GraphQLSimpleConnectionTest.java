@@ -93,7 +93,6 @@ public class GraphQLSimpleConnectionTest {
     public static class TestConnectionOnField {
         @GraphQLField
         @GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
-        @GraphQLDataFetcher(ObjsSimpleConnectionFetcher.class)
         public SimplePaginatedData<Obj> objs;
 
         public TestConnectionOnField(List<Obj> objs) {
