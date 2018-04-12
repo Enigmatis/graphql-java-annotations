@@ -29,7 +29,7 @@ public class SimpleRelay extends Relay {
                 .field(newFieldDefinition()
                         .name("data")
                         .description("The data itself")
-                        .type(nodeType))
+                        .type(new GraphQLList(nodeType)))
                 .build();
     }
 
