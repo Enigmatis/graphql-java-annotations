@@ -63,10 +63,10 @@ public @interface GraphQLConnection {
     boolean async() default false;
 
     /**
-     * By default, the regular relay connection is used. If you want to change the way connection works
+     * By default, the relay connection that the container has is used. If you want to change the way connection works
      * (For example, you don't want edges and nodes), override the {@link Relay} class and specify it.
      *
      * @return a class that represents the connection type
      */
-    Class<? extends Relay> connectionType() default Relay.class;
+    Class<? extends Relay> connectionType() default FakeRelay.class;
 }
