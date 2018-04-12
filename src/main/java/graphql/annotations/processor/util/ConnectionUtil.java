@@ -15,9 +15,12 @@
 package graphql.annotations.processor.util;
 
 import graphql.annotations.connection.ConnectionValidator;
+import graphql.annotations.connection.FakeRelay;
 import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.dataFetchers.connection.AsyncConnectionDataFetcher;
 import graphql.annotations.dataFetchers.connection.ConnectionDataFetcher;
+import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.relay.Relay;
 import graphql.schema.*;
 
 import java.lang.reflect.AccessibleObject;
@@ -45,6 +48,16 @@ public class ConnectionUtil {
         } else {
             return false;
         }
+    }
+
+    public static Relay getRelay(AccessibleObject obj, ProcessingElementsContainer container) {
+        if (obj.isAnnotationPresent(GraphQLConnection.class)) {
+            Class<? extends Relay> aClass = obj.getAnnotation(GraphQLConnection.class).connectionType();
+            if (!FakeRelay.class.isAssignableFrom(aClass)) {
+                return newInstance(aClass);
+            }
+        }
+        return container.getRelay();
     }
 
     public static DataFetcher getConnectionDataFetcher(GraphQLConnection connectionAnnotation, DataFetcher actualDataFetcher) {
