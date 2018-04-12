@@ -62,6 +62,7 @@ public class DefaultTypeFunction implements TypeFunction {
         typeFunctions.add(new BigDecimalFunction());
         typeFunctions.add(new CharFunction());
         typeFunctions.add(new IterableFunction(DefaultTypeFunction.this));
+        typeFunctions.add(new ArrayFunction(DefaultTypeFunction.this));
         typeFunctions.add(new StreamFunction(DefaultTypeFunction.this));
         typeFunctions.add(new OptionalFunction(DefaultTypeFunction.this));
         typeFunctions.add(new ObjectFunction(graphQLInputProcessor, graphQLOutputProcessor));
