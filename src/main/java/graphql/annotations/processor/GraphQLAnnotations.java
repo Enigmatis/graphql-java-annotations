@@ -101,7 +101,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     public static GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
         GraphQLAnnotations instance = getInstance();
-        return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
+        try {
+            return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
+        } finally {
+            instance.getContainer().getProcessing().clear();
+            instance.getTypeRegistry().clear();
+        }
     }
 
     public void registerTypeExtension(Class<?> objectClass) {
