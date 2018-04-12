@@ -48,7 +48,7 @@ public class ConnectionUtil {
     }
 
     public static DataFetcher getConnectionDataFetcher(GraphQLConnection connectionAnnotation, DataFetcher actualDataFetcher) {
-        actualDataFetcher = new ConnectionDataFetcher(connectionAnnotation.connection(), actualDataFetcher);
+        actualDataFetcher = new ConnectionDataFetcher(connectionAnnotation.connectionFetcher(), actualDataFetcher);
         if (connectionAnnotation.async()) {
             actualDataFetcher = new AsyncConnectionDataFetcher((ConnectionDataFetcher) actualDataFetcher);
         }
