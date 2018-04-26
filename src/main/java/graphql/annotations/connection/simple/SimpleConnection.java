@@ -2,6 +2,8 @@ package graphql.annotations.connection.simple;
 
 
 import graphql.relay.Connection;
+import graphql.relay.Edge;
+import graphql.relay.PageInfo;
 
 import java.util.List;
 
@@ -26,4 +28,14 @@ public interface SimpleConnection<T> extends Connection<T> {
      * @return The amount of entities
      */
     long getTotalCount();
+
+    @Override
+    default List<Edge<T>> getEdges() {
+        throw new UnsupportedOperationException("Simple paging doesn't have edges");
+    }
+
+    @Override
+    default PageInfo getPageInfo() {
+        throw new UnsupportedOperationException("Simple paging doesn't have page info");
+    }
 }
