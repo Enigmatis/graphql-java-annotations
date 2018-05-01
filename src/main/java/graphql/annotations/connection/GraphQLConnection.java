@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  *
  * At the moment, the only allowed type for such field is <code>List&lt;?&gt;</code>
  */
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GraphQLConnection {
     /**
