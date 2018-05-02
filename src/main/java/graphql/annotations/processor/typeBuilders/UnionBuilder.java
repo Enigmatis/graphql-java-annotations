@@ -24,7 +24,7 @@ import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.typeResolvers.UnionTypeResolver;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLUnionType;
+import graphql.schema.GraphQLUnionType.Builder;
 import graphql.schema.TypeResolver;
 
 import java.lang.reflect.Constructor;
@@ -44,18 +44,18 @@ public class UnionBuilder {
     }
 
     /**
-     * This will examine the class and return a {@link GraphQLUnionType.Builder} ready for further definition
+     * This will examine the class and return a {@link Builder} ready for further definition
      * @param container a class that hold several members that are required in order to build schema
      * @param iface interface to examine
-     * @return a {@link GraphQLUnionType.Builder}
+     * @return a {@link Builder}
      * @throws GraphQLAnnotationsException if the class cannot be examined
      */
 
-    public GraphQLUnionType.Builder getUnionBuilder(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException, IllegalArgumentException {
+    public Builder getUnionBuilder(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException, IllegalArgumentException {
         if (!iface.isInterface()) {
             throw new IllegalArgumentException(iface + " is not an interface");
         }
-        GraphQLUnionType.Builder builder = newUnionType();
+        Builder builder = newUnionType();
 
         GraphQLUnion unionAnnotation = iface.getAnnotation(GraphQLUnion.class);
         builder.name(graphQLObjectInfoRetriever.getTypeName(iface));
@@ -90,10 +90,8 @@ public class UnionBuilder {
                         Class[].class.isAssignableFrom(constructor.getParameterTypes()[0]))
                 .findFirst();
 
-        TypeResolver typeResolver;
-        typeResolver = typeResolverConstructorOptional
+        return typeResolverConstructorOptional
                 .map(constructor -> (TypeResolver) constructNewInstance(constructor, unionAnnotation.possibleTypes(), container))
                 .orElseGet(() -> new UnionTypeResolver(unionAnnotation.possibleTypes(), container));
-        return typeResolver;
     }
 }
