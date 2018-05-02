@@ -38,7 +38,8 @@ public class UnionTypeResolver implements TypeResolver {
     public GraphQLObjectType getType(TypeResolutionEnvironment env) {
         Object object = env.getObject();
         Optional<Entry<Class<?>, GraphQLType>> maybeType = types.entrySet().
-                stream().filter(e -> e.getKey().isAssignableFrom(object.getClass())).findFirst();
+                stream().filter(e -> object.getClass().getSimpleName()
+                .contains(e.getKey().getSimpleName().replace("Api", ""))).findFirst();
         if (maybeType.isPresent()) {
             return (GraphQLObjectType) maybeType.get().getValue();
         } else {
