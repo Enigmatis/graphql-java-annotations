@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+@SuppressWarnings({"WeakerAccess", "unchecked", "AssertEqualsBetweenInconvertibleTypesTestNG"})
 public class GraphQLUnionTest {
 
     @BeforeMethod
@@ -67,24 +68,56 @@ public class GraphQLUnionTest {
     }
 
     @Test
-    public void query() {
+    public void unionQuery_returnTypeIsComputer_getComputer() {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ hardware{ ... on Computer {name}} }");
+        String query = "{ hardwareComputer{ ... on Computer {name}, ... on Screen{resolution}} }";
+        ExecutionResult result = graphQL.execute(query);
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("hardware").get("name"), "Guy");
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("hardwareComputer").get("name"), "MyComputer");
     }
 
+    @Test
+    public void unionQuery_returnTypeIsScreen_getScreen() {
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        String query = "{ hardwareScreen{ ... on Computer {name}, ... on Screen{resolution}} }";
+        ExecutionResult result = graphQL.execute(query);
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("hardwareScreen").get("resolution"), 10);
+    }
+
+    static class Screen implements Hardware {
+        @GraphQLField
+        int resolution;
+
+    }
 
     @GraphQLUnion(possibleTypes = {Computer.class, Screen.class})
     interface Hardware {
     }
 
-    private static class Screen {
+    // Hibernate class with same structure of API class
+    public static class ComputerFetcher implements DataFetcher<ComputerDB> {
+        ComputerDB computerDB = new ComputerDB("MyComputer");
+
+        @Override
+        public ComputerDB get(DataFetchingEnvironment environment) {
+            return computerDB;
+        }
     }
 
-    // Hibernate class with same structure of API class
+    public static class ScreenFetcher implements DataFetcher<ScreenDB> {
+        ScreenDB screenDB = new ScreenDB(10);
+
+        @Override
+        public ScreenDB get(DataFetchingEnvironment environment) {
+            return screenDB;
+        }
+    }
+
     static class ComputerDB {
         String name;
 
@@ -93,12 +126,25 @@ public class GraphQLUnionTest {
         }
     }
 
-    public static class HardwareFetcher implements DataFetcher<ComputerDB> {
-        ComputerDB computerDB = new ComputerDB("Guy");
+    static class ScreenDB {
+        int resolution;
 
-        @Override
-        public ComputerDB get(DataFetchingEnvironment environment) {
-            return computerDB;
+        public ScreenDB(int resolution) {
+            this.resolution = resolution;
+        }
+    }
+
+    class Query {
+        @GraphQLField
+        @GraphQLDataFetcher(ComputerFetcher.class)
+        public Hardware getHardwareComputer() {
+            return null;
+        }
+
+        @GraphQLField
+        @GraphQLDataFetcher(ScreenFetcher.class)
+        public Hardware getHardwareScreen() {
+            return null;
         }
     }
 
@@ -106,13 +152,4 @@ public class GraphQLUnionTest {
         @GraphQLField
         String name;
     }
-
-    class Query {
-        @GraphQLField
-        @GraphQLDataFetcher(HardwareFetcher.class)
-        public Hardware getHardware() {
-            return null;
-        }
-    }
-
 }
