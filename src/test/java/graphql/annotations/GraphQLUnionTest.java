@@ -26,7 +26,6 @@ import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.lang.model.type.UnionType;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +53,7 @@ public class GraphQLUnionTest {
         GraphQLOutputType unionType = graphQLInterfaceRetriever.getInterface(Hardware.class, GraphQLAnnotations.getInstance().getContainer());
 
         //Assert
-        assertThat(unionType, instanceOf(UnionType.class));
+        assertThat(unionType, instanceOf(GraphQLUnionType.class));
     }
 
     @Test
@@ -77,8 +76,9 @@ public class GraphQLUnionTest {
         List<GraphQLFieldDefinition> unions = object.getFieldDefinitions();
 
         //Assert
-        assertThat(unions.size(), is(1));
-        assertThat(unions.get(0).getName(), is("hardware"));
+        assertThat(unions.size(), is(2));
+        assertThat(unions.get(0).getName(), is("hardwareComputer"));
+        assertThat(unions.get(1).getName(), is("hardwareScreen"));
     }
 
     @Test
