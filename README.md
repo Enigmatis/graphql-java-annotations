@@ -54,6 +54,42 @@ GraphQLInterfaceType object = GraphQLAnnotations.iface(SomeInterface.class);
 An instance of the type resolver will be created from the specified class. If a `getInstance` method is present on the
 class, it will be used instead of the default constructor.
 
+## Defining Unions
+
+To have a union, you must annotate an interface with `@GraphQLUnion`. In the annotation, you must declare all the 
+possible types of the union, and a type resolver.
+If no type resolver is specified, `UnionTypeResovler` is used. It follows this algorithm:
+The resolver assumes the the DB entity's name contains the API entity's name, after removing the "Api"
+suffix from the name of the API entity. If so, it takes the result from the dataFetcher and decides to which
+API entity it should be mapped (according to the name). 
+Example: If you have a `Pet` union type, and the dataFetcher returns `DogDB` (or just `Dog`), the typeResolver
+will check for each API entity if its name (without the "Api" suffix - if the suffix exists) is contained 
+inside the name of the DB entity, so both `Dog` and `DogApi` are valid.
+
+```java
+@GraphQLUnion(possibleTypes={DogApi.class, Cat.class})
+public interface Pet {}
+``` 
+and an example with custom `TypeResovler`:
+```java
+@GraphQLUnion(possibleTypes={DogApi.class, Cat.class}, typeResolver = PetTypeResolver.class)
+public interface Pet {}
+
+
+public class PetTypeResolver implements TypeResolver {
+    @Override
+    GraphQLObjectType getType(TypeResolutionEnvironment env) {
+        Object obj = env.getObject();
+        if(obj instanceof DogDB) {
+            return (GraphQLObjectType) env.getSchema().getType("DogApi");
+        }
+        else {
+            return (GraphQLObjectType) env.getSchema().getType("Cat");
+        }
+      
+    }
+}
+```
 ## Fields
 
 In addition to specifying a field over a Java class field, a field can be defined over a method:
