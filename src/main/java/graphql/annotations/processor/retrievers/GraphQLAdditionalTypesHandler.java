@@ -37,7 +37,7 @@ import java.util.Set;
 import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
 
 @SuppressWarnings("ConstantConditions")
-@Component(service = GraphQLExtensionsHandler.class, immediate = true)
+@Component(service = GraphQLAdditionalTypesHandler.class, immediate = true)
 public class GraphQLAdditionalTypesHandler {
 
     private GraphQLInterfaceRetriever graphQLInterfaceRetriever;
