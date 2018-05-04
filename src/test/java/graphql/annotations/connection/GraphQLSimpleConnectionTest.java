@@ -5,7 +5,9 @@ import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.connection.exceptions.GraphQLConnectionException;
-import graphql.annotations.connection.simple.*;
+import graphql.annotations.connection.simple.GraphQLSimpleConnection;
+import graphql.annotations.connection.simple.SimplePaginatedData;
+import graphql.annotations.connection.simple.SimplePaginatedDataImpl;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -93,7 +95,7 @@ public class GraphQLSimpleConnectionTest {
 
     public static class TestConnectionOnField {
         @GraphQLField
-        @GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
+        @GraphQLSimpleConnection
         public SimplePaginatedData<Obj> objs;
 
         public TestConnectionOnField(List<Obj> objs) {
@@ -103,7 +105,7 @@ public class GraphQLSimpleConnectionTest {
 
     public static class TestConnectionNotGoodReturnType {
         @GraphQLField
-        @GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
+        @GraphQLSimpleConnection
         @GraphQLDataFetcher(ObjsSimpleConnectionFetcher.class)
         public List<Obj> objs;
 
@@ -114,7 +116,7 @@ public class GraphQLSimpleConnectionTest {
 
     public static class MainConnection {
         @GraphQLField
-        @GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)
+        @GraphQLSimpleConnection
         @GraphQLDataFetcher(ObjsSimpleConnectionFetcher.class)
         public SimplePaginatedData<Obj> objs;
     }
