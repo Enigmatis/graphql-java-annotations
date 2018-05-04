@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, validator = SimplePaginatedDataConnectionTypeValidator.class, connectionType = SimpleRelay.class)
-public @interface SimpleGraphQLConnection {
+public @interface GraphQLSimpleConnection {
 }
