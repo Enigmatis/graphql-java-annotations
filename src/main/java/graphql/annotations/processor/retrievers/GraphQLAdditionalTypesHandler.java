@@ -44,13 +44,11 @@ public class GraphQLAdditionalTypesHandler {
     private GraphQLObjectInfoRetriever graphQLObjectInfoRetriever;
     private SearchAlgorithm methodSearchAlgorithm;
     private SearchAlgorithm fieldSearchAlgorithm;
-    private GraphQLObjectInfoRetriever infoRetriever;
     private ClassFinder classFinder;
 
     public GraphQLAdditionalTypesHandler() {
         classFinder = new ClassFinder();
         classFinder.addClassPath();
-        infoRetriever = new GraphQLObjectInfoRetriever();
     }
 
     public Set<GraphQLType> getAdditionalInterfacesImplementations(Class<?> root, ProcessingElementsContainer container) {
@@ -80,13 +78,13 @@ public class GraphQLAdditionalTypesHandler {
 
     private Set<GraphQLType> getNewImplementations(ProcessingElementsContainer container, ClassFinder classFinder, Class<?> aClass) {
         Set<GraphQLType> additionalFields = new HashSet<>();
-        if (container.getTypeRegistry().containsKey(infoRetriever.getTypeName(aClass)) && aClass.isInterface() && aClass.isAnnotationPresent(GraphQLTypeResolver.class)) {
+        if (container.getTypeRegistry().containsKey(graphQLObjectInfoRetriever.getTypeName(aClass)) && aClass.isInterface() && aClass.isAnnotationPresent(GraphQLTypeResolver.class)) {
             ClassFilter classFilter = new SubclassClassFilter(aClass);
             List<ClassInfo> foundClasses = new ArrayList<>();
             classFinder.findClasses(foundClasses, classFilter);
             for (ClassInfo classInfo : foundClasses) {
                 try {
-                    if (!(container.getTypeRegistry().containsKey(infoRetriever.getTypeName(Class.forName(classInfo.getClassName()))))) {
+                    if (!(container.getTypeRegistry().containsKey(graphQLObjectInfoRetriever.getTypeName(Class.forName(classInfo.getClassName()))))) {
                         GraphQLOutputType additionalObject = graphQLInterfaceRetriever.getInterface(Class.forName(classInfo.getClassName()), container);
                         additionalFields.add(additionalObject);
                     }
