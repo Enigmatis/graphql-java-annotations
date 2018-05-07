@@ -39,9 +39,9 @@ public class DataFetcherConstructor {
             return newInstance(annotatedDataFetcher.value());
         } else {
             try {
-                final Constructor<? extends DataFetcher> ctr = annotatedDataFetcher.value().getDeclaredConstructor(
-                        stream(args).map(v -> String.class).toArray(Class[]::new));
-                return constructNewInstance(ctr, (Object[]) args);
+                // Get the String[] constructor
+                final Constructor<? extends DataFetcher> ctr = annotatedDataFetcher.value().getDeclaredConstructor(String[].class);
+                return constructNewInstance(ctr, new Object[] {args});
             } catch (final NoSuchMethodException e) {
                 throw new GraphQLAnnotationsException("Unable to instantiate DataFetcher via constructor for: " + fieldName, e);
             }
