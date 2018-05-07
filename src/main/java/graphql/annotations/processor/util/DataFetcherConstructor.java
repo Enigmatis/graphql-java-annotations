@@ -38,14 +38,31 @@ public class DataFetcherConstructor {
         if (args.length == 0) {
             return newInstance(annotatedDataFetcher.value());
         } else {
-            try {
-                // Get the String[] constructor
-                final Constructor<? extends DataFetcher> ctr = annotatedDataFetcher.value().getDeclaredConstructor(String[].class);
-                return constructNewInstance(ctr, new Object[] {args});
-            } catch (final NoSuchMethodException e) {
-                throw new GraphQLAnnotationsException("Unable to instantiate DataFetcher via constructor for: " + fieldName, e);
-            }
+            return Stream.of(annotatedDataFetcher.value().getConstructors())
+                    // filter only constructor that have the same args as the annotation args
+                    // or that get String[], String... args
+                    .filter(x -> (x.getParameterCount() == args.length) ||
+                            (x.getParameterTypes().length == 1 && x.getParameterTypes()[0] == String[].class))
+                    .map(x -> {
+                        try {
+                            Constructor<? extends DataFetcher> constructor;
+                            if (x.getParameterTypes().length == 1 && x.getParameterTypes()[0] == String[].class) {
+                                constructor = annotatedDataFetcher.value().getDeclaredConstructor(String[].class);
+                                return constructNewInstance(constructor, new Object[]{args});
+                            }
+
+                            constructor = annotatedDataFetcher.value().getDeclaredConstructor(
+                                    stream(args).map(v -> String.class).toArray(Class[]::new));
+                            return constructNewInstance(constructor, (Object[]) args);
+                        } catch (NoSuchMethodException e) {
+                            throw new GraphQLAnnotationsException("Unable to instantiate DataFetcher via constructor for: " + fieldName, e);
+                        }
+                    })
+                    .findFirst()
+                    .orElseThrow(NoArgsConstructorException::new);
         }
     }
 
+    public static class NoArgsConstructorException extends RuntimeException {
+    }
 }
