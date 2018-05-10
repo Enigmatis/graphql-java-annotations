@@ -12,18 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations.connection;
-
+package graphql.annotations.connection.simple;
 
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
+import graphql.annotations.connection.ConnectionValidator;
+import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-public class PaginatedDataConnectionTypeValidator implements ConnectionValidator {
+public class SimplePaginatedDataConnectionTypeValidator implements ConnectionValidator {
 
+    @Override
     public void validate(AccessibleObject field) {
         if (field instanceof Field) {
             if (field.isAnnotationPresent(GraphQLConnection.class) && !field.isAnnotationPresent(GraphQLDataFetcher.class)) {
@@ -32,12 +34,12 @@ public class PaginatedDataConnectionTypeValidator implements ConnectionValidator
                         "neither PropertyDataFetcher nor FieldDataFetcher know how to handle connection");
             }
 
-            if (!PaginatedData.class.isAssignableFrom(((Field) field).getType())) {
-                throw new GraphQLConnectionException(((Field) field).getName() + " type must be PaginatedData");
+            if (!SimplePaginatedData.class.isAssignableFrom(((Field) field).getType())) {
+                throw new GraphQLConnectionException(((Field) field).getName() + " type must be SimplePaginatedData");
             }
         } else {
-            if (!PaginatedData.class.isAssignableFrom(((Method) field).getReturnType())) {
-                throw new GraphQLConnectionException(((Method) field).getName() + " return type must be PaginatedData");
+            if (!SimplePaginatedData.class.isAssignableFrom(((Method) field).getReturnType())) {
+                throw new GraphQLConnectionException(((Method) field).getName() + " return type must be SimplePaginatedData");
             }
         }
     }

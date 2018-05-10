@@ -54,6 +54,45 @@ GraphQLInterfaceType object = GraphQLAnnotations.iface(SomeInterface.class);
 An instance of the type resolver will be created from the specified class. If a `getInstance` method is present on the
 class, it will be used instead of the default constructor.
 
+## Defining Unions
+
+To have a union, you must annotate an interface with `@GraphQLUnion`. In the annotation, you must declare all the 
+possible types of the union, and a type resolver.
+If no type resolver is specified, `UnionTypeResovler` is used. It follows this algorithm:
+The resolver assumes the the DB entity's name is the same as  the API entity's name.
+ If so, it takes the result from the dataFetcher and decides to which
+API entity it should be mapped (according to the name). 
+Example: If you have a `Pet` union type, and the dataFetcher returns `Dog`, the typeResolver
+will check for each API entity if its name is equal to `Dog`, and returns if it finds something
+
+```java
+@GraphQLUnion(possibleTypes={Dog.class, Cat.class})
+public interface Pet {}
+``` 
+and an example with custom `TypeResovler`:
+```java
+@GraphQLUnion(possibleTypes={DogApi.class, Cat.class}, typeResolver = PetTypeResolver.class)
+public interface Pet {}
+
+
+public class PetTypeResolver implements TypeResolver {
+    @Override
+    GraphQLObjectType getType(TypeResolutionEnvironment env) {
+        Object obj = env.getObject();
+        if(obj instanceof DogDB) {
+            return (GraphQLObjectType) env.getSchema().getType("DogApi");
+        }
+        else {
+            return (GraphQLObjectType) env.getSchema().getType("Cat");
+        }
+      
+    }
+}
+```
+NOTE: you can have (but not mandatory) a type resolver with constructor that has `Class<?>[]` as the first parameter and
+`ProcessingElementsContainer` as the second. the `Class<?>[]` parameter contains the possibleTypes class
+and `ProcessingElementsContainer` has all sorts of utils (you can check `UnionTypeResolver` to see how we use it there)
+
 ## Fields
 
 In addition to specifying a field over a Java class field, a field can be defined over a method:
@@ -268,3 +307,17 @@ NOTE: because `PropertyDataFetcher` and `FieldDataFetcher` can't handle connecti
 By default, GraphQLAnnotations will use the `graphql.relay.Relay` class to create the Relay specific schema types (Mutations, Connections, Edges, PageInfo, ...).
 It is possible to set a custom implementation of the Relay class with `GraphQLAnnotations.setRelay` method. The class should inherit from `graphql.relay.Relay` and 
 can redefine methods that create Relay types.
+
+It is also possible to specify for every connection which relay do you want to use, by giving a value to the annotation: 
+`@GraphQLConnection(connectionType = customRelay.class)`. If you do that, please also give values to `connectionFetcher`
+and `validator`.
+
+There is also a support for simple paging, without "Nodes" and "Edges". To use it, annotate you connection like that:
+`@GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)`
+and the return type must be of type `SimplePaginatedData`.
+It has 2 methods:
+1. `getTotalCount` - how many elements are there in total
+2. `getData` - get the data
+
+For you convenience, there are two classes that you can use: `AbstractSimplePaginatedData` and `SimplePaginatedDataImpl`
+For examples, look at the tests

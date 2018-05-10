@@ -12,20 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations.annotationTypes;
+package graphql.annotations.connection;
 
-import graphql.annotations.typeResolvers.UnionTypeResolver;
-import graphql.schema.TypeResolver;
+import graphql.relay.Relay;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GraphQLUnion {
-    Class<?>[] possibleTypes();
-
-    Class<? extends TypeResolver> typeResolver() default UnionTypeResolver.class;
+/**
+ * This class is just for the library to know whether to use the relay in the container or not
+ */
+public final class FakeRelay extends Relay {
 }

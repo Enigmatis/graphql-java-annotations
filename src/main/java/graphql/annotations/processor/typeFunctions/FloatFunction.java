@@ -29,7 +29,7 @@ class FloatFunction implements TypeFunction {
 
     @Override
     public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
-        return aClass == Float.class || aClass == float.class || aClass == Double.class || aClass == double.class;
+        return aClass == Double.class || aClass == double.class;
     }
 
     @Override

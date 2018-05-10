@@ -12,20 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations.annotationTypes;
+package graphql.annotations.connection.simple;
 
-import graphql.annotations.typeResolvers.UnionTypeResolver;
-import graphql.schema.TypeResolver;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GraphQLUnion {
-    Class<?>[] possibleTypes();
-
-    Class<? extends TypeResolver> typeResolver() default UnionTypeResolver.class;
+/**
+ * This class is the result of a simple connection. Every Graphql connection field must return this interface
+ * <p>
+ * NOTE: this interface extends Iterable. The data is retrieved from the "iterator" function.
+ * Please implement the iterator with data structure that has order
+ *
+ * @param <T> the data of which we paginated over
+ */
+public interface SimplePaginatedData<T> extends Iterable<T>, SimpleConnection<T> {
 }

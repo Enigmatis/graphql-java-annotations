@@ -12,20 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations.annotationTypes;
+package graphql.annotations.connection.simple;
 
-import graphql.annotations.typeResolvers.UnionTypeResolver;
-import graphql.schema.TypeResolver;
+public class SimplePaginatedDataImpl<T> extends AbstractSimplePaginatedData<T> {
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+    private long totalCount;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GraphQLUnion {
-    Class<?>[] possibleTypes();
+    public SimplePaginatedDataImpl(Iterable<T> data, long totalCount) {
+        super(data);
+        this.totalCount = totalCount;
+    }
 
-    Class<? extends TypeResolver> typeResolver() default UnionTypeResolver.class;
+    @Override
+    public long getTotalCount() {
+        return totalCount;
+    }
 }
