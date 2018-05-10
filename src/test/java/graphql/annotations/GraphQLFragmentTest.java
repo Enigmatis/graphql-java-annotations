@@ -28,12 +28,7 @@ import graphql.schema.TypeResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -76,7 +71,7 @@ public class GraphQLFragmentTest {
         GraphQL graphQL2 = GraphQL.newGraphQL(schema).build();
 
         // When
-        ExecutionResult graphQLResult = graphQL2.execute("{items { ... on MyObject {a, my {b}} ... on MyObject2 {a, b}  }}", new RootObject());
+        ExecutionResult graphQLResult = graphQL2.execute("{getItems { ... on MyObject {getA, getMy {getB}} ... on MyObject2 {getA, getB}  }}", new RootObject());
         Set resultMap = ((Map) graphQLResult.getData()).entrySet();
 
         // Then

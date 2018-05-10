@@ -20,20 +20,14 @@ import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.PropertyDataFetcher;
+import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
 
 import static graphql.schema.GraphQLSchema.newSchema;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class GraphQLDataFetcherTest {
 
@@ -53,7 +47,7 @@ public class GraphQLDataFetcherTest {
         final ExecutionResult result = graphql.execute("{sample {isGreat isBad}}");
 
         // Then
-        final HashMap<String, Object> data = (HashMap) result.getData();
+        final HashMap<String, Object> data = result.getData();
         assertNotNull(data);
         assertTrue(((HashMap<String, Boolean>) data.get("sample")).get("isGreat"));
         assertTrue(((HashMap<String, Boolean>) data.get("sample")).get("isBad"));
@@ -70,7 +64,7 @@ public class GraphQLDataFetcherTest {
         final ExecutionResult result = graphql.execute("{great}");
 
         // Then
-        final HashMap<String, Object> data = (HashMap) result.getData();
+        final HashMap<String, Object> data = result.getData();
         assertNotNull(data);
         assertFalse((Boolean)data.get("great"));
     }
@@ -83,12 +77,12 @@ public class GraphQLDataFetcherTest {
         final GraphQL graphql = GraphQL.newGraphQL(schema).build();
 
         // When
-        final ExecutionResult result = graphql.execute("{sample {bad}}");
+        final ExecutionResult result = graphql.execute("{sample {isBad}}");
 
         // Then
-        final HashMap<String, Object> data = (HashMap) result.getData();
+        final HashMap<String, Object> data = result.getData();
         assertNotNull(data);
-        assertTrue(((HashMap<String,Boolean>)data.get("sample")).get("bad"));
+        assertTrue(((HashMap<String,Boolean>)data.get("sample")).get("isBad"));
     }
 
     @GraphQLName("Query")

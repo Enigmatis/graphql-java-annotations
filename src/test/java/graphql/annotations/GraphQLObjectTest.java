@@ -22,14 +22,12 @@ import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.typeBuilders.InputObjectBuilder;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.*;
-
 import graphql.schema.GraphQLType;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.SchemaPrinter;
@@ -44,10 +42,7 @@ import java.util.function.Supplier;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLSchema.newSchema;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 @SuppressWarnings("unchecked")
 public class GraphQLObjectTest {
@@ -358,10 +353,10 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestAccessors.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 2);
-        fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        fields.sort(Comparator.comparing(GraphQLFieldDefinition::getName));
 
-        assertEquals(fields.get(1).getName(), "value");
-        assertEquals(fields.get(0).getName(), "anotherValue");
+        assertEquals(fields.get(0).getName(), "getValue");
+        assertEquals(fields.get(1).getName(), "setAnotherValue");
     }
 
 
@@ -438,7 +433,7 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(OnMethodTest.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 1);
-        assertEquals(fields.get(0).getName(), "value");
+        assertEquals(fields.get(0).getName(), "getValue");
     }
 
     public static class TestFetcher implements DataFetcher {
@@ -618,7 +613,7 @@ public class GraphQLObjectTest {
         }
 
         @GraphQLField
-        public Collection<TestInputArgument> getInputs() {
+        public Collection<TestInputArgument> inputs() {
             return inputs;
         }
 
@@ -670,7 +665,7 @@ public class GraphQLObjectTest {
         GraphQLSchema schema = newSchema().query(object).build();
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{ test2(arg: {inputs:[{ a:\"ok\", b:2 }]}, other:0) }", new TestObjectInput());
         assertTrue(result.getErrors().isEmpty());
-        Map<String, Object> v = (Map<String, Object>) result.getData();
+        Map<String, Object> v = result.getData();
         assertEquals(v.get("test2"), "ok");
     }
 
@@ -817,12 +812,12 @@ public class GraphQLObjectTest {
         @GraphQLField(false)
         public String forcedOff;
 
-        public String getOn() {
+        public String on() {
             return "on";
         }
 
         @GraphQLField(false)
-        public String getOff() {
+        public String off() {
             return "off";
         }
     }

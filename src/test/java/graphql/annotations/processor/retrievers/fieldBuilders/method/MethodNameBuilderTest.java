@@ -64,7 +64,7 @@ public class MethodNameBuilderTest {
         String name = methodNameBuilder.build();
 
         // assert
-        assertEquals(name, "test");
+        assertEquals(name, "getTest");
     }
 
     @Test
@@ -77,7 +77,7 @@ public class MethodNameBuilderTest {
         String name = methodNameBuilder.build();
 
         // assert
-        assertEquals(name, "test");
+        assertEquals(name, "isTest");
     }
 
     @Test
@@ -90,7 +90,7 @@ public class MethodNameBuilderTest {
         String name = methodNameBuilder.build();
 
         // assert
-        assertEquals(name, "test");
+        assertEquals(name, "setTest");
     }
 
 

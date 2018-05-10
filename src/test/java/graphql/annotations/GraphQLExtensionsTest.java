@@ -23,6 +23,7 @@ import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.schema.*;
 import org.testng.annotations.Test;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -80,7 +81,7 @@ public class GraphQLExtensionsTest {
         }
 
         @GraphQLField
-        public String getField() {
+        public String field() {
             return "invalid";
         }
     }
@@ -102,7 +103,7 @@ public class GraphQLExtensionsTest {
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 5);
 
-        fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        fields.sort(Comparator.comparing(GraphQLFieldDefinition::getName));
 
         assertEquals(fields.get(0).getName(), "field");
         assertEquals(fields.get(1).getName(), "field2");
@@ -122,7 +123,7 @@ public class GraphQLExtensionsTest {
         GraphQLSchema schemaInherited = newSchema().query(object).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field field2 field3 field4 field5}", new GraphQLExtensionsTest.TestObject());
-        Map<String, Object> data = (Map<String, Object>) result.getData();
+        Map<String, Object> data = result.getData();
         assertEquals(data.get("field"), "test");
         assertEquals(data.get("field2"), "test test2");
         assertEquals(data.get("field3"), "test test3");
