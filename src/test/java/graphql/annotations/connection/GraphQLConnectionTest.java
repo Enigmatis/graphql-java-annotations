@@ -150,22 +150,6 @@ public class GraphQLConnectionTest {
     }
 
     @Test
-    public void customConnection() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestCustomConnection.class);
-        GraphQLSchema schema = newSchema().query(object).build();
-
-        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
-                new TestCustomConnection(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
-
-        assertTrue(result.getErrors().isEmpty());
-        Map<String, Object> data = result.getData();
-        Map<String, Object> objs = (Map<String, Object>) (data.get("objs"));
-        List edges = (List) objs.get("edges");
-        assertEquals(edges.size(), 0);
-    }
-
-    @Test
     public void customRelayMethodList() {
         try {
             GraphQLAnnotations.getInstance().setRelay(new CustomRelay());
