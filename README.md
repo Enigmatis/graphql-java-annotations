@@ -58,7 +58,7 @@ class, it will be used instead of the default constructor.
 
 To have a union, you must annotate an interface with `@GraphQLUnion`. In the annotation, you must declare all the 
 possible types of the union, and a type resolver.
-If no type resolver is specified, `UnionTypeResovler` is used. It follows this algorithm:
+If no type resolver is specified, `UnionTypeResolver` is used. It follows this algorithm:
 The resolver assumes the the DB entity's name is the same as  the API entity's name.
  If so, it takes the result from the dataFetcher and decides to which
 API entity it should be mapped (according to the name). 
@@ -166,8 +166,42 @@ You can specify a custom data fetcher for a field with `@GraphQLDataFetcher`. Th
 which will be used as data fetcher. 
 
 An instance of the data fetcher will be created. The `args` attribute on the annotation can be used to specify a list of 
-String arguments to pass to the construcor, allowing to reuse the same class on different fields, with different parameter. 
+String arguments to pass to the constructor, allowing to reuse the same class on different fields, with different parameter.
 The `firstArgIsTargetName` attribute can also be set on `@GraphQLDataFetcher` to pass the field name as a single parameter of the constructor.
+
+Assuming you are using `@GraphQLDataFetcher` this way:
+
+```java
+@GraphQLField
+@GraphQLDataFetcher(value = HelloWorldDataFetcher.class, args = { "arg1", "arg2" })
+public String getHelloWorld(){
+    return null;
+}
+```
+
+Then the class that extends from `DataFetcher.class` will get this args to two supported constructors <br>
+Or to a constructor that expecting String array that's way (`String[] args` or `String... args`) or for a constructor that expecting the same number of args that you send with in the annotation.<br>
+You get to choose which implementation you want.
+```java
+public class HelloWorldDataFetcher implements DataFetcher<String> {
+
+    public HelloWorldDataFetcher(String[] args){
+        // Do something with your args
+    }
+
+    // Note that you need to expect the same number of args as you send with in the annotation args
+    public HelloWorldDataFetcher(String arg1, String arg2){
+        // Do something with your args
+    }
+
+    @Override
+    public String get(DataFetchingEnvironment environment) {
+        return "something";
+    }
+}
+```
+
+
 
 If no argument is needed and a `getInstance` method is present, this method will be called instead of the constructor.
 
@@ -218,7 +252,7 @@ public class HumanExtension {
 Classes marked as "extensions" will actually not define a new type, but rather set new fields on the class it extends when it will be created. 
 All GraphQL annotations can be used on extension classes.
 
-Extensions are registered in GraqhQLAnnotationProcessor by using `registerTypeExtension`. Note that extensions must be registered before the type itself is requested with `getObject()` :
+Extensions are registered in GraphQLAnnotationProcessor by using `registerTypeExtension`. Note that extensions must be registered before the type itself is requested with `getObject()` :
 
 ```
 GraphQLAnnotationsProcessor processor = GraphQLAnnotations.getInstance(); 
