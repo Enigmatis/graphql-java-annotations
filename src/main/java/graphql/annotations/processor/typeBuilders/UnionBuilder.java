@@ -85,13 +85,17 @@ public class UnionBuilder {
 
     private TypeResolver getTypeResolver(ProcessingElementsContainer container, GraphQLUnion unionAnnotation) {
         Optional<Constructor<?>> typeResolverConstructorOptional = Arrays.stream(unionAnnotation.typeResolver().getConstructors())
-                .filter(constructor -> constructor.getParameterCount() == 2 &&
-                        container.getClass().isAssignableFrom(constructor.getParameterTypes()[1]) &&
-                        Class[].class.isAssignableFrom(constructor.getParameterTypes()[0]))
+                .filter(constructor -> constructor.getParameterCount() == 0 || constructorHasPossibleTypesAndContainerAsParameters(container, constructor))
                 .findFirst();
 
         return typeResolverConstructorOptional
                 .map(constructor -> (TypeResolver) constructNewInstance(constructor, unionAnnotation.possibleTypes(), container))
                 .orElseGet(() -> new UnionTypeResolver(unionAnnotation.possibleTypes(), container));
+    }
+
+    private boolean constructorHasPossibleTypesAndContainerAsParameters(ProcessingElementsContainer container, Constructor<?> constructor) {
+        return constructor.getParameterCount() == 2 &&
+                Class[].class.isAssignableFrom(constructor.getParameterTypes()[0]) &&
+                container.getClass().isAssignableFrom(constructor.getParameterTypes()[1]);
     }
 }
