@@ -89,6 +89,10 @@ public class PetTypeResolver implements TypeResolver {
     }
 }
 ```
+NOTE: you can have (but not mandatory) a type resolver with constructor that has `Class<?>[]` as the first parameter and
+`ProcessingElementsContainer` as the second. the `Class<?>[]` parameter contains the possibleTypes class
+and `ProcessingElementsContainer` has all sorts of utils (you can check `UnionTypeResolver` to see how we use it there)
+
 ## Fields
 
 In addition to specifying a field over a Java class field, a field can be defined over a method:
