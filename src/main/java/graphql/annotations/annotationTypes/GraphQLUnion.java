@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GraphQLUnion {
-    Class<?>[] possibleTypes();
+    Class<?>[] possibleTypes() default {};
 
     Class<? extends TypeResolver> typeResolver() default UnionTypeResolver.class;
 }
