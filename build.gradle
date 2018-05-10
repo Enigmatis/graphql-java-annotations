@@ -59,12 +59,12 @@ signing {
     sign configurations.archives
 }
 
-idea {
-    project {
-        languageLevel = '1.8'
-        vcs = 'Git'
-    }
-}
+//idea {
+//    project {
+//        languageLevel = '1.8'
+//        vcs = 'Git'
+//    }
+//}
 release {
     tagTemplate = 'v${version}'
     failOnPublishNeeded = false
