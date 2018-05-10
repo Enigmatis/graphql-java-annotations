@@ -76,9 +76,7 @@ public class GraphQLUnionTest {
         List<GraphQLFieldDefinition> unions = object.getFieldDefinitions();
 
         //Assert
-        assertThat(unions.size(), is(2));
-        assertThat(unions.get(0).getName(), is("hardwareComputer"));
-        assertThat(unions.get(1).getName(), is("hardwareScreen"));
+        assertThat(unions.size(), is(3));
     }
 
     @Test
@@ -89,7 +87,7 @@ public class GraphQLUnionTest {
         String query = "{ getHardwareComputer{ ... on Computer {name}, ... on Screen{resolution}} }";
         ExecutionResult result = graphQL.execute(query);
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("hardwareComputer").get("name"), "MyComputer");
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("getHardwareComputer").get("name"), "MyComputer");
     }
 
     @Test
@@ -100,7 +98,7 @@ public class GraphQLUnionTest {
         String query = "{ getHardwareScreen{ ... on Computer {name}, ... on Screen{resolution}} }";
         ExecutionResult result = graphQL.execute(query);
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("hardwareScreen").get("resolution"), 10);
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("getHardwareScreen").get("resolution"), 10);
     }
 
     @Test
