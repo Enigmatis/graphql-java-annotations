@@ -202,7 +202,7 @@ public class GraphQLUnionTest {
         }
     }
 
-    static class PetResolver implements TypeResolver {
+    public static class PetResolver implements TypeResolver {
         @Override
         public GraphQLObjectType getType(TypeResolutionEnvironment env) {
             Object object = env.getObject();
