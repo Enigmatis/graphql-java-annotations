@@ -59,15 +59,14 @@ class, it will be used instead of the default constructor.
 To have a union, you must annotate an interface with `@GraphQLUnion`. In the annotation, you must declare all the 
 possible types of the union, and a type resolver.
 If no type resolver is specified, `UnionTypeResovler` is used. It follows this algorithm:
-The resolver assumes the the DB entity's name contains the API entity's name, after removing the "Api"
-suffix from the name of the API entity. If so, it takes the result from the dataFetcher and decides to which
+The resolver assumes the the DB entity's name is the same as  the API entity's name.
+ If so, it takes the result from the dataFetcher and decides to which
 API entity it should be mapped (according to the name). 
-Example: If you have a `Pet` union type, and the dataFetcher returns `DogDB` (or just `Dog`), the typeResolver
-will check for each API entity if its name (without the "Api" suffix - if the suffix exists) is contained 
-inside the name of the DB entity, so both `Dog` and `DogApi` are valid.
+Example: If you have a `Pet` union type, and the dataFetcher returns `Dog`, the typeResolver
+will check for each API entity if its name is equal to `Dog`, and returns if it finds something
 
 ```java
-@GraphQLUnion(possibleTypes={DogApi.class, Cat.class})
+@GraphQLUnion(possibleTypes={Dog.class, Cat.class})
 public interface Pet {}
 ``` 
 and an example with custom `TypeResovler`:
