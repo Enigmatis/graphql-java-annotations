@@ -14,6 +14,7 @@
  */
 package graphql.annotations;
 
+import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
@@ -31,8 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static graphql.schema.GraphQLSchema.newSchema;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 @SuppressWarnings("unchecked")
 public class MethodDataFetcherTest {
@@ -73,6 +73,11 @@ public class MethodDataFetcherTest {
         public int b() {
             return 2;
         }
+
+        @GraphQLField
+        public int c() {
+            return 4;
+        }
     }
 
     public static class InternalType {
@@ -103,6 +108,7 @@ public class MethodDataFetcherTest {
         }
     }
 
+
     @Test
     public void queryingOneFieldNotAnnotatedWithGraphQLInvokeDetached_valueIsDeterminedByEntity() {
         GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
@@ -132,5 +138,15 @@ public class MethodDataFetcherTest {
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, Integer>>) result.getData()).get("apiField").get("a").toString(), "1");
         assertEquals(((Map<String, Map<String, Integer>>) result.getData()).get("apiField").get("b").toString(), "2");
+    }
+
+    @Test
+    public void queryingFieldsFromNoApiEntityFetcher_noMatchingFieldInEntity_throwException(){
+        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { c } }");
+        assertFalse(result.getErrors().isEmpty());
+        assertTrue(((ExceptionWhileDataFetching)result.getErrors().get(0)).getException().getCause() instanceof NoSuchFieldException);
     }
 }
