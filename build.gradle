@@ -159,18 +159,6 @@ publishing {
                 }
             }
 
-//            project.tasks.withType(Sign) {
-//                signatures.all {
-//                    def type = it.type
-//                    if (it.file.name.endsWith('.tar.gz.asc')) {  // Workaround in case a tar.gz file should published
-//                        type = 'tar.gz.asc'
-//                    } else if (it.type.equals('xml.asc')) {  // Set correct extension for signature of pom file
-//                        type = 'pom.asc'
-//                    }
-//                    artifact source: it.file, classifier: it.classifier ?: null, extension: type
-//                }
-//            }
-
             pom.withXml {
                 writeTo(project.ext.pomFile)
                 def pomAscFile = signing.sign(project.ext.pomFile).signatureFiles[0]
