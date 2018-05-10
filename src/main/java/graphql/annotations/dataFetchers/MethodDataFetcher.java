@@ -14,20 +14,19 @@
  */
 package graphql.annotations.dataFetchers;
 
-import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.*;
-import graphql.schema.GraphQLType;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
+import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 
 public class MethodDataFetcher<T> implements DataFetcher<T> {
@@ -59,7 +58,13 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
                     return null;
                 }
             }
-            return (T)method.invoke(obj, invocationArgs(environment, container));
+
+            if (obj == null && environment.getSource() != null) {
+                Object value = getFieldValue(environment.getSource(), method.getName());
+                if (value != null) return (T) value;
+            }
+
+            return (T) method.invoke(obj, invocationArgs(environment, container));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -129,6 +134,16 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
             return list;
         } else {
             return arg;
+        }
+    }
+
+    private Object getFieldValue(Object source, String fieldName) throws IllegalAccessException {
+        try {
+            Field field = source.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(source);
+        } catch (NoSuchFieldException e) {
+            return null;
         }
     }
 }
