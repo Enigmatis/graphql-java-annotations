@@ -89,7 +89,14 @@ public class UnionBuilder {
                 .findFirst();
 
         return typeResolverConstructorOptional
-                .map(constructor -> (TypeResolver) constructNewInstance(constructor, unionAnnotation.possibleTypes(), container))
+                .map(constructor -> {
+                    if(constructor.getParameterCount() == 0) {
+                        return (TypeResolver) constructNewInstance(constructor);
+                    }
+                    else {
+                        return (TypeResolver) constructNewInstance(constructor, unionAnnotation.possibleTypes(), container);
+                    }
+                })
                 .orElseGet(() -> new UnionTypeResolver(unionAnnotation.possibleTypes(), container));
     }
 
