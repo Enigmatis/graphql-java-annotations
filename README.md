@@ -54,6 +54,45 @@ GraphQLInterfaceType object = GraphQLAnnotations.iface(SomeInterface.class);
 An instance of the type resolver will be created from the specified class. If a `getInstance` method is present on the
 class, it will be used instead of the default constructor.
 
+## Defining Unions
+
+To have a union, you must annotate an interface with `@GraphQLUnion`. In the annotation, you must declare all the 
+possible types of the union, and a type resolver.
+If no type resolver is specified, `UnionTypeResovler` is used. It follows this algorithm:
+The resolver assumes the the DB entity's name is the same as  the API entity's name.
+ If so, it takes the result from the dataFetcher and decides to which
+API entity it should be mapped (according to the name). 
+Example: If you have a `Pet` union type, and the dataFetcher returns `Dog`, the typeResolver
+will check for each API entity if its name is equal to `Dog`, and returns if it finds something
+
+```java
+@GraphQLUnion(possibleTypes={Dog.class, Cat.class})
+public interface Pet {}
+``` 
+and an example with custom `TypeResovler`:
+```java
+@GraphQLUnion(possibleTypes={DogApi.class, Cat.class}, typeResolver = PetTypeResolver.class)
+public interface Pet {}
+
+
+public class PetTypeResolver implements TypeResolver {
+    @Override
+    GraphQLObjectType getType(TypeResolutionEnvironment env) {
+        Object obj = env.getObject();
+        if(obj instanceof DogDB) {
+            return (GraphQLObjectType) env.getSchema().getType("DogApi");
+        }
+        else {
+            return (GraphQLObjectType) env.getSchema().getType("Cat");
+        }
+      
+    }
+}
+```
+NOTE: you can have (but not mandatory) a type resolver with constructor that has `Class<?>[]` as the first parameter and
+`ProcessingElementsContainer` as the second. the `Class<?>[]` parameter contains the possibleTypes class
+and `ProcessingElementsContainer` has all sorts of utils (you can check `UnionTypeResolver` to see how we use it there)
+
 ## Fields
 
 In addition to specifying a field over a Java class field, a field can be defined over a method:
