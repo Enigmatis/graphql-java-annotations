@@ -16,9 +16,9 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.annotationTypes.GraphQLDataFetcher;
-import graphql.annotations.annotationTypes.GraphQLField;
-import graphql.annotations.annotationTypes.GraphQLUnion;
+import graphql.TypeResolutionEnvironment;
+import graphql.annotations.annotationTypes.*;
+import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
 import graphql.annotations.typeResolvers.UnionTypeResolver;
@@ -103,6 +103,28 @@ public class GraphQLUnionTest {
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("hardwareScreen").get("resolution"), 10);
     }
 
+    @Test
+    public void unionQueryWithCustomTypeResolver_askForDog_getDog() {
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        String query = "{ pet(kindOfPet:\"dog\"){ ... on Cat {mew}, ... on Dog{waf}} }";
+        ExecutionResult result = graphQL.execute(query);
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("pet").get("waf"), "waf");
+    }
+
+    @Test
+    public void unionQueryWithCustomTypeResolver_askForCat_getCat() {
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        String query = "{ pet(kindOfPet:\"cat\"){ ... on Cat {mew}, ... on Dog{waf}} }";
+        ExecutionResult result = graphQL.execute(query);
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("pet").get("mew"), "mew");
+    }
+
     static class Screen implements Hardware {
         @GraphQLField
         int resolution;
@@ -136,25 +158,73 @@ public class GraphQLUnionTest {
     }
 
     class Query {
-        @GraphQLField
-        @GraphQLDataFetcher(ComputerFetcher.class)
-        public Hardware getHardwareComputer() {
-            return null;
-        }
 
         @GraphQLField
+        @GraphQLDataFetcher(ComputerFetcher.class)
+        public Hardware getHardwareComputer;
+        @GraphQLField
         @GraphQLDataFetcher(ScreenFetcher.class)
-        public Hardware getHardwareScreen() {
-            return null;
+        public Hardware getHardwareScreen;
+
+        @GraphQLField
+        @GraphQLDataFetcher(PetDataFetcher.class)
+        public Pet getPet(@GraphQLName("kindOfPet") @GraphQLNonNull String kindOfPet){return null;}
+
+    }
+    static class Computer implements Hardware {
+
+        @GraphQLField
+        String name;
+        public Computer(String name) {
+            this.name = name;
+        }
+
+    }
+    @GraphQLUnion(typeResolver = PetResolver.class, possibleTypes = {Cat.class, Dog.class})
+    interface Pet {
+    }
+
+    static class Cat implements Pet{
+        @GraphQLField
+        String mew;
+
+        public Cat(String mew) {
+            this.mew = mew;
         }
     }
 
-    static class Computer implements Hardware {
+    static class Dog implements Pet{
         @GraphQLField
-        String name;
+        String waf;
 
-        public Computer(String name) {
-            this.name = name;
+        public Dog(String waf) {
+            this.waf = waf;
+        }
+    }
+
+    static class PetResolver implements TypeResolver {
+        @Override
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+            Object object = env.getObject();
+            if(object instanceof Dog) {
+                return env.getSchema().getObjectType("Dog");
+            }
+            else {
+                return env.getSchema().getObjectType("Cat");
+            }
+        }
+    }
+
+    public static class PetDataFetcher implements DataFetcher<Pet> {
+        @Override
+        public Pet get(DataFetchingEnvironment environment) {
+            String nameOfPet = environment.getArgument("kindOfPet");
+            if(nameOfPet.toLowerCase().equals("dog")) {
+                return new Dog("waf");
+            }
+            else {
+                return new Cat("mew");
+            }
         }
     }
 }
