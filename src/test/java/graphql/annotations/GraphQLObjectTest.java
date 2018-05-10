@@ -125,6 +125,12 @@ public class GraphQLObjectTest {
         public void setZ(String z) {
             this.z = z;
         }
+
+        @GraphQLField
+        @GraphQLInvokeDetached
+        public Integer doubleToInt(@GraphQLNonNull @GraphQLName("data") Double data) {
+            return data.intValue();
+        }
     }
 
     private static class TestDefaults {
@@ -172,6 +178,17 @@ public class GraphQLObjectTest {
             return new TestObjectDB("test", "test");
         }
     }
+
+    @Test
+    public void doubleIntQuery() {
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(TestObject.class)).build();
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ doubleToInt ( data:15.0 ) }");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Integer>) result.getData()).get("doubleToInt"), Integer.valueOf(15));
+    }
+
+
 
     @Test
     public void fetchTestMappedObject_assertNameIsMappedFromDBObject(){
@@ -825,6 +842,7 @@ public class GraphQLObjectTest {
         public String getOff() {
             return "off";
         }
+
     }
 
     @Test
@@ -835,5 +853,6 @@ public class GraphQLObjectTest {
         assertNotNull(object.getFieldDefinition("inheritedOn"));
         assertNull(object.getFieldDefinition("forcedOff"));
     }
+
 
 }
