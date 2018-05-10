@@ -86,7 +86,7 @@ public class GraphQLUnionTest {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        String query = "{ hardwareComputer{ ... on Computer {name}, ... on Screen{resolution}} }";
+        String query = "{ getHardwareComputer{ ... on Computer {name}, ... on Screen{resolution}} }";
         ExecutionResult result = graphQL.execute(query);
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("hardwareComputer").get("name"), "MyComputer");
@@ -97,7 +97,7 @@ public class GraphQLUnionTest {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        String query = "{ hardwareScreen{ ... on Computer {name}, ... on Screen{resolution}} }";
+        String query = "{ getHardwareScreen{ ... on Computer {name}, ... on Screen{resolution}} }";
         ExecutionResult result = graphQL.execute(query);
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("hardwareScreen").get("resolution"), 10);
