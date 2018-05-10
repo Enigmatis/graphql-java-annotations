@@ -30,16 +30,14 @@ public class UnionTypeResolver implements TypeResolver {
 
     public UnionTypeResolver(Class<?>[] classes, ProcessingElementsContainer container) {
         Arrays.stream(classes).
-                forEach(c -> types.put(c, container.getDefaultTypeFunction().buildType(c, null, container)));
+                forEach(c -> types.put(c,container.getDefaultTypeFunction().buildType(c, null, container)));
     }
 
     @Override
     public GraphQLObjectType getType(TypeResolutionEnvironment env) {
         Object object = env.getObject();
-        Optional<Map.Entry<Class<?>, GraphQLType>> maybeType = types.entrySet()
-                .stream().filter(e -> object.getClass().getSimpleName()
-                        .equals(e.getKey().getSimpleName())).findFirst();
-
+        Optional<Map.Entry<Class<?>, GraphQLType>> maybeType = types.entrySet().
+                stream().filter(e -> e.getKey().isAssignableFrom(object.getClass())).findFirst();
         if (maybeType.isPresent()) {
             return (GraphQLObjectType) maybeType.get().getValue();
         } else {
