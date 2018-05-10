@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.schema.GraphQLSchema.newSchema;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -107,6 +107,9 @@ public class GraphQLUnionTest {
         @GraphQLField
         int resolution;
 
+        public Screen(int resolution) {
+            this.resolution = resolution;
+        }
     }
 
     @GraphQLUnion(possibleTypes = {Computer.class, Screen.class})
@@ -114,37 +117,21 @@ public class GraphQLUnionTest {
     }
 
     // Hibernate class with same structure of API class
-    public static class ComputerFetcher implements DataFetcher<ComputerDB> {
-        ComputerDB computerDB = new ComputerDB("MyComputer");
+    public static class ComputerFetcher implements DataFetcher<Computer> {
+        Computer computerDB = new Computer("MyComputer");
 
         @Override
-        public ComputerDB get(DataFetchingEnvironment environment) {
+        public Computer get(DataFetchingEnvironment environment) {
             return computerDB;
         }
     }
 
-    public static class ScreenFetcher implements DataFetcher<ScreenDB> {
-        ScreenDB screenDB = new ScreenDB(10);
+    public static class ScreenFetcher implements DataFetcher<Screen> {
+        Screen screenDB = new Screen(10);
 
         @Override
-        public ScreenDB get(DataFetchingEnvironment environment) {
+        public Screen get(DataFetchingEnvironment environment) {
             return screenDB;
-        }
-    }
-
-    static class ComputerDB {
-        String name;
-
-        public ComputerDB(String name) {
-            this.name = name;
-        }
-    }
-
-    static class ScreenDB {
-        int resolution;
-
-        public ScreenDB(int resolution) {
-            this.resolution = resolution;
         }
     }
 
@@ -162,8 +149,12 @@ public class GraphQLUnionTest {
         }
     }
 
-    class Computer implements Hardware {
+    static class Computer implements Hardware {
         @GraphQLField
         String name;
+
+        public Computer(String name) {
+            this.name = name;
+        }
     }
 }
