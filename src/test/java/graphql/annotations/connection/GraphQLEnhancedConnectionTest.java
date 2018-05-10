@@ -81,6 +81,11 @@ public class GraphQLEnhancedConnectionTest {
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
         public PaginatedData<Obj> objs;
 
+        @GraphQLField
+        @GraphQLConnection(connection = PaginatedDataConnectionFetcher.class, async = true)
+        @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
+        public PaginatedData<Obj> objsAsync;
+
         public TestListField(PaginatedData<Obj> objs) {
             this.objs = objs;
         }
@@ -142,6 +147,21 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
         ExecutionResult result = graphQL.execute(executionInput);
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
         List<Map<String, Map<String, Object>>> edges = data.get("objs").get("edges");
+
+        //Assert
+        assertEquals(edges.get(0).get("cursor"), "1");
+        assertEquals(edges.get(1).get("cursor"), "2");
+    }
+
+    @Test
+    public void fetchConnectionAsync() throws Exception {
+        //Arrange
+        ExecutionInput executionInput = new ExecutionInput("{ objsAsync(first:2) { edges { cursor } } }",
+                null, "CONTEXT", null, null);
+        //Act
+        ExecutionResult result = graphQL.execute(executionInput);
+        Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
+        List<Map<String, Map<String, Object>>> edges = data.get("objsAsync").get("edges");
 
         //Assert
         assertEquals(edges.get(0).get("cursor"), "1");

@@ -21,7 +21,6 @@ import graphql.annotations.connection.GraphQLConnection;
 import graphql.annotations.dataFetchers.BatchedMethodDataFetcher;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.dataFetchers.RelayMutationMethodDataFetcher;
-import graphql.annotations.dataFetchers.connection.ConnectionDataFetcher;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.fieldBuilders.Builder;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
@@ -33,6 +32,8 @@ import graphql.schema.GraphQLOutputType;
 
 import java.lang.reflect.Method;
 import java.util.List;
+
+import static graphql.annotations.processor.util.ConnectionUtil.getConnectionDataFetcher;
 
 public class MethodDataFetcherBuilder implements Builder<DataFetcher> {
     private Method method;
@@ -74,7 +75,7 @@ public class MethodDataFetcherBuilder implements Builder<DataFetcher> {
         }
 
         if (isConnection){
-            actualDataFetcher = new ConnectionDataFetcher(method.getAnnotation(GraphQLConnection.class).connection(), actualDataFetcher);
+            actualDataFetcher = getConnectionDataFetcher(method.getAnnotation(GraphQLConnection.class), actualDataFetcher);
         }
         return actualDataFetcher;
     }

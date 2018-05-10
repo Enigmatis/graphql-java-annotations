@@ -52,4 +52,11 @@ public @interface GraphQLConnection {
      * @return a connection validator
      */
     Class <? extends ConnectionValidator> validator() default PaginatedDataConnectionTypeValidator.class;
+
+    /**
+     * By default, the paginated data is fetched synchronously. If explicitly specified, asynchronous data fetching
+     * will be used.
+     * @return if async fetching to be used.
+     */
+    boolean async() default false;
 }
