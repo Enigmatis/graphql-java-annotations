@@ -30,9 +30,7 @@ public class MethodNameBuilder implements Builder<String> {
 
     @Override
     public String build() {
-        String name = method.getName().replaceFirst("^(is|get|set)(.+)", "$2");
-        name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
-        GraphQLName nameAnn = method.getAnnotation(GraphQLName.class);
-        return toGraphqlName(nameAnn == null ? name : nameAnn.value());
+        GraphQLName name = method.getAnnotation(GraphQLName.class);
+        return toGraphqlName(name == null ? method.getName() : name.value());
     }
 }
