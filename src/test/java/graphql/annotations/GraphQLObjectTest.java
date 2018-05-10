@@ -120,6 +120,7 @@ public class GraphQLObjectTest {
         public void setZ(String z) {
             this.z = z;
         }
+
     }
 
     private static class TestDefaults {
@@ -820,6 +821,7 @@ public class GraphQLObjectTest {
         public String off() {
             return "off";
         }
+
     }
 
     @Test
@@ -830,5 +832,6 @@ public class GraphQLObjectTest {
         assertNotNull(object.getFieldDefinition("inheritedOn"));
         assertNull(object.getFieldDefinition("forcedOff"));
     }
+
 
 }

@@ -19,6 +19,7 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -28,7 +29,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
@@ -77,12 +81,12 @@ public class GraphQLEnhancedConnectionTest {
 
     public static class TestListField {
         @GraphQLField
-        @GraphQLConnection(connection = PaginatedDataConnectionFetcher.class)
+        @GraphQLConnection(connectionFetcher = PaginatedDataConnectionFetcher.class)
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
         public PaginatedData<Obj> objs;
 
         @GraphQLField
-        @GraphQLConnection(connection = PaginatedDataConnectionFetcher.class, async = true)
+        @GraphQLConnection(connectionFetcher = PaginatedDataConnectionFetcher.class, async = true)
         @GraphQLDataFetcher(GoodConnectionDataFetcher.class)
         public PaginatedData<Obj> objsAsync;
 

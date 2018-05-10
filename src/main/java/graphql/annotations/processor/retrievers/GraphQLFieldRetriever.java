@@ -71,10 +71,10 @@ public class GraphQLFieldRetriever {
 
         boolean isConnection = ConnectionUtil.isConnection(method, outputType);
         if (isConnection) {
-            outputType = getGraphQLConnection(method, outputType, container.getRelay(), container.getTypeRegistry());
+            outputType = getGraphQLConnection(method, outputType, ConnectionUtil.getRelay(method, container), container.getTypeRegistry());
+            builder.argument(ConnectionUtil.getRelay(method, container).getConnectionFieldArguments());
         }
         builder.type(outputType);
-        handleConnectionArgument(container, builder, isConnection);
         List<GraphQLArgument> args = new ArgumentBuilder(method, typeFunction, builder, container, outputType).build();
         GraphQLFieldDefinition relayFieldDefinition = handleRelayArguments(method, container, builder, outputType, args);
         builder.description(new DescriptionBuilder(method).build())
@@ -91,8 +91,8 @@ public class GraphQLFieldRetriever {
         GraphQLType outputType = typeFunction.buildType(field.getType(), field.getAnnotatedType(), container);
         boolean isConnection = ConnectionUtil.isConnection(field, outputType);
         if (isConnection) {
-            outputType = getGraphQLConnection(field, outputType, container.getRelay(), container.getTypeRegistry());
-            builder.argument(container.getRelay().getConnectionFieldArguments());
+            outputType = getGraphQLConnection(field, outputType, ConnectionUtil.getRelay(field, container), container.getTypeRegistry());
+            builder.argument(ConnectionUtil.getRelay(field, container).getConnectionFieldArguments());
         }
 
         builder.type((GraphQLOutputType) outputType).description(new DescriptionBuilder(field).build())
@@ -126,12 +126,6 @@ public class GraphQLFieldRetriever {
             builder.argument(args);
         }
         return relayFieldDefinition;
-    }
-
-    private void handleConnectionArgument(ProcessingElementsContainer container, GraphQLFieldDefinition.Builder builder, boolean isConnection) {
-        if (isConnection) {
-            builder.argument(container.getRelay().getConnectionFieldArguments());
-        }
     }
 
     private TypeFunction getTypeFunction(Method method, ProcessingElementsContainer container) {
@@ -188,7 +182,7 @@ public class GraphQLFieldRetriever {
         GraphQLOutputType wrappedType = (GraphQLOutputType) listType.getWrappedType();
         String connectionName = field.getAnnotation(GraphQLConnection.class).name();
         connectionName = connectionName.isEmpty() ? wrappedType.getName() : connectionName;
-        GraphQLObjectType edgeType = getActualType(relay.edgeType(connectionName, wrappedType, null, Collections.<GraphQLFieldDefinition>emptyList()), typeRegistry);
+        GraphQLObjectType edgeType = getActualType(relay.edgeType(connectionName, wrappedType, null, Collections.emptyList()), typeRegistry);
         return getActualType(relay.connectionType(connectionName, edgeType, Collections.emptyList()), typeRegistry);
     }
 

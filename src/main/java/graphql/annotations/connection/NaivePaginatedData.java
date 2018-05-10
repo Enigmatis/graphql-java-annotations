@@ -19,15 +19,15 @@ import java.util.Iterator;
 
 import static java.util.Base64.getEncoder;
 
-public class SimplePaginatedData<T> extends AbstractPaginatedData<T> {
+public class NaivePaginatedData<T> extends AbstractPaginatedData<T> {
     private static final String DUMMY_CURSOR_PREFIX = "simple-cursor";
     private final String prefix;
 
-    public SimplePaginatedData(boolean hasPreviousPage, boolean hasNextPage, Iterable<T> data) {
+    public NaivePaginatedData(boolean hasPreviousPage, boolean hasNextPage, Iterable<T> data) {
         this(hasPreviousPage, hasNextPage, data, DUMMY_CURSOR_PREFIX);
     }
 
-    public SimplePaginatedData(boolean hasPreviousPage, boolean hasNextPage, Iterable<T> data, String prefix) {
+    public NaivePaginatedData(boolean hasPreviousPage, boolean hasNextPage, Iterable<T> data, String prefix) {
         super(hasPreviousPage, hasNextPage, data);
         this.prefix = prefix;
     }

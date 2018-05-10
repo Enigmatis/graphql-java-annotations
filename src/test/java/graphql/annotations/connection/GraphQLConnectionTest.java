@@ -19,6 +19,7 @@ import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLNonNull;
+import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.util.CustomRelay;
@@ -133,96 +134,6 @@ public class GraphQLConnectionTest {
         ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
                 new TestListField(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
     }
-
-    public static class TestConnections {
-        private List<Obj> objs;
-
-        public TestConnections(List<Obj> objs) {
-            this.objs = objs;
-        }
-
-        @GraphQLField
-        @GraphQLConnection
-        public PaginatedData<Obj> getObjs(DataFetchingEnvironment environment) {
-            Integer first = environment.getArgument("first");
-            List<Obj> actualobjs = new ArrayList<>(objs);
-
-            if (first != null && first < objs.size()) {
-                actualobjs = actualobjs.subList(0, first);
-            }
-            return new AbstractPaginatedData<Obj>(false, true, actualobjs) {
-                @Override
-                public String getCursor(Obj entity) {
-                    return entity.id;
-                }
-            };
-        }
-
-        @GraphQLField
-        @GraphQLConnection(name = "objStream")
-        public PaginatedData<Obj> getObjStream(DataFetchingEnvironment environment) {
-            Integer first = environment.getArgument("first");
-            List<Obj> actualobjs = new ArrayList<>(objs);
-
-            if (first != null && first < objs.size()) {
-                actualobjs = actualobjs.subList(0, first);
-            }
-
-            Obj[] a = new Obj[actualobjs.size()];
-            Iterable<Obj> data = Stream.of(actualobjs.toArray(a))::iterator;
-            return new AbstractPaginatedData<Obj>(false, true, data) {
-                @Override
-                public String getCursor(Obj entity) {
-                    return entity.id;
-                }
-            };
-        }
-
-        @GraphQLField
-        @GraphQLConnection(name = "objStreamWithParam")
-        public PaginatedData<Obj> getObjStreamWithParam(DataFetchingEnvironment environment, @GraphQLName("filter") String filter) {
-            Integer first = environment.getArgument("first");
-            List<Obj> actualobjs = new ArrayList<>(objs);
-            List<Obj> filteredObjs = actualobjs.stream().filter(obj -> obj.val.startsWith(filter)).collect(Collectors.toList());
-            if (first != null && first < filteredObjs.size()) {
-                filteredObjs = filteredObjs.subList(0, first);
-            }
-            Iterable<Obj> objIterable = filteredObjs::iterator;
-            return new AbstractPaginatedData<Obj>(false, true, objIterable) {
-                @Override
-                public String getCursor(Obj entity) {
-                    return entity.id;
-                }
-            };
-        }
-
-        @GraphQLField
-        @GraphQLConnection(name = "nonNullObjs")
-        @GraphQLNonNull
-        public PaginatedData<Obj> getNonNullObjs(DataFetchingEnvironment environment) {
-            Integer first = environment.getArgument("first");
-            List<Obj> actualobjs = new ArrayList<>(objs);
-
-            if (first != null && first < objs.size()) {
-                actualobjs = actualobjs.subList(0, first);
-            }
-            return new AbstractPaginatedData<Obj>(false, true, actualobjs) {
-                @Override
-                public String getCursor(Obj entity) {
-                    return entity.id;
-                }
-            };
-        }
-
-        @GraphQLField
-        @GraphQLConnection(name = "nullObj")
-        public PaginatedData<Obj> getNullObj() {
-            return null;
-        }
-
-
-    }
-
     @Test
     public void methodList() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
@@ -236,6 +147,22 @@ public class GraphQLConnectionTest {
 
         testResult("getObjs", result);
 
+    }
+
+    @Test
+    public void customConnection() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestCustomConnection.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
+                new TestCustomConnection(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
+
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> data = result.getData();
+        Map<String, Object> objs = (Map<String, Object>) (data.get("objs"));
+        List edges = (List) objs.get("edges");
+        assertEquals(edges.size(), 0);
     }
 
     @Test
@@ -367,7 +294,7 @@ public class GraphQLConnectionTest {
         }
 
         @GraphQLField
-        @GraphQLConnection(connection = CustomConnection.class)
+        @GraphQLConnection(connectionFetcher = CustomConnection.class)
         public PaginatedData<Obj> getObjs() {
             return new AbstractPaginatedData<Obj>(true, false, objs) {
                 @Override
@@ -398,10 +325,100 @@ public class GraphQLConnectionTest {
     public void duplicateConnection() {
         try {
             GraphQLObjectType object = GraphQLAnnotations.object(DuplicateTest.class);
-            GraphQLSchema schema = newSchema().query(object).build();
+            newSchema().query(object).build();
         } catch (GraphQLAnnotationsException e) {
             fail("Schema cannot be created", e);
         }
+    }
+
+    public static class TestConnections {
+
+        private List<Obj> objs;
+
+        public TestConnections(List<Obj> objs) {
+            this.objs = objs;
+        }
+
+        @GraphQLField
+        @GraphQLConnection
+        public PaginatedData<Obj> getObjs(DataFetchingEnvironment environment) {
+            Integer first = environment.getArgument("first");
+            List<Obj> actualobjs = new ArrayList<>(objs);
+
+            if (first != null && first < objs.size()) {
+                actualobjs = actualobjs.subList(0, first);
+            }
+            return new AbstractPaginatedData<Obj>(false, true, actualobjs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
+        }
+
+        @GraphQLField
+        @GraphQLConnection(name = "objStream")
+        public PaginatedData<Obj> getObjStream(DataFetchingEnvironment environment) {
+            Integer first = environment.getArgument("first");
+            List<Obj> actualobjs = new ArrayList<>(objs);
+
+            if (first != null && first < objs.size()) {
+                actualobjs = actualobjs.subList(0, first);
+            }
+
+            Obj[] a = new Obj[actualobjs.size()];
+            Iterable<Obj> data = Stream.of(actualobjs.toArray(a))::iterator;
+            return new AbstractPaginatedData<Obj>(false, true, data) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
+        }
+
+        @GraphQLField
+        @GraphQLConnection(name = "objStreamWithParam")
+        public PaginatedData<Obj> getObjStreamWithParam(DataFetchingEnvironment environment, @GraphQLName("filter") String filter) {
+            Integer first = environment.getArgument("first");
+            List<Obj> actualobjs = new ArrayList<>(objs);
+            List<Obj> filteredObjs = actualobjs.stream().filter(obj -> obj.val.startsWith(filter)).collect(Collectors.toList());
+            if (first != null && first < filteredObjs.size()) {
+                filteredObjs = filteredObjs.subList(0, first);
+            }
+            Iterable<Obj> objIterable = filteredObjs::iterator;
+            return new AbstractPaginatedData<Obj>(false, true, objIterable) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
+        }
+
+        @GraphQLField
+        @GraphQLConnection(name = "nonNullObjs")
+        @GraphQLNonNull
+        public PaginatedData<Obj> getNonNullObjs(DataFetchingEnvironment environment) {
+            Integer first = environment.getArgument("first");
+            List<Obj> actualobjs = new ArrayList<>(objs);
+
+            if (first != null && first < objs.size()) {
+                actualobjs = actualobjs.subList(0, first);
+            }
+            return new AbstractPaginatedData<Obj>(false, true, actualobjs) {
+                @Override
+                public String getCursor(Obj entity) {
+                    return entity.id;
+                }
+            };
+        }
+
+        @GraphQLField
+        @GraphQLConnection(name = "nullObj")
+        public PaginatedData<Obj> getNullObj() {
+            return null;
+        }
+
+
     }
 
 }
