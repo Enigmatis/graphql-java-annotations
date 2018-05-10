@@ -32,8 +32,6 @@ public class FloatFunctionTests {
     @Test
     public void buildType_floatType_returnsGraphQLFloat() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();
-        assertEquals(instance.buildType(float.class, null,null), GraphQLFloat);
-        assertEquals(instance.buildType(Float.class, null,null), GraphQLFloat);
         assertEquals(instance.buildType(Double.class, null,null), GraphQLFloat);
         assertEquals(instance.buildType(double.class, null,null), GraphQLFloat);
     }
