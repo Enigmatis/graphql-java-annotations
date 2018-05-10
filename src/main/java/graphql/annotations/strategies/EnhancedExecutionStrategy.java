@@ -31,8 +31,8 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
 
     @Override
     protected CompletableFuture<ExecutionResult> resolveField(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
-        GraphQLObjectType parentType = (GraphQLObjectType) parameters.typeInfo().getType();
-        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, parameters.field().get(0));
+        GraphQLObjectType parentType = (GraphQLObjectType) parameters.getTypeInfo().getType();
+        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, parameters.getField().get(0));
         if (fieldDef == null) return null;
 
         if (fieldDef.getName().contentEquals(CLIENT_MUTATION_ID)) {
@@ -52,11 +52,11 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
                 clientMutationId = clientMutationIdVal.getValue();
             }
 
-            ExecutionTypeInfo fieldTypeInfo = ExecutionTypeInfo.newTypeInfo().type(fieldDef.getType()).parentInfo(parameters.typeInfo()).build();
+            ExecutionTypeInfo fieldTypeInfo = ExecutionTypeInfo.newTypeInfo().type(fieldDef.getType()).parentInfo(parameters.getTypeInfo()).build();
             ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-                    .arguments(parameters.arguments())
-                    .fields(parameters.fields())
-                    .nonNullFieldValidator(parameters.nonNullFieldValidator())
+                    .arguments(parameters.getArguments())
+                    .fields(parameters.getFields())
+                    .nonNullFieldValidator(parameters.getNonNullFieldValidator())
                     .typeInfo(fieldTypeInfo)
                     .source(clientMutationId)
                     .build();
@@ -70,8 +70,8 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
 
     @Override
     protected CompletableFuture<ExecutionResult> completeValue(ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws NonNullableFieldWasNullException {
-        graphql.schema.GraphQLType fieldType = parameters.typeInfo().getType();
-        Object result = parameters.source();
+        graphql.schema.GraphQLType fieldType = parameters.getTypeInfo().getType();
+        Object result = parameters.getSource();
         if (result instanceof Enum && fieldType instanceof GraphQLEnumType) {
             Object value = ((GraphQLEnumType) fieldType).getCoercing().parseValue(((Enum) result).name());
             return super.completeValue(executionContext, withSource(parameters, value));
@@ -88,10 +88,10 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
      */
     private ExecutionStrategyParameters withSource(ExecutionStrategyParameters parameters, Object source) {
         return ExecutionStrategyParameters.newParameters()
-                .arguments(parameters.arguments())
-                .fields(parameters.fields())
-                .nonNullFieldValidator(parameters.nonNullFieldValidator())
-                .typeInfo(parameters.typeInfo())
+                .arguments(parameters.getArguments())
+                .fields(parameters.getFields())
+                .nonNullFieldValidator(parameters.getNonNullFieldValidator())
+                .typeInfo(parameters.getTypeInfo())
                 .source(source)
                 .build();
     }
