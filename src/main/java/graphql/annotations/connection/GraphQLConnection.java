@@ -15,6 +15,8 @@
 package graphql.annotations.connection;
 
 
+import graphql.relay.Relay;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,7 +29,7 @@ import java.lang.annotation.Target;
  *
  * At the moment, the only allowed type for such field is <code>List&lt;?&gt;</code>
  */
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GraphQLConnection {
     /**
@@ -37,7 +39,7 @@ public @interface GraphQLConnection {
      * your own connection validator
      * @return a connection class
      */
-    Class<? extends ConnectionFetcher> connection() default PaginatedDataConnectionFetcher.class;
+    Class<? extends ConnectionFetcher> connectionFetcher() default PaginatedDataConnectionFetcher.class;
 
     /**
      * By default, wrapped type's name is used for naming TypeConnection, but can be overridden
@@ -59,4 +61,12 @@ public @interface GraphQLConnection {
      * @return if async fetching to be used.
      */
     boolean async() default false;
+
+    /**
+     * By default, the relay connection that the container has is used. If you want to change the way connection works
+     * (For example, you don't want edges and nodes), override the {@link Relay} class and specify it.
+     *
+     * @return a class that represents the connection type
+     */
+    Class<? extends Relay> connectionType() default FakeRelay.class;
 }

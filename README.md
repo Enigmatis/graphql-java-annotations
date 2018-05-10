@@ -307,3 +307,17 @@ NOTE: because `PropertyDataFetcher` and `FieldDataFetcher` can't handle connecti
 By default, GraphQLAnnotations will use the `graphql.relay.Relay` class to create the Relay specific schema types (Mutations, Connections, Edges, PageInfo, ...).
 It is possible to set a custom implementation of the Relay class with `GraphQLAnnotations.setRelay` method. The class should inherit from `graphql.relay.Relay` and 
 can redefine methods that create Relay types.
+
+It is also possible to specify for every connection which relay do you want to use, by giving a value to the annotation: 
+`@GraphQLConnection(connectionType = customRelay.class)`. If you do that, please also give values to `connectionFetcher`
+and `validator`.
+
+There is also a support for simple paging, without "Nodes" and "Edges". To use it, annotate you connection like that:
+`@GraphQLConnection(connectionFetcher = SimplePaginatedDataConnectionFetcher.class, connectionType = SimpleRelay.class, validator = SimplePaginatedDataConnectionTypeValidator.class)`
+and the return type must be of type `SimplePaginatedData`.
+It has 2 methods:
+1. `getTotalCount` - how many elements are there in total
+2. `getData` - get the data
+
+For you convenience, there are two classes that you can use: `AbstractSimplePaginatedData` and `SimplePaginatedDataImpl`
+For examples, look at the tests

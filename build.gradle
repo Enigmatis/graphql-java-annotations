@@ -11,9 +11,9 @@ buildscript {
     }
 }
 plugins {
-    id "com.github.hierynomus.license" version "0.12.1"
     id "com.jfrog.bintray" version "1.7"
     id 'net.researchgate.release' version '2.3.4'
+    id "com.github.hierynomus.license" version "0.14.0"
 }
 
 apply plugin: 'java'
