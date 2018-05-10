@@ -27,8 +27,10 @@ import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLType;
 
 import java.util.Map;
+import java.util.Set;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 
@@ -40,6 +42,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private GraphQLObjectHandler graphQLObjectHandler;
     private GraphQLExtensionsHandler graphQLExtensionsHandler;
+    private GraphQLAdditionalTypesHandler graphQLAdditionalTypesHandler;
 
     private ProcessingElementsContainer container;
 
@@ -73,6 +76,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         extensionsHandler.setMethodSearchAlgorithm(methodSearchAlgorithm);
         extensionsHandler.setFieldRetriever(fieldRetriever);
 
+        GraphQLAdditionalTypesHandler additionalTypesHandler = new GraphQLAdditionalTypesHandler();
+        additionalTypesHandler.setGraphQLInterfaceRetriever(interfaceRetriever);
+        additionalTypesHandler.setGraphQLObjectInfoRetriever(objectInfoRetriever);
+        additionalTypesHandler.setMethodSearchAlgorithm(methodSearchAlgorithm);
+        additionalTypesHandler.setFieldSearchAlgorithm(fieldSearchAlgorithm);
+
+        this.graphQLAdditionalTypesHandler = additionalTypesHandler;
         this.graphQLObjectHandler = objectHandler;
         this.graphQLExtensionsHandler = extensionsHandler;
         this.container = new ProcessingElementsContainer(defaultTypeFunction);
@@ -104,6 +114,12 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
     }
 
+    public static Set<GraphQLType> additionalTypes(Class<?> root) {
+        GraphQLAnnotations instance = getInstance();
+        return instance.graphQLAdditionalTypesHandler.getAdditionalInterfacesImplementations(root, instance.getContainer());
+
+    }
+
     public void registerTypeExtension(Class<?> objectClass) {
         graphQLExtensionsHandler.registerTypeExtension(objectClass, container);
     }
@@ -116,7 +132,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         getInstance().registerType(typeFunction);
     }
 
-    public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {
+    public Map<String, GraphQLType> getTypeRegistry() {
         return container.getTypeRegistry();
     }
 
