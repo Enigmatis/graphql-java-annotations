@@ -23,10 +23,11 @@ import graphql.schema.TypeResolver;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 public class UnionTypeResolver implements TypeResolver {
-    private final Map<Class<?>, graphql.schema.GraphQLType> types = new HashMap<>();
+    private final Map<Class<?>, GraphQLType> types = new HashMap<>();
 
     public UnionTypeResolver(Class<?>[] classes, ProcessingElementsContainer container) {
         Arrays.stream(classes).
@@ -36,8 +37,10 @@ public class UnionTypeResolver implements TypeResolver {
     @Override
     public GraphQLObjectType getType(TypeResolutionEnvironment env) {
         Object object = env.getObject();
-        Optional<Map.Entry<Class<?>, GraphQLType>> maybeType = types.entrySet().
-                stream().filter(e -> e.getKey().isAssignableFrom(object.getClass())).findFirst();
+        Optional<Entry<Class<?>, GraphQLType>> maybeType = types.entrySet().
+                stream().filter(e -> object.getClass().getSimpleName()
+                .equals(e.getKey().getSimpleName())).findFirst();
+
         if (maybeType.isPresent()) {
             return (GraphQLObjectType) maybeType.get().getValue();
         } else {

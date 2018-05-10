@@ -14,6 +14,9 @@
  */
 package graphql.annotations.annotationTypes;
 
+import graphql.annotations.typeResolvers.UnionTypeResolver;
+import graphql.schema.TypeResolver;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,4 +26,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GraphQLUnion {
     Class<?>[] possibleTypes();
+
+    Class<? extends TypeResolver> typeResolver() default UnionTypeResolver.class;
 }

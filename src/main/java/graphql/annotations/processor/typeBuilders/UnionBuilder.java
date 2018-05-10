@@ -19,17 +19,20 @@ import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLType;
 import graphql.annotations.annotationTypes.GraphQLUnion;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.processor.util.ReflectionKit;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
+import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.typeResolvers.UnionTypeResolver;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLUnionType;
+import graphql.schema.GraphQLUnionType.Builder;
+import graphql.schema.TypeResolver;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.function.Function;
+import java.util.Optional;
 
+import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
+import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 import static graphql.schema.GraphQLUnionType.newUnionType;
 
 public class UnionBuilder {
@@ -41,18 +44,18 @@ public class UnionBuilder {
     }
 
     /**
-     * This will examine the class and return a {@link GraphQLUnionType.Builder} ready for further definition
+     * This will examine the class and return a {@link Builder} ready for further definition
      * @param container a class that hold several members that are required in order to build schema
      * @param iface interface to examine
-     * @return a {@link GraphQLUnionType.Builder}
+     * @return a {@link Builder}
      * @throws GraphQLAnnotationsException if the class cannot be examined
      */
 
-    public GraphQLUnionType.Builder getUnionBuilder(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException, IllegalArgumentException {
+    public Builder getUnionBuilder(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException, IllegalArgumentException {
         if (!iface.isInterface()) {
             throw new IllegalArgumentException(iface + " is not an interface");
         }
-        GraphQLUnionType.Builder builder = newUnionType();
+        Builder builder = newUnionType();
 
         GraphQLUnion unionAnnotation = iface.getAnnotation(GraphQLUnion.class);
         builder.name(graphQLObjectInfoRetriever.getTypeName(iface));
@@ -65,21 +68,41 @@ public class UnionBuilder {
         TypeFunction typeFunction = container.getDefaultTypeFunction();
 
         if (typeAnnotation != null) {
-            typeFunction = ReflectionKit.newInstance(typeAnnotation.value());
+            typeFunction = newInstance(typeAnnotation.value());
         }
 
         TypeFunction finalTypeFunction = typeFunction;
-        Arrays.asList(unionAnnotation.possibleTypes()).stream()
-                .map(new Function<Class<?>, graphql.schema.GraphQLType>() {
-                    @Override
-                    public graphql.schema.GraphQLType apply(Class<?> aClass) {
-                        return finalTypeFunction.buildType(aClass, null, container);
-                    }
-                })
+        Arrays.stream(unionAnnotation.possibleTypes())
+                .map(aClass -> finalTypeFunction.buildType(aClass, null, container))
                 .map(v -> (GraphQLObjectType) v)
                 .forEach(builder::possibleType);
 
-        builder.typeResolver(new UnionTypeResolver(unionAnnotation.possibleTypes(), container));
+        TypeResolver typeResolver = getTypeResolver(container, unionAnnotation);
+
+        builder.typeResolver(typeResolver);
         return builder;
+    }
+
+    private TypeResolver getTypeResolver(ProcessingElementsContainer container, GraphQLUnion unionAnnotation) {
+        Optional<Constructor<?>> typeResolverConstructorOptional = Arrays.stream(unionAnnotation.typeResolver().getConstructors())
+                .filter(constructor -> constructor.getParameterCount() == 0 || constructorHasPossibleTypesAndContainerAsParameters(container, constructor))
+                .findFirst();
+
+        return typeResolverConstructorOptional
+                .map(constructor -> {
+                    if(constructor.getParameterCount() == 0) {
+                        return (TypeResolver) constructNewInstance(constructor);
+                    }
+                    else {
+                        return (TypeResolver) constructNewInstance(constructor, unionAnnotation.possibleTypes(), container);
+                    }
+                })
+                .orElseGet(() -> new UnionTypeResolver(unionAnnotation.possibleTypes(), container));
+    }
+
+    private boolean constructorHasPossibleTypesAndContainerAsParameters(ProcessingElementsContainer container, Constructor<?> constructor) {
+        return constructor.getParameterCount() == 2 &&
+                Class[].class.isAssignableFrom(constructor.getParameterTypes()[0]) &&
+                container.getClass().isAssignableFrom(constructor.getParameterTypes()[1]);
     }
 }
