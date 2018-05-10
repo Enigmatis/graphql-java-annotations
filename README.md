@@ -16,6 +16,16 @@ dependencies {
 }
 ```
 
+(Maven syntax)
+
+```groovy
+<dependency>
+    <groupId>io.github.graphql-java</groupId>
+    <artifactId>graphql-java-annotations</artifactId>
+    <version>5.1</version>
+</dependency>
+```
+
 
 ## Defining Objects
 
