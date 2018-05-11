@@ -14,15 +14,27 @@
  */
 package graphql.annotations;
 
+import graphql.ExceptionWhileDataFetching;
+import graphql.ExecutionResult;
+import graphql.GraphQL;
+import graphql.annotations.annotationTypes.GraphQLDataFetcher;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
+import graphql.annotations.annotationTypes.GraphQLType;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.schema.DataFetchingEnvironmentImpl;
+import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
+import static graphql.schema.GraphQLSchema.newSchema;
+import static org.testng.Assert.*;
+
+@SuppressWarnings("unchecked")
 public class MethodDataFetcherTest {
 
     @BeforeMethod
@@ -41,10 +53,100 @@ public class MethodDataFetcherTest {
     @Test(expectedExceptions = RuntimeException.class)
     public void exceptionRethrowing() {
         try {
-            MethodDataFetcher methodDataFetcher = new MethodDataFetcher(getClass().getMethod("method"),null,null);
-            methodDataFetcher.get(new DataFetchingEnvironmentImpl(this, new HashMap<String,Object>(), null, null, null, new ArrayList<>(), null, null, null, null, null, null, null));
+            MethodDataFetcher methodDataFetcher = new MethodDataFetcher(getClass().getMethod("method"), null, null);
+            methodDataFetcher.get(new DataFetchingEnvironmentImpl(this, new HashMap<>(), null, null, null, new ArrayList<>(), null, null, null, null, null, null, null));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+    }
+
+
+    @GraphQLType
+    public static class ApiType {
+        @GraphQLField
+        public int a() {
+            return 1;
+        }
+
+        @GraphQLField
+        @GraphQLInvokeDetached
+        public int b() {
+            return 2;
+        }
+
+        @GraphQLField
+        public int c() {
+            return 4;
+        }
+    }
+
+    public static class InternalType {
+        public int a = 123;
+        public int b;
+    }
+
+    @GraphQLType
+    public static class Query {
+        @GraphQLField
+        @GraphQLDataFetcher(MyFetcher.class)
+        public ApiType field;
+
+        @GraphQLField
+        @GraphQLDataFetcher(MyApiFetcher.class)
+        public ApiType apiField;
+    }
+
+    public static class MyFetcher implements DataFetcher<InternalType> {
+        public InternalType get(DataFetchingEnvironment environment) {
+            return new InternalType();
+        }
+    }
+
+    public static class MyApiFetcher implements DataFetcher<ApiType> {
+        public ApiType get(DataFetchingEnvironment environment) {
+            return new ApiType();
+        }
+    }
+
+
+    @Test
+    public void queryingOneFieldNotAnnotatedWithGraphQLInvokeDetached_valueIsDeterminedByEntity() {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { a } }");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, Integer>>) result.getData()).get("field").get("a").toString(), "123");
+    }
+
+    @Test
+    public void queryingOneFieldAnnotatedWithGraphQLInvokeDetached_valueIsDeterminedByApiEntity() {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { b } }");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, Integer>>) result.getData()).get("field").get("b").toString(), "2");
+    }
+
+    @Test
+    public void queryingFieldsFromApiEntityFetcher_valueIsDeterminedByApiEntity() {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { apiField { a b } }");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, Integer>>) result.getData()).get("apiField").get("a").toString(), "1");
+        assertEquals(((Map<String, Map<String, Integer>>) result.getData()).get("apiField").get("b").toString(), "2");
+    }
+
+    @Test
+    public void queryingFieldsFromNoApiEntityFetcher_noMatchingFieldInEntity_throwException(){
+        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { c } }");
+        assertFalse(result.getErrors().isEmpty());
+        assertTrue(((ExceptionWhileDataFetching)result.getErrors().get(0)).getException().getCause() instanceof NoSuchFieldException);
     }
 }
