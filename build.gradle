@@ -55,9 +55,9 @@ ext {
 }
 
 
-signing {
-    sign configurations.archives
-}
+//signing {
+//    sign configurations.archives
+//}
 
 idea {
     project {
