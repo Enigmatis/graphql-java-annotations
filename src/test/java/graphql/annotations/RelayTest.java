@@ -110,20 +110,20 @@ public class RelayTest {
         assertTrue(doSomething.getType() instanceof GraphQLObjectType);
         GraphQLObjectType returnType = (GraphQLObjectType) doSomething.getType();
 
-        assertNotNull(returnType.getFieldDefinition("i"));
+        assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
         GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
-        ExecutionResult result = graphQL.execute("mutation { doSomething(input: {clientMutationId: \"1\"}) { i clientMutationId } }", new TestObject());
+        ExecutionResult result = graphQL.execute("mutation { doSomething(input: {clientMutationId: \"1\"}) { getI clientMutationId } }", new TestObject());
 
         assertEquals(result.getErrors().size(), 0);
 
         Map<String, Object> returns = (Map<String, Object>) ((Map<String, Object>) result.getData()).get("doSomething");
 
-        assertEquals(returns.get("i"), 0);
+        assertEquals(returns.get("getI"), 0);
         assertEquals(returns.get("clientMutationId"), "1");
     }
 
@@ -139,13 +139,13 @@ public class RelayTest {
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
-        ExecutionResult result = graphQL.execute("mutation { doSomethingI(input: {clientMutationId: \"1\"}) { i clientMutationId } }", new TestObject());
+        ExecutionResult result = graphQL.execute("mutation { doSomethingI(input: {clientMutationId: \"1\"}) { getI clientMutationId } }", new TestObject());
 
         assertEquals(result.getErrors().size(), 0);
 
         Map<String, Object> returns = (Map<String, Object>) ((Map<String, Object>) result.getData()).get("doSomethingI");
 
-        assertEquals(returns.get("i"), 0);
+        assertEquals(returns.get("getI"), 0);
         assertEquals(returns.get("clientMutationId"), "1");
     }
 
@@ -171,20 +171,20 @@ public class RelayTest {
         assertTrue(doSomethingElse.getType() instanceof GraphQLObjectType);
         GraphQLObjectType returnType = (GraphQLObjectType) doSomethingElse.getType();
 
-        assertNotNull(returnType.getFieldDefinition("i"));
+        assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
         GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
-        ExecutionResult result = graphQL.execute("mutation { doSomethingElse(input: {a: 0, b: 1, clientMutationId: \"1\"}) { i clientMutationId } }", new TestObject());
+        ExecutionResult result = graphQL.execute("mutation { doSomethingElse(input: {a: 0, b: 1, clientMutationId: \"1\"}) { getI clientMutationId } }", new TestObject());
 
         assertEquals(result.getErrors().size(), 0);
 
         Map<String, Object> returns = (Map<String, Object>) ((Map<String, Object>) result.getData()).get("doSomethingElse");
 
-        assertEquals(returns.get("i"), -1);
+        assertEquals(returns.get("getI"), -1);
         assertEquals(returns.get("clientMutationId"), "1");
     }
 
@@ -208,7 +208,7 @@ public class RelayTest {
         assertTrue(doSomethingElse.getType() instanceof GraphQLObjectType);
         GraphQLObjectType returnType = (GraphQLObjectType) doSomethingElse.getType();
 
-        assertNotNull(returnType.getFieldDefinition("i"));
+        assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
         GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
@@ -221,13 +221,13 @@ public class RelayTest {
         inputVariables.put("b", 1);
         inputVariables.put("clientMutationId", "1");
         variables.put("input", inputVariables);
-        ExecutionResult result = graphQL.execute("mutation VariableMutation($input:DoSomethingElseInput!) { doSomethingElse(input: $input) { i clientMutationId } }", new TestObject(), variables);
+        ExecutionResult result = graphQL.execute("mutation VariableMutation($input:DoSomethingElseInput!) { doSomethingElse(input: $input) { getI clientMutationId } }", new TestObject(), variables);
 
         assertEquals(result.getErrors().size(), 0);
 
         Map<String, Object> returns = (Map<String, Object>) ((Map<String, Object>) result.getData()).get("doSomethingElse");
 
-        assertEquals(returns.get("i"), -1);
+        assertEquals(returns.get("getI"), -1);
         assertEquals(returns.get("clientMutationId"), "1");
     }
 }

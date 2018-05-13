@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,14 +22,12 @@ import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
 import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.typeBuilders.InputObjectBuilder;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.*;
-
 import graphql.schema.GraphQLType;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.SchemaPrinter;
@@ -44,10 +42,7 @@ import java.util.function.Supplier;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLSchema.newSchema;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 @SuppressWarnings("unchecked")
 public class GraphQLObjectTest {
@@ -83,7 +78,7 @@ public class GraphQLObjectTest {
         }
 
         @GraphQLField
-        public String fieldWithArgsAndEnvironment(DataFetchingEnvironment env,@GraphQLName("a") String a, @GraphQLName("b") String b) {
+        public String fieldWithArgsAndEnvironment(DataFetchingEnvironment env, @GraphQLName("a") String a, @GraphQLName("b") String b) {
             return a;
         }
 
@@ -146,7 +141,7 @@ public class GraphQLObjectTest {
         public String aaa;
     }
 
-    public static class TestObjectDB{
+    public static class TestObjectDB {
         public String aaa;
 
         private String name;
@@ -156,11 +151,12 @@ public class GraphQLObjectTest {
         }
 
         public TestObjectDB(String name, String aaa) {
-            this.name = name; this.aaa=aaa;
+            this.name = name;
+            this.aaa = aaa;
         }
     }
 
-    public static class TestQuery{
+    public static class TestQuery {
         @GraphQLField
         @GraphQLDataFetcher(ObjectFetcher.class)
         public TestMappedObject object;
@@ -174,15 +170,62 @@ public class GraphQLObjectTest {
         }
     }
 
+    public static class NameTest {
+        @GraphQLField
+        public Boolean isCool;
+
+        @GraphQLField
+        @GraphQLPrettify
+        public Boolean isAwesome;
+
+        @GraphQLField
+        @GraphQLPrettify
+        @GraphQLName("yarinnn")
+        public Boolean isYarin;
+
+        @GraphQLField
+        public String getX() {
+            return "Asdf0";
+        }
+
+        @GraphQLField
+        @GraphQLPrettify
+        public String getY() {
+            return "asd";
+        }
+
+        @GraphQLField
+        @GraphQLPrettify
+        @GraphQLName("daniel")
+        public String setM(){
+            return "Asdf";
+        }
+
+    }
+
     @Test
-    public void fetchTestMappedObject_assertNameIsMappedFromDBObject(){
+    public void objectCreation_nameIsCorrect() {
+        // Act
+        GraphQLObjectType object = GraphQLAnnotations.object(NameTest.class);
+
+        // Assert
+        assertNotNull(object.getFieldDefinition("awesome"));
+        assertNotNull(object.getFieldDefinition("isCool"));
+        assertNotNull(object.getFieldDefinition("yarinnn"));
+        assertNotNull(object.getFieldDefinition("getX"));
+        assertNotNull(object.getFieldDefinition("y"));
+        assertNotNull(object.getFieldDefinition("daniel"));
+    }
+
+    @Test
+    public void fetchTestMappedObject_assertNameIsMappedFromDBObject() {
         GraphQLObjectType object = GraphQLAnnotations.object(TestQuery.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{object {name aaa}}");
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((LinkedHashMap)(((LinkedHashMap)result.getData()).get("object"))).get("name"), "test");
-        assertEquals(((LinkedHashMap)(((LinkedHashMap)result.getData()).get("object"))).get("aaa"), "test");
+        assertEquals(((LinkedHashMap) (((LinkedHashMap) result.getData()).get("object"))).get("name"), "test");
+        assertEquals(((LinkedHashMap) (((LinkedHashMap) result.getData()).get("object"))).get("aaa"), "test");
     }
 
     @Test
@@ -359,10 +402,10 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(TestAccessors.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 2);
-        fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        fields.sort(Comparator.comparing(GraphQLFieldDefinition::getName));
 
-        assertEquals(fields.get(1).getName(), "value");
-        assertEquals(fields.get(0).getName(), "anotherValue");
+        assertEquals(fields.get(0).getName(), "getValue");
+        assertEquals(fields.get(1).getName(), "setAnotherValue");
     }
 
 
@@ -439,7 +482,7 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = GraphQLAnnotations.object(OnMethodTest.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 1);
-        assertEquals(fields.get(0).getName(), "value");
+        assertEquals(fields.get(0).getName(), "getValue");
     }
 
     public static class TestFetcher implements DataFetcher {
@@ -545,7 +588,7 @@ public class GraphQLObjectTest {
     @Test
     public void recursiveTypes() {
         GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectType object = graphQLAnnotations.getObjectHandler().getObject(Class1.class,graphQLAnnotations.getContainer());
+        GraphQLObjectType object = graphQLAnnotations.getObjectHandler().getObject(Class1.class, graphQLAnnotations.getContainer());
         GraphQLSchema schema = newSchema().query(object).build();
 
         Class1 class1 = new Class1();
@@ -598,7 +641,7 @@ public class GraphQLObjectTest {
         assertEquals(object.getFieldDefinition("id").getType(), GraphQLString);
     }
 
-    public  static class TestInputArgument {
+    public static class TestInputArgument {
         @GraphQLField
         public String a;
         @GraphQLField
@@ -619,15 +662,14 @@ public class GraphQLObjectTest {
         }
 
         @GraphQLField
-        public Collection<TestInputArgument> getInputs() {
+        public Collection<TestInputArgument> inputs() {
             return inputs;
         }
 
     }
 
 
-
-    public  static class TestObjectInput {
+    public static class TestObjectInput {
         @GraphQLField
         public String test(@GraphQLName("other") int other, @GraphQLName("arg") TestInputArgument arg) {
             return arg.a;
@@ -639,7 +681,7 @@ public class GraphQLObjectTest {
         }
     }
 
-    public static class InputObject{
+    public static class InputObject {
         @GraphQLField
         int a;
 
@@ -671,7 +713,7 @@ public class GraphQLObjectTest {
         GraphQLSchema schema = newSchema().query(object).build();
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{ test2(arg: {inputs:[{ a:\"ok\", b:2 }]}, other:0) }", new TestObjectInput());
         assertTrue(result.getErrors().isEmpty());
-        Map<String, Object> v = (Map<String, Object>) result.getData();
+        Map<String, Object> v = result.getData();
         assertEquals(v.get("test2"), "ok");
     }
 
@@ -693,7 +735,7 @@ public class GraphQLObjectTest {
 
         @Override
         public GraphQLType buildType(boolean input, Class<?> aClass, AnnotatedType annotatedType, ProcessingElementsContainer container) {
-            return buildType(input,aClass,annotatedType);
+            return buildType(input, aClass, annotatedType);
         }
 
         @Override
@@ -818,12 +860,12 @@ public class GraphQLObjectTest {
         @GraphQLField(false)
         public String forcedOff;
 
-        public String getOn() {
+        public String on() {
             return "on";
         }
 
         @GraphQLField(false)
-        public String getOff() {
+        public String off() {
             return "off";
         }
 

@@ -140,29 +140,13 @@ public class GraphQLConnectionTest {
         GraphQLSchema schema = newSchema().query(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
+        ExecutionResult result = graphQL.execute("{ getObjs(first: 1) { edges { cursor node { id, val } } } }",
                 new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
 
         assertTrue(result.getErrors().isEmpty());
 
-        testResult("objs", result);
+        testResult("getObjs", result);
 
-    }
-
-    @Test
-    public void customConnection() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestCustomConnection.class);
-        GraphQLSchema schema = newSchema().query(object).build();
-
-        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
-                new TestCustomConnection(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
-
-        assertTrue(result.getErrors().isEmpty());
-        Map<String, Object> data = result.getData();
-        Map<String, Object> objs = (Map<String, Object>) (data.get("objs"));
-        List edges = (List) objs.get("edges");
-        assertEquals(edges.size(), 0);
     }
 
     @Test
@@ -199,12 +183,12 @@ public class GraphQLConnectionTest {
         GraphQLSchema schema = newSchema().query(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ objStream(first: 1) { edges { cursor node { id, val } } } }",
+        ExecutionResult result = graphQL.execute("{ getObjStream(first: 1) { edges { cursor node { id, val } } } }",
                 new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
 
         assertTrue(result.getErrors().isEmpty());
 
-        testResult("objStream", result);
+        testResult("getObjStream", result);
     }
 
     @Test
@@ -213,12 +197,12 @@ public class GraphQLConnectionTest {
         GraphQLSchema schema = newSchema().query(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ nonNullObjs(first: 1) { edges { cursor node { id, val } } } }",
+        ExecutionResult result = graphQL.execute("{ getNonNullObjs(first: 1) { edges { cursor node { id, val } } } }",
                 new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
 
         assertTrue(result.getErrors().isEmpty());
 
-        testResult("nonNullObjs", result);
+        testResult("getNonNullObjs", result);
     }
 
     @Test
@@ -227,14 +211,14 @@ public class GraphQLConnectionTest {
         GraphQLSchema schema = newSchema().query(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ nullObj(first: 1) { edges { cursor node { id, val } } } }",
+        ExecutionResult result = graphQL.execute("{ getNullObj(first: 1) { edges { cursor node { id, val } } } }",
                 new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
 
         assertTrue(result.getErrors().isEmpty());
 
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
 
-        assertEquals(data.get("nullObj").get("edges").size(), 0);
+        assertEquals(data.get("getNullObj").get("edges").size(), 0);
     }
 
     @Test
@@ -243,12 +227,12 @@ public class GraphQLConnectionTest {
         GraphQLSchema schema = newSchema().query(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ objStreamWithParam(first: 1, filter:\"hel\") { edges { cursor node { id, val } } } }",
+        ExecutionResult result = graphQL.execute("{ getObjStreamWithParam(first: 1, filter:\"hel\") { edges { cursor node { id, val } } } }",
                 new TestConnections(emptyList()));
         assertTrue(result.getErrors().isEmpty());
 
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
-        List<Map<String, Map<String, Object>>> edges = data.get("objStreamWithParam").get("edges");
+        List<Map<String, Map<String, Object>>> edges = data.get("getObjStreamWithParam").get("edges");
 
         assertEquals(edges.size(), 0);
     }
@@ -259,13 +243,13 @@ public class GraphQLConnectionTest {
         GraphQLSchema schema = newSchema().query(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ objStreamWithParam(first: 2, filter:\"hel\") { edges { cursor node { id, val } } } }",
+        ExecutionResult result = graphQL.execute("{ getObjStreamWithParam(first: 2, filter:\"hel\") { edges { cursor node { id, val } } } }",
                 new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"), new Obj("4", "hello world"), new Obj("5", "hello again"))));
 
         assertTrue(result.getErrors().isEmpty());
 
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
-        List<Map<String, Map<String, Object>>> edges = data.get("objStreamWithParam").get("edges");
+        List<Map<String, Map<String, Object>>> edges = data.get("getObjStreamWithParam").get("edges");
 
         assertEquals(edges.size(), 2);
         assertEquals(edges.get(0).get("node").get("id"), "2");
@@ -303,6 +287,22 @@ public class GraphQLConnectionTest {
                 }
             };
         }
+    }
+
+    @Test
+    public void customConnection() {
+        GraphQLObjectType object = GraphQLAnnotations.object(TestCustomConnection.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ getObjs(first: 1) { edges { cursor node { id, val } } } }",
+                new TestCustomConnection(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
+
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> data = result.getData();
+        Map<String, Object> objs = (Map<String, Object>) (data.get("getObjs"));
+        List edges = (List) objs.get("edges");
+        assertEquals(edges.size(), 0);
     }
 
     @Test

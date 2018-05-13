@@ -19,7 +19,7 @@ import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.schema.*;
+import graphql.schema.GraphQLObjectType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -72,8 +72,8 @@ public class GraphQLEnumTest {
         GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
-        ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
-        assertEquals(result.getData().toString(), "{defaultUser={name=ONE}}");
+        ExecutionResult result = graphql.execute("{ defaultUser{ getName } }");
+        assertEquals(result.getData().toString(), "{defaultUser={getName=ONE}}");
     }
 
     @Test
@@ -81,8 +81,8 @@ public class GraphQLEnumTest {
         GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
-        ExecutionResult result = graphql.execute("{ user(param:TWO){ name } }");
-        assertEquals(result.getData().toString(), "{user={name=TWO}}");
+        ExecutionResult result = graphql.execute("{ user(param:TWO){ getName } }");
+        assertEquals(result.getData().toString(), "{user={getName=TWO}}");
     }
 
 

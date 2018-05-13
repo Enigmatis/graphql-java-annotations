@@ -106,10 +106,10 @@ public class GraphQLUnionTest {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        String query = "{ pet(kindOfPet:\"dog\"){ ... on Cat {mew}, ... on Dog{waf}} }";
+        String query = "{ getPet(kindOfPet:\"dog\"){ ... on Cat {mew}, ... on Dog{waf}} }";
         ExecutionResult result = graphQL.execute(query);
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("pet").get("waf"), "waf");
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("getPet").get("waf"), "waf");
     }
 
     @Test
@@ -117,10 +117,10 @@ public class GraphQLUnionTest {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        String query = "{ pet(kindOfPet:\"cat\"){ ... on Cat {mew}, ... on Dog{waf}} }";
+        String query = "{ getPet(kindOfPet:\"cat\"){ ... on Cat {mew}, ... on Dog{waf}} }";
         ExecutionResult result = graphQL.execute(query);
         assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("pet").get("mew"), "mew");
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("getPet").get("mew"), "mew");
     }
 
     static class Screen implements Hardware {
