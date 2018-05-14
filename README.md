@@ -22,7 +22,7 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>5.2</version>
+    <version>5.3</version>
 </dependency>
 ```
 
