@@ -180,7 +180,7 @@ public class GraphQLInputTest {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }");
+        ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }", Query.class);
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "testa");
     }
