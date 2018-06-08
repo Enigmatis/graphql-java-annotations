@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,7 @@ package graphql.annotations;
 import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.annotationTypes.GraphQLDataFetcher;
-import graphql.annotations.annotationTypes.GraphQLField;
-import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
+import graphql.annotations.annotationTypes.*;
 import graphql.annotations.annotationTypes.GraphQLType;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.processor.GraphQLAnnotations;
@@ -69,6 +67,12 @@ public class MethodDataFetcherTest {
         }
 
         @GraphQLField
+        @GraphQLPrettify
+        public int getX() {
+            return 1;
+        }
+
+        @GraphQLField
         @GraphQLInvokeDetached
         public int b() {
             return 2;
@@ -78,11 +82,41 @@ public class MethodDataFetcherTest {
         public int c() {
             return 4;
         }
+
+        @GraphQLField
+        @GraphQLPrettify
+        @GraphQLDataFetcher(CanonizedFetcher.class)
+        public CanonizedTypeApi getCanonizedType() {
+            return null;
+        }
+
+
+    }
+
+    public static class CanonizedFetcher implements DataFetcher<CanonizedType> {
+
+        @Override
+        public CanonizedType get(DataFetchingEnvironment environment) {
+            return new CanonizedType();
+        }
+    }
+
+    public static class CanonizedTypeApi {
+        @GraphQLPrettify
+        @GraphQLField
+        public int getM() {
+            return 1;
+        }
+    }
+
+    public static class CanonizedType {
+        public int m = 5;
     }
 
     public static class InternalType {
         public int a = 123;
         public int b;
+        public int x = 5;
     }
 
     @GraphQLType
@@ -119,6 +153,27 @@ public class MethodDataFetcherTest {
         assertEquals(((Map<String, Map<String, Integer>>) result.getData()).get("field").get("a").toString(), "123");
     }
 
+
+    @Test
+    public void queryingOneCanonizedFieldNotAnnotatedWithGraphQLInvokeDetached_valueIsDeterminedByEntity() {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { canonizedType { m } } }");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, Map<String, Integer>>>) result.getData()).get("field").get("canonizedType").get("m").toString(), "5");
+    }
+
+    @Test
+    public void queryingOneFieldNotAnnotatedWithGraphQLInvokeDetachedAndNameIsPrettified_valueIsDeterminedByEntity() {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { x } }");
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, Integer>>) result.getData()).get("field").get("x").toString(), "5");
+    }
+
     @Test
     public void queryingOneFieldAnnotatedWithGraphQLInvokeDetached_valueIsDeterminedByApiEntity() {
         GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
@@ -141,12 +196,12 @@ public class MethodDataFetcherTest {
     }
 
     @Test
-    public void queryingFieldsFromNoApiEntityFetcher_noMatchingFieldInEntity_throwException(){
+    public void queryingFieldsFromNoApiEntityFetcher_noMatchingFieldInEntity_throwException() {
         GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { c } }");
         assertFalse(result.getErrors().isEmpty());
-        assertTrue(((ExceptionWhileDataFetching)result.getErrors().get(0)).getException().getCause() instanceof NoSuchFieldException);
+        assertTrue(((ExceptionWhileDataFetching) result.getErrors().get(0)).getException().getCause() instanceof NoSuchFieldException);
     }
 }

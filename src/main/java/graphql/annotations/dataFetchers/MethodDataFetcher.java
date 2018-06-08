@@ -58,7 +58,7 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
             }
 
             if (obj == null && environment.getSource() != null) {
-                Object value = getFieldValue(environment.getSource(), method.getName());
+                Object value = getFieldValue(environment.getSource(), environment.getField().getName());
                 return (T) value;
             }
 
