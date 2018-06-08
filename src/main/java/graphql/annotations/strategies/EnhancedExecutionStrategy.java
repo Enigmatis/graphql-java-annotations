@@ -62,14 +62,14 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
                     .build();
 
 
-            return completeValue(executionContext, newParameters);
+            return completeValue(executionContext, newParameters).getFieldValue();
         } else {
             return super.resolveField(executionContext, parameters);
         }
     }
 
     @Override
-    protected CompletableFuture<ExecutionResult> completeValue(ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws NonNullableFieldWasNullException {
+    protected FieldValueInfo completeValue(ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws NonNullableFieldWasNullException {
         graphql.schema.GraphQLType fieldType = parameters.getTypeInfo().getType();
         Object result = parameters.getSource();
         if (result instanceof Enum && fieldType instanceof GraphQLEnumType) {

@@ -147,8 +147,6 @@ public class GraphQLInputTest {
         public TestIface object() {
             return new TestObject();
         }
-
-        ;
     }
 
     public static class QueryRecursion {
@@ -182,7 +180,7 @@ public class GraphQLInputTest {
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }", new Query());
+        ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }");
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "testa");
     }
