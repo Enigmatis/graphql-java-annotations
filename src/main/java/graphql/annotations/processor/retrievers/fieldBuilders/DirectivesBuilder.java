@@ -4,16 +4,16 @@ import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.directives.DirectiveInfo;
 import graphql.schema.GraphQLDirective;
 
-import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
-    private AccessibleObject object;
+    private AnnotatedElement object;
 
-    public DirectivesBuilder(AccessibleObject method) {
-        this.object = method;
+    public DirectivesBuilder(AnnotatedElement object) {
+        this.object = object;
     }
 
     @Override
