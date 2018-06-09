@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,13 +16,18 @@ package graphql.annotations.processor.retrievers;
 
 
 import graphql.annotations.GraphQLFieldDefinitionWrapper;
+import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.connection.GraphQLConnection;
+import graphql.annotations.directives.AnnotationsWiringEnvironmentImpl;
+import graphql.annotations.directives.BasicDirectiveInfo;
+import graphql.annotations.directives.DirectiveInfo;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.fieldBuilders.ArgumentBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.DeprecateBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.DescriptionBuilder;
+import graphql.annotations.processor.retrievers.fieldBuilders.DirectivesBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.field.FieldDataFetcherBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.field.FieldNameBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.method.MethodDataFetcherBuilder;
@@ -33,6 +38,7 @@ import graphql.annotations.processor.util.ConnectionUtil;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
 import graphql.schema.*;
+import graphql.schema.idl.SchemaDirectiveWiringEnvironmentImpl;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -41,9 +47,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
@@ -75,12 +79,15 @@ public class GraphQLFieldRetriever {
             builder.argument(ConnectionUtil.getRelay(method, container).getConnectionFieldArguments());
         }
         builder.type(outputType);
+        DirectivesBuilder directivesBuilder = new DirectivesBuilder(method);
+        builder.withDirectives(directivesBuilder.build());
         List<GraphQLArgument> args = new ArgumentBuilder(method, typeFunction, builder, container, outputType).build();
         GraphQLFieldDefinition relayFieldDefinition = handleRelayArguments(method, container, builder, outputType, args);
         builder.description(new DescriptionBuilder(method).build())
                 .deprecate(new DeprecateBuilder(method).build())
                 .dataFetcher(new MethodDataFetcherBuilder(method, outputType, typeFunction, container, relayFieldDefinition, args, dataFetcherConstructor, isConnection).build());
-        return new GraphQLFieldDefinitionWrapper(builder.build());
+
+        return new GraphQLFieldDefinitionWrapper(wireField(builder.build(), container, directivesBuilder.buildInfos()));
     }
 
     public GraphQLFieldDefinition getField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
@@ -99,7 +106,9 @@ public class GraphQLFieldRetriever {
                 .deprecate(new DeprecateBuilder(field).build())
                 .dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, isConnection).build());
 
-        return new GraphQLFieldDefinitionWrapper(builder.build());
+        DirectivesBuilder directivesBuilder = new DirectivesBuilder(field);
+        builder.withDirectives(directivesBuilder.build());
+        return new GraphQLFieldDefinitionWrapper(wireField(builder.build(), container, directivesBuilder.buildInfos()));
     }
 
     public GraphQLInputObjectField getInputField(Method method, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
@@ -202,5 +211,13 @@ public class GraphQLFieldRetriever {
 
     public void unsetDataFetcherConstructor(DataFetcherConstructor dataFetcherConstructor) {
         this.dataFetcherConstructor = new DataFetcherConstructor();
+    }
+
+    private GraphQLFieldDefinition wireField(GraphQLFieldDefinition fieldDefinition, ProcessingElementsContainer container, DirectiveInfo... directiveInfos) {
+        for (DirectiveInfo x : directiveInfos) {
+            fieldDefinition = x.getSchemaDirectiveWiring()
+                    .onField(new AnnotationsWiringEnvironmentImpl<>(fieldDefinition, x.toDirective()));
+        }
+        return fieldDefinition;
     }
 }
