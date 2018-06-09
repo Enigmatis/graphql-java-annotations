@@ -19,9 +19,7 @@ import graphql.annotations.GraphQLFieldDefinitionWrapper;
 import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.connection.GraphQLConnection;
-import graphql.annotations.directives.AnnotationsWiringEnvironmentImpl;
-import graphql.annotations.directives.BasicDirectiveInfo;
-import graphql.annotations.directives.DirectiveInfo;
+import graphql.annotations.directives.*;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.fieldBuilders.ArgumentBuilder;
@@ -87,7 +85,7 @@ public class GraphQLFieldRetriever {
                 .deprecate(new DeprecateBuilder(method).build())
                 .dataFetcher(new MethodDataFetcherBuilder(method, outputType, typeFunction, container, relayFieldDefinition, args, dataFetcherConstructor, isConnection).build());
 
-        return new GraphQLFieldDefinitionWrapper(wireField(builder.build(), container, directivesBuilder.buildInfos()));
+        return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), container, new DirectiveInfoRetriever().getDirectiveInfos(method)));
     }
 
     public GraphQLFieldDefinition getField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
@@ -108,7 +106,7 @@ public class GraphQLFieldRetriever {
 
         DirectivesBuilder directivesBuilder = new DirectivesBuilder(field);
         builder.withDirectives(directivesBuilder.build());
-        return new GraphQLFieldDefinitionWrapper(wireField(builder.build(), container, directivesBuilder.buildInfos()));
+        return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), container, new DirectiveInfoRetriever().getDirectiveInfos(field)));
     }
 
     public GraphQLInputObjectField getInputField(Method method, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
@@ -211,13 +209,5 @@ public class GraphQLFieldRetriever {
 
     public void unsetDataFetcherConstructor(DataFetcherConstructor dataFetcherConstructor) {
         this.dataFetcherConstructor = new DataFetcherConstructor();
-    }
-
-    private GraphQLFieldDefinition wireField(GraphQLFieldDefinition fieldDefinition, ProcessingElementsContainer container, DirectiveInfo... directiveInfos) {
-        for (DirectiveInfo x : directiveInfos) {
-            fieldDefinition = x.getSchemaDirectiveWiring()
-                    .onField(new AnnotationsWiringEnvironmentImpl<>(fieldDefinition, x.toDirective()));
-        }
-        return fieldDefinition;
     }
 }

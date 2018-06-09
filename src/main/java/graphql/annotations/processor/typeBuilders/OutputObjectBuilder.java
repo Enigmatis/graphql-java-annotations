@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,8 @@ package graphql.annotations.processor.typeBuilders;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
+import graphql.annotations.directives.DirectiveInfoRetriever;
+import graphql.annotations.directives.DirectiveWirer;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
@@ -33,6 +35,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
 import static graphql.schema.GraphQLObjectType.newObject;
@@ -58,7 +61,7 @@ public class OutputObjectBuilder {
     /**
      * This will examine the object class and return a {@link GraphQLObjectType.Builder} ready for further definition
      *
-     * @param object the object class to examine
+     * @param object    the object class to examine
      * @param container a class that hold several members that are required in order to build schema
      * @return a {@link GraphQLObjectType.Builder} that represents that object class
      * @throws GraphQLAnnotationsException if the object class cannot be examined
@@ -77,7 +80,7 @@ public class OutputObjectBuilder {
                 continue;
             }
             if (methodSearchAlgorithm.isFound(method)) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method,container);
+                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method, container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
@@ -88,7 +91,7 @@ public class OutputObjectBuilder {
                 continue;
             }
             if (fieldSearchAlgorithm.isFound(field)) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field,container);
+                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field, container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }

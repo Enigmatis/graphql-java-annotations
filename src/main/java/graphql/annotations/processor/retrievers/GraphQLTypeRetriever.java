@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,8 +14,12 @@
  */
 package graphql.annotations.processor.retrievers;
 
+import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.annotationTypes.GraphQLUnion;
+import graphql.annotations.directives.DirectiveInfo;
+import graphql.annotations.directives.DirectiveInfoRetriever;
+import graphql.annotations.directives.DirectiveWirer;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -23,6 +27,10 @@ import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
 import graphql.annotations.processor.typeBuilders.*;
 import graphql.schema.*;
 import org.osgi.service.component.annotations.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 
@@ -86,6 +94,11 @@ public class GraphQLTypeRetriever {
             }
         }
 
+        DirectiveWirer directiveWirer = new DirectiveWirer();
+
+        // wire the type with the directives and change the original type
+        type = directiveWirer.wire((GraphQLDirectiveContainer) type, container, new DirectiveInfoRetriever().getDirectiveInfos(object));
+
         container.getTypeRegistry().put(type.getName(), type);
         container.getProcessing().pop();
 
@@ -104,7 +117,7 @@ public class GraphQLTypeRetriever {
         return graphQLFieldRetriever;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
     }
@@ -113,7 +126,7 @@ public class GraphQLTypeRetriever {
         this.graphQLObjectInfoRetriever = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setGraphQLInterfaceRetriever(GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
         this.graphQLInterfaceRetriever = graphQLInterfaceRetriever;
     }
@@ -122,7 +135,7 @@ public class GraphQLTypeRetriever {
         this.graphQLInterfaceRetriever = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setGraphQLFieldRetriever(GraphQLFieldRetriever graphQLFieldRetriever) {
         this.graphQLFieldRetriever = graphQLFieldRetriever;
     }
@@ -131,7 +144,7 @@ public class GraphQLTypeRetriever {
         this.graphQLFieldRetriever = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, target = "(type=field)", policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, target = "(type=field)", policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setFieldSearchAlgorithm(SearchAlgorithm fieldSearchAlgorithm) {
         this.fieldSearchAlgorithm = fieldSearchAlgorithm;
     }
@@ -140,7 +153,7 @@ public class GraphQLTypeRetriever {
         this.fieldSearchAlgorithm = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, target = "(type=method)", policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, target = "(type=method)", policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setMethodSearchAlgorithm(SearchAlgorithm methodSearchAlgorithm) {
         this.methodSearchAlgorithm = methodSearchAlgorithm;
     }
@@ -149,7 +162,7 @@ public class GraphQLTypeRetriever {
         this.methodSearchAlgorithm = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setExtensionsHandler(GraphQLExtensionsHandler extensionsHandler) {
         this.extensionsHandler = extensionsHandler;
     }
@@ -157,4 +170,5 @@ public class GraphQLTypeRetriever {
     public void unsetExtensionsHandler(GraphQLExtensionsHandler extensionsHandler) {
         this.extensionsHandler = null;
     }
+
 }

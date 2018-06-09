@@ -30,18 +30,4 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
         }).collect(Collectors.toList());
         return graphQLDirectives.toArray(new GraphQLDirective[graphQLDirectives.size()]);
     }
-
-    public DirectiveInfo[] buildInfos(){
-        GraphQLDirectives directives = object.getAnnotation(GraphQLDirectives.class);
-        if (directives == null) return new DirectiveInfo[]{};
-        List<DirectiveInfo> graphQLDirectives = Arrays.stream(directives.value()).map(x -> {
-            try {
-                DirectiveInfo directiveInfo = x.newInstance();
-                return directiveInfo;
-            } catch (InstantiationException | IllegalAccessException e) {
-                return null;
-            }
-        }).collect(Collectors.toList());
-        return graphQLDirectives.toArray(new DirectiveInfo[graphQLDirectives.size()]);
-    }
 }
