@@ -3,6 +3,7 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.directives.DirectiveInfo;
 import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.GraphQLDirective;
 
@@ -29,7 +30,11 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
         List<GraphQLDirective> graphQLDirectives = Arrays.stream(directives.value()).map(x -> {
             try {
                 DirectiveInfo directiveInfo = x.info().newInstance();
-                return directiveInfo.toDirective(typeFunction, container, x.argumentsValues());
+                try {
+                    return directiveInfo.toDirective(typeFunction, container, x.argumentsValues());
+                } catch (GraphQLAnnotationsException e) {
+                    throw new GraphQLAnnotationsException(String.format("Exception while creating directive in '%s': %s", object.toString(), e.getMessage()), e);
+                }
             } catch (InstantiationException | IllegalAccessException e) {
                 return null;
             }

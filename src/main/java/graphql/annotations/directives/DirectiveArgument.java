@@ -6,7 +6,9 @@ public class DirectiveArgument {
     private String description;
     private Class<?> type;
 
-    public DirectiveArgument(String name, String defaultValue, String description, Class<?> type) {
+    public DirectiveArgument(String name, Class<?> type, String defaultValue, String description) {
+        assert (name != null);
+        assert (type != null);
         this.name = name;
         this.defaultValue = defaultValue;
         this.description = description;

@@ -48,19 +48,31 @@ public class DirectiveGraphQLArgumentBuilder implements Builder<GraphQLArgument>
             GraphQLAnnotationsException {
         GraphQLArgument.Builder argumentBuilder = newArgument().type(inputType);
         argumentBuilder.description(directiveArgument.getDescription());
-        try {
-            argumentBuilder.defaultValue(toObject(directiveArgument.getType(), directiveArgument.getDefaultValue()));
-        } catch (Exception e) {
-            throw new GraphQLAnnotationsException(String.format("The directive '%s' default value is of type '%s', but provided with '%s'", directiveArgument.getName(),
-                    directiveArgument.getType(), directiveArgument.getDefaultValue()), e);
+
+        if (directiveArgument.getDefaultValue() != null) {
+            try {
+                argumentBuilder.defaultValue(toObject(directiveArgument.getType(), directiveArgument.getDefaultValue()));
+            } catch (Exception e) {
+                throw new GraphQLAnnotationsException(String.format("The directive argument '%s' default value is of type '%s', but provided with '%s'", directiveArgument.getName(),
+                        directiveArgument.getType(), directiveArgument.getDefaultValue()), e);
+            }
         }
+
         argumentBuilder.name(directiveArgument.getName());
+        
+        if (argumentValue == null && directiveArgument.getDefaultValue() != null) {
+            argumentValue = directiveArgument.getDefaultValue();
+        } else if (argumentValue == null) {
+            throw new GraphQLAnnotationsException(String.format("The directive argument '%s' is not supplied with a value nor a default value", directiveArgument.getName()), null);
+        }
+
         try {
             argumentBuilder.value(toObject(directiveArgument.getType(), argumentValue));
         } catch (Exception e) {
             throw new GraphQLAnnotationsException(String.format("The directive '%s' value is of type '%s', but provided with '%s'", directiveArgument.getName(),
                     directiveArgument.getType(), argumentValue), e);
         }
+
         return argumentBuilder.build();
     }
 
