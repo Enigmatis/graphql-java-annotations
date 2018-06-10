@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 
 public class DirectiveInfoRetriever {
     public DirectiveInfo[] getDirectiveInfos(AnnotatedElement object) {
-        GraphQLDirectives directives = object.getAnnotation(GraphQLDirectives.class);
-        if (directives == null) return new DirectiveInfo[]{};
-        List<DirectiveInfo> graphQLDirectives = Arrays.stream(directives.value()).map(x -> {
+        GraphQLDirectives directivesContainer = object.getAnnotation(GraphQLDirectives.class);
+        if (directivesContainer == null) return new DirectiveInfo[]{};
+        List<DirectiveInfo> graphQLDirectives = Arrays.stream(directivesContainer.value()).map(x -> {
             try {
-                DirectiveInfo directiveInfo = x.newInstance();
+                DirectiveInfo directiveInfo = x.info().newInstance();
                 return directiveInfo;
             } catch (InstantiationException | IllegalAccessException e) {
                 return null;

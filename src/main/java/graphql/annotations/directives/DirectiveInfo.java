@@ -1,5 +1,7 @@
 package graphql.annotations.directives;
 
+import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLDirective;
 
@@ -10,9 +12,11 @@ public interface DirectiveInfo {
 
     String getDescription();
 
+    DirectiveArgument[] getArguments();
+
     List<Introspection.DirectiveLocation> getValidLocations();
 
-    GraphQLDirective toDirective();
+    GraphQLDirective toDirective(TypeFunction typeFunction, ProcessingElementsContainer container, String... argumentsValues);
 
     AnnotationsDirectiveWiring getSchemaDirectiveWiring();
 }

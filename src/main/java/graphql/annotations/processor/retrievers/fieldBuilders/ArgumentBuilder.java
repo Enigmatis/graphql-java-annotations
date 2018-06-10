@@ -80,7 +80,7 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
         } else {
             argumentBuilder.name(toGraphqlName(parameter.getName()));
         }
-        argumentBuilder.withDirectives(new DirectivesBuilder(parameter).build());
+        argumentBuilder.withDirectives(new DirectivesBuilder(parameter, typeFunction, container).build());
         return (GraphQLArgument) new DirectiveWirer().wire(argumentBuilder.build(), container, new DirectiveInfoRetriever().getDirectiveInfos(parameter));
     }
 

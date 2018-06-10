@@ -16,10 +16,10 @@ package graphql.annotations.processor.retrievers;
 
 
 import graphql.annotations.GraphQLFieldDefinitionWrapper;
-import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.connection.GraphQLConnection;
-import graphql.annotations.directives.*;
+import graphql.annotations.directives.DirectiveInfoRetriever;
+import graphql.annotations.directives.DirectiveWirer;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.fieldBuilders.ArgumentBuilder;
@@ -36,7 +36,6 @@ import graphql.annotations.processor.util.ConnectionUtil;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
 import graphql.schema.*;
-import graphql.schema.idl.SchemaDirectiveWiringEnvironmentImpl;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -45,7 +44,9 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
@@ -77,7 +78,7 @@ public class GraphQLFieldRetriever {
             builder.argument(ConnectionUtil.getRelay(method, container).getConnectionFieldArguments());
         }
         builder.type(outputType);
-        DirectivesBuilder directivesBuilder = new DirectivesBuilder(method);
+        DirectivesBuilder directivesBuilder = new DirectivesBuilder(method, typeFunction, container);
         builder.withDirectives(directivesBuilder.build());
         List<GraphQLArgument> args = new ArgumentBuilder(method, typeFunction, builder, container, outputType).build();
         GraphQLFieldDefinition relayFieldDefinition = handleRelayArguments(method, container, builder, outputType, args);
@@ -104,7 +105,7 @@ public class GraphQLFieldRetriever {
                 .deprecate(new DeprecateBuilder(field).build())
                 .dataFetcher(new FieldDataFetcherBuilder(field, dataFetcherConstructor, outputType, typeFunction, container, isConnection).build());
 
-        DirectivesBuilder directivesBuilder = new DirectivesBuilder(field);
+        DirectivesBuilder directivesBuilder = new DirectivesBuilder(field, typeFunction, container);
         builder.withDirectives(directivesBuilder.build());
         return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), container, new DirectiveInfoRetriever().getDirectiveInfos(field)));
     }
