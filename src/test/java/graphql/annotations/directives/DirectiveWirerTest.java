@@ -20,7 +20,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static graphql.schema.GraphQLDirective.newDirective;
 import static org.mockito.Mockito.*;
@@ -50,7 +49,7 @@ public class DirectiveWirerTest {
         when(upperWiring.onField(upperCaseEnv)).thenReturn(directiveContainer);
         when(lowerWiring.onField(lowerCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLDirective lowerCase = newDirective().name("lowerCase").validLocations(Introspection.DirectiveLocation.FIELD).build();
         map.put(upperCase, upperWiring);
@@ -76,7 +75,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onField(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.ENUM).build();
         map.put(upperCase, upperWiring);
 
@@ -97,7 +96,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onObject(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.OBJECT).build();
         map.put(upperCase, upperWiring);
 
@@ -120,7 +119,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onObject(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 
@@ -141,7 +140,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onArgument(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.ARGUMENT_DEFINITION).build();
         map.put(upperCase, upperWiring);
 
@@ -164,7 +163,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onArgument(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 
@@ -185,7 +184,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onInterface(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.INTERFACE).build();
         map.put(upperCase, upperWiring);
 
@@ -208,7 +207,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onInterface(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 
@@ -229,7 +228,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onUnion(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.UNION).build();
         map.put(upperCase, upperWiring);
 
@@ -252,7 +251,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onUnion(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 
@@ -273,7 +272,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onEnum(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.ENUM).build();
         map.put(upperCase, upperWiring);
 
@@ -296,7 +295,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onEnum(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 
@@ -317,7 +316,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onEnumValue(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.ENUM_VALUE).build();
         map.put(upperCase, upperWiring);
 
@@ -340,7 +339,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onEnumValue(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 
@@ -361,7 +360,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onScalar(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.SCALAR).build();
         map.put(upperCase, upperWiring);
 
@@ -384,7 +383,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onScalar(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 
@@ -405,7 +404,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onInputObjectType(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.INPUT_OBJECT).build();
         map.put(upperCase, upperWiring);
 
@@ -428,7 +427,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onInputObjectType(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 
@@ -449,7 +448,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onInputObjectField(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").validLocations(Introspection.DirectiveLocation.INPUT_FIELD_DEFINITION).build();
         map.put(upperCase, upperWiring);
 
@@ -472,7 +471,7 @@ public class DirectiveWirerTest {
 
         when(upperWiring.onInputObjectField(upperCaseEnv)).thenReturn(directiveContainer);
 
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         map.put(upperCase, upperWiring);
 

@@ -22,14 +22,14 @@ import graphql.schema.GraphQLDirective;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class DirectiveWiringMapRetriever {
-    public Map<GraphQLDirective, AnnotationsDirectiveWiring> getDirectiveWiringMap(AnnotatedElement object, ProcessingElementsContainer container) {
+    public HashMap<GraphQLDirective, AnnotationsDirectiveWiring> getDirectiveWiringMap(AnnotatedElement object, ProcessingElementsContainer container) {
         GraphQLDirectives directivesContainer = object.getAnnotation(GraphQLDirectives.class);
-        Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
+        LinkedHashMap<GraphQLDirective, AnnotationsDirectiveWiring> map = new LinkedHashMap<>();
         if (directivesContainer == null) return map;
-        Arrays.stream(directivesContainer.value()).forEach(x -> {
+        Arrays.stream(directivesContainer.value()).sequential().forEach(x -> {
             if (!container.getDirectiveRegistry().containsKey(x.name())) {
                 throw new GraphQLAnnotationsException(String.format("No directive named %s is found in the directive registry", x.name()), null);
             }
@@ -39,6 +39,7 @@ public class DirectiveWiringMapRetriever {
                 throw new GraphQLAnnotationsException("Cannot create an instance of the wiring class " + x.wiringClass().getSimpleName(), e);
             }
         });
+        System.out.println(map);
         return map;
     }
 

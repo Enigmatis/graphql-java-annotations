@@ -18,11 +18,13 @@ import graphql.introspection.Introspection;
 import graphql.schema.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DirectiveWirer {
-    public GraphQLDirectiveContainer wire(GraphQLDirectiveContainer element, Map<GraphQLDirective, AnnotationsDirectiveWiring> directiveWiringMap) {
+    public GraphQLDirectiveContainer wire(GraphQLDirectiveContainer element, HashMap<GraphQLDirective, AnnotationsDirectiveWiring> directiveWiringMap) {
         for (Map.Entry<GraphQLDirective, AnnotationsDirectiveWiring> entry : directiveWiringMap.entrySet()) {
+            System.out.println(entry.getKey());
             GraphQLDirective graphQLDirective = entry.getKey();
             AnnotationsDirectiveWiring wiring = entry.getValue();
 
