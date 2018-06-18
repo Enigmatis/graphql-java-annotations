@@ -30,10 +30,13 @@ public class DirectiveWiringMapRetriever {
         Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         if (directivesContainer == null) return map;
         Arrays.stream(directivesContainer.value()).forEach(x -> {
+            if (!container.getDirectiveRegistry().containsKey(x.name())) {
+                throw new GraphQLAnnotationsException(String.format("No directive named %s is found in the directive registry", x.name()), null);
+            }
             try {
                 map.put(container.getDirectiveRegistry().get(x.name()), x.wiringClass().newInstance());
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new GraphQLAnnotationsException("Cannot create an instance of the wiring class " + x.wiringClass().toString(), e);
+                throw new GraphQLAnnotationsException("Cannot create an instance of the wiring class " + x.wiringClass().getSimpleName(), e);
             }
         });
         return map;
