@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
+
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDirectives;
@@ -105,7 +106,7 @@ public class GraphQLDirectivesTest {
         GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
-        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { name }");
+        GraphQL.newGraphQL(schema).build().execute("query { name }");
     }
 
     @Test
