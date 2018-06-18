@@ -91,7 +91,7 @@ public class GraphQLTypeRetriever {
         DirectiveWirer directiveWirer = new DirectiveWirer();
 
         // wire the type with the directives and change the original type
-        type = directiveWirer.wire((GraphQLDirectiveContainer) type, container, new DirectiveWiringMapRetriever().getDirectiveWiringMap(object, container));
+        type = directiveWirer.wire((GraphQLDirectiveContainer) type, new DirectiveWiringMapRetriever().getDirectiveWiringMap(object, container));
 
         container.getTypeRegistry().put(type.getName(), type);
         container.getProcessing().pop();

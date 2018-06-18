@@ -14,7 +14,6 @@
  */
 package graphql.annotations.directives;
 
-import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.introspection.Introspection;
 import graphql.schema.*;
 
@@ -22,8 +21,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class DirectiveWirer {
-    public GraphQLDirectiveContainer wire(GraphQLDirectiveContainer element, ProcessingElementsContainer container, Map<GraphQLDirective, AnnotationsDirectiveWiring> directiveInfos) {
-        for (Map.Entry<GraphQLDirective, AnnotationsDirectiveWiring> entry : directiveInfos.entrySet()) {
+    public GraphQLDirectiveContainer wire(GraphQLDirectiveContainer element, Map<GraphQLDirective, AnnotationsDirectiveWiring> directiveWiringMap) {
+        for (Map.Entry<GraphQLDirective, AnnotationsDirectiveWiring> entry : directiveWiringMap.entrySet()) {
             GraphQLDirective graphQLDirective = entry.getKey();
             AnnotationsDirectiveWiring wiring = entry.getValue();
 

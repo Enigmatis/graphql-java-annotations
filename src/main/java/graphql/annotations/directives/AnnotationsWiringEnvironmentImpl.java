@@ -35,4 +35,22 @@ public class AnnotationsWiringEnvironmentImpl<T extends GraphQLDirectiveContaine
     public GraphQLDirective getDirective() {
         return directive;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AnnotationsWiringEnvironmentImpl<?> that = (AnnotationsWiringEnvironmentImpl<?>) o;
+
+        if (element != null ? !element.equals(that.element) : that.element != null) return false;
+        return directive != null ? directive.equals(that.directive) : that.directive == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = element != null ? element.hashCode() : 0;
+        result = 31 * result + (directive != null ? directive.hashCode() : 0);
+        return result;
+    }
 }

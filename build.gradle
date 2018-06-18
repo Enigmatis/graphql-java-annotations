@@ -79,6 +79,7 @@ dependencies {
 
     testCompile 'org.testng:testng:6.9.10'
     testCompile 'org.hamcrest:hamcrest-all:1.3'
+    testCompile 'org.mockito:mockito-core:2.+'
 }
 
 test.useTestNG()
@@ -137,7 +138,7 @@ publishing {
                             name 'Yarin Vaknin'
                             email 'yarinvak@gmail.com'
                         }
-                        developer{
+                        developer {
                             id 'guy120494'
                             name 'Guy Smorodinsky'
                         }

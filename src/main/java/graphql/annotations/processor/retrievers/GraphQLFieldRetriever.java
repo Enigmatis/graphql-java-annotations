@@ -86,7 +86,7 @@ public class GraphQLFieldRetriever {
                 .deprecate(new DeprecateBuilder(method).build())
                 .dataFetcher(new MethodDataFetcherBuilder(method, outputType, typeFunction, container, relayFieldDefinition, args, dataFetcherConstructor, isConnection).build());
 
-        return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), container, new DirectiveWiringMapRetriever().getDirectiveWiringMap(method, container)));
+        return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(method, container)));
     }
 
     public GraphQLFieldDefinition getField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
@@ -108,7 +108,7 @@ public class GraphQLFieldRetriever {
         GraphQLDirective[] graphQLDirectives = new DirectivesBuilder(field, container).build();
         builder.withDirectives(graphQLDirectives);
 
-        return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), container, new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container)));
+        return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container)));
     }
 
     public GraphQLInputObjectField getInputField(Method method, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
