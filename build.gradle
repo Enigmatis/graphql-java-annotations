@@ -142,6 +142,10 @@ publishing {
                             id 'guy120494'
                             name 'Guy Smorodinsky'
                         }
+                        developer{
+                            id 'osher-sade'
+                            name 'Osher Sade'
+                        }
                     }
                 }
             }
