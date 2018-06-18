@@ -11,22 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DirectiveInfoRetriever {
-//    public DirectiveInfo[] getDirectiveInfos(AnnotatedElement object) {
-//        GraphQLDirectives directivesContainer = object.getAnnotation(GraphQLDirectives.class);
-//        if (directivesContainer == null) return new DirectiveInfo[]{};
-//        List<DirectiveInfo> graphQLDirectives = Arrays.stream(directivesContainer.value()).map(x -> {
-//            try {
-//                DirectiveInfo directiveInfo = x.info().newInstance();
-//                return directiveInfo;
-//            } catch (InstantiationException | IllegalAccessException e) {
-//                return null;
-//            }
-//        }).collect(Collectors.toList());
-//        return graphQLDirectives.toArray(new DirectiveInfo[graphQLDirectives.size()]);
-//
-//    }
-
-
     public Map<GraphQLDirective, AnnotationsDirectiveWiring> getDirectiveInfos(AnnotatedElement object, ProcessingElementsContainer container) {
         GraphQLDirectives directivesContainer = object.getAnnotation(GraphQLDirectives.class);
         Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
