@@ -14,10 +14,8 @@
  */
 package graphql.annotations.processor.retrievers;
 
-import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.annotationTypes.GraphQLUnion;
-import graphql.annotations.directives.DirectiveInfo;
 import graphql.annotations.directives.DirectiveInfoRetriever;
 import graphql.annotations.directives.DirectiveWirer;
 import graphql.annotations.processor.ProcessingElementsContainer;
@@ -27,10 +25,6 @@ import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
 import graphql.annotations.processor.typeBuilders.*;
 import graphql.schema.*;
 import org.osgi.service.component.annotations.*;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 
@@ -97,7 +91,7 @@ public class GraphQLTypeRetriever {
         DirectiveWirer directiveWirer = new DirectiveWirer();
 
         // wire the type with the directives and change the original type
-        type = directiveWirer.wire((GraphQLDirectiveContainer) type, container, new DirectiveInfoRetriever().getDirectiveInfos(object));
+        type = directiveWirer.wire((GraphQLDirectiveContainer) type, container, new DirectiveInfoRetriever().getDirectiveInfos(object, container));
 
         container.getTypeRegistry().put(type.getName(), type);
         container.getProcessing().pop();
