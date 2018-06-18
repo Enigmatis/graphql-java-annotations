@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DirectiveInfoRetriever {
-    public Map<GraphQLDirective, AnnotationsDirectiveWiring> getDirectiveInfos(AnnotatedElement object, ProcessingElementsContainer container) {
+public class DirectiveWiringMapRetriever {
+    public Map<GraphQLDirective, AnnotationsDirectiveWiring> getDirectiveWiringMap(AnnotatedElement object, ProcessingElementsContainer container) {
         GraphQLDirectives directivesContainer = object.getAnnotation(GraphQLDirectives.class);
         Map<GraphQLDirective, AnnotationsDirectiveWiring> map = new HashMap<>();
         if (directivesContainer == null) return map;

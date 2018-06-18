@@ -17,7 +17,6 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLScalarType;
@@ -31,12 +30,10 @@ import static graphql.schema.GraphQLDirective.newDirective;
 
 public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
     private AnnotatedElement object;
-    private TypeFunction typeFunction;
     private ProcessingElementsContainer container;
 
-    public DirectivesBuilder(AnnotatedElement object, TypeFunction typeFunction, ProcessingElementsContainer container) {
+    public DirectivesBuilder(AnnotatedElement object, ProcessingElementsContainer container) {
         this.object = object;
-        this.typeFunction = typeFunction;
         this.container = container;
     }
 
@@ -56,15 +53,16 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
 
             directiveBuilder.argument(graphQLArgument.transform(builder -> {
                 String argumentValue = argumentValues[finalI];
-                try {
-                    if (graphQLArgument.getType() instanceof GraphQLScalarType) {
+                if (graphQLArgument.getType() instanceof GraphQLScalarType) {
+
+                    try {
                         Object value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
                         builder.value(value);
-                    } else {
-                        throw new GraphQLAnnotationsException("Directive argument type must be a scalar!", null);
+                    } catch (Exception e) {
+                        throw new GraphQLAnnotationsException("Could not parse argument value to argument type", e);
                     }
-                } catch (Exception e) {
-                    throw new GraphQLAnnotationsException("Could not parse argument value to argument type", e);
+                } else {
+                    throw new GraphQLAnnotationsException("Directive argument type must be a scalar!", null);
                 }
             }));
         }
@@ -81,7 +79,14 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
         GraphQLDirectives directives = object.getAnnotation(GraphQLDirectives.class);
         if (directives == null) return new GraphQLDirective[]{};
         List<GraphQLDirective> graphQLDirectives = Arrays.stream(directives.value())
-                .map(x -> transformArgs(container.getDirectiveRegistry().get(x.name()), x.argumentsValues())).collect(Collectors.toList());
+                .map(x -> {
+                            if (container.getDirectiveRegistry().containsKey(x.name())) {
+                                return transformArgs(container.getDirectiveRegistry().get(x.name()), x.argumentsValues());
+                            } else {
+                                throw new GraphQLAnnotationsException(String.format("No directive named %s is found in the directive registry", x.name()), null);
+                            }
+                        }
+                ).collect(Collectors.toList());
 
         return graphQLDirectives.toArray(new GraphQLDirective[graphQLDirectives.size()]);
     }

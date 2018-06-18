@@ -17,8 +17,8 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 import graphql.annotations.annotationTypes.GraphQLDefaultValue;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.directives.DirectiveInfoRetriever;
 import graphql.annotations.directives.DirectiveWirer;
+import graphql.annotations.directives.DirectiveWiringMapRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
@@ -80,8 +80,8 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
         } else {
             argumentBuilder.name(toGraphqlName(parameter.getName()));
         }
-        argumentBuilder.withDirectives(new DirectivesBuilder(parameter, typeFunction, container).build());
-        return (GraphQLArgument) new DirectiveWirer().wire(argumentBuilder.build(), container, new DirectiveInfoRetriever().getDirectiveInfos(parameter, container));
+        argumentBuilder.withDirectives(new DirectivesBuilder(parameter, container).build());
+        return (GraphQLArgument) new DirectiveWirer().wire(argumentBuilder.build(), container, new DirectiveWiringMapRetriever().getDirectiveWiringMap(parameter, container));
     }
 
 }
