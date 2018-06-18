@@ -25,6 +25,7 @@ import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,192 @@ public class MethodDataFetcherTest {
     @BeforeMethod
     public void init() {
         GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
+
+    /**
+     * CASE 1 : Only Api class, value determined by field
+     */
+    public static class Api1 {
+        @GraphQLField
+        private String name = "yarin";
+    }
+
+    public static class Query1 {
+        @GraphQLField
+        public Api1 queryField() {
+            return new Api1();
+        }
+    }
+
+    @Test
+    public void query_onlyApiClass_valueIsDeterminedByField() throws Exception {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query1.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { name } }").root(new Query1()));
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("queryField").get("name").toString(), "yarin");
+    }
+
+
+    /**
+     * CASE 2 : Only Api class, value determined by method
+     */
+    public static class Api2 {
+        @GraphQLField
+        public String name() {
+            return "guy";
+        }
+    }
+
+    public static class Query2 {
+        @GraphQLField
+        public Api2 queryField() {
+            return new Api2();
+        }
+    }
+
+    @Test
+    public void query_onlyApiClass_valueIsDeterminedByMethod() throws Exception {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query2.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { name } }").root(new Query2()));
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("queryField").get("name").toString(), "guy");
+    }
+
+    /**
+     * Case 3: Api and a DB class, value is determined by the db field
+     */
+    public static class Api3 {
+        @GraphQLField
+        public String name() {
+            return "dani";
+        }
+    }
+
+    public static class SuperDb3 {
+        private String name = "osher";
+
+    }
+
+    public static class DB3 extends SuperDb3 {
+    }
+
+    public static class Api3Resolver implements DataFetcher<DB3> {
+
+        @Override
+        public DB3 get(DataFetchingEnvironment environment) {
+            return new DB3();
+        }
+    }
+
+    public static class Query3 {
+        @GraphQLField
+        @GraphQLDataFetcher(Api3Resolver.class)
+        public Api3 queryField;
+    }
+
+    @Test
+    public void query_apiAndDbClass_valueIsDeterminedByDBField() throws Exception {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query3.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { name } }").root(new Query3()));
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("queryField").get("name").toString(), "osher");
+    }
+
+    /**
+     * Case 4: Api and DB classes, value is determined by db method
+     */
+
+    public static class Api4 {
+        @GraphQLField
+        public String name() {
+            return null;
+        }
+    }
+
+    public static class SuperDB4 {
+        private String name = "guy";
+
+        public String getName() {
+            return name + "/yarin";
+        }
+    }
+
+    public static class DB4 extends SuperDB4 {
+    }
+
+    public static class Api4Resolver implements DataFetcher<DB4> {
+
+        @Override
+        public DB4 get(DataFetchingEnvironment environment) {
+            return new DB4();
+        }
+    }
+
+    public static class Query4 {
+        @GraphQLField
+        @GraphQLDataFetcher(Api4Resolver.class)
+        public Api4 queryField;
+    }
+
+    @Test
+    public void query_apiAndDbClass_valueIsDeterminedByDBMethod() throws Exception {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query4.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { name } }").root(new Query4()));
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("queryField").get("name").toString(), "guy/yarin");
+    }
+
+    /**
+     * Case 5: Invoke Detached on method, both api and db classes, value is determined by the api method
+     */
+
+    public static class Api5 {
+        private String name = "yarin";
+
+        @GraphQLField
+        @GraphQLInvokeDetached
+        @GraphQLPrettify
+        public String getName() {
+            return name + "/guy/osher";
+        }
+    }
+
+    public static class DB5 {
+        private String name = "moshe";
+    }
+
+    public static class Api5Resolver implements DataFetcher<DB5> {
+
+        @Override
+        public DB5 get(DataFetchingEnvironment environment) {
+            return new DB5();
+        }
+    }
+
+    public static class Query5 {
+        @GraphQLField
+        @GraphQLDataFetcher(Api5Resolver.class)
+        public Api5 queryField;
+    }
+
+/////////////////////////////////////////
+
+    @Test
+    public void query_apiAndDbClassAndApiIsInvokeDetached_valueIsDeterminedByApiMethod() throws Exception {
+        GraphQLObjectType object = GraphQLAnnotations.object(Query5.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { name } }").root(new Query5()));
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, Map<String, String>>) result.getData()).get("queryField").get("name").toString(), "yarin/guy/osher");
     }
 
 

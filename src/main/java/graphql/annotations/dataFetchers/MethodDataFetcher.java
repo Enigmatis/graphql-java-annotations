@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
+import static graphql.annotations.processor.util.PrefixesUtil.createPrefix;
 import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 
@@ -58,7 +59,7 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
             }
 
             if (obj == null && environment.getSource() != null) {
-                Object value = getFieldValue(environment.getSource(), environment.getField().getName());
+                Object value = getGraphQLFieldValue(environment.getSource(), environment.getField().getName());
                 return (T) value;
             }
 
@@ -135,9 +136,51 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
         }
     }
 
-    private Object getFieldValue(Object source, String fieldName) throws IllegalAccessException, NoSuchFieldException {
-        Field field = source.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(source);
+    private Object getGraphQLFieldValue(Object source, String fieldName) throws IllegalAccessException, NoSuchFieldException, InvocationTargetException {
+        Method method = getMethod(source.getClass(), fieldName, "");
+        Method getMethod = getMethod(source.getClass(), fieldName, "get");
+        Method isMethod = getMethod(source.getClass(), fieldName, "is");
+        if (method != null) {
+            return method.invoke(source);
+        } else if (getMethod != null) {
+            return getMethod.invoke(source);
+        } else if (isMethod != null) {
+            return isMethod.invoke(source);
+        } else {
+            Field field = getField(source.getClass(), fieldName);
+            if (field != null) {
+                field.setAccessible(true);
+                return field.get(source);
+            } else {
+                throw new NoSuchFieldException("No GraphQL field found");
+            }
+        }
     }
+
+    private Method getMethod(Class<?> clazz, String name, String prefix) {
+        String prefixedName = createPrefix(prefix, name);
+        Method method = null;
+        while (clazz != null && method == null) {
+            try {
+                method = clazz.getDeclaredMethod(prefixedName);
+            } catch (Exception e) {
+            }
+            clazz = clazz.getSuperclass();
+        }
+
+        return method;
+    }
+
+    private Field getField(Class<?> clazz, String name) {
+        Field field = null;
+        while (clazz != null && field == null) {
+            try {
+                field = clazz.getDeclaredField(name);
+            } catch (Exception e) {
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return field;
+    }
+
 }
