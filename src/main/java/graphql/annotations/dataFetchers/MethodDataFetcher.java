@@ -137,6 +137,24 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
     }
 
     private Object getGraphQLFieldValue(Object source, String fieldName) throws IllegalAccessException, NoSuchFieldException, InvocationTargetException {
+        Object methodValue = getValueFromMethod(source, fieldName);
+        if (methodValue != null) return methodValue;
+
+        Field field = getField(source.getClass(), fieldName);
+        if (getValueFromField(field)) return field.get(source);
+
+        throw new NoSuchFieldException("No GraphQL field found");
+    }
+
+    private boolean getValueFromField(Field field) throws IllegalAccessException {
+        if (field != null) {
+            field.setAccessible(true);
+            return true;
+        }
+        return false;
+    }
+
+    private Object getValueFromMethod(Object source, String fieldName) throws IllegalAccessException, InvocationTargetException {
         String[] orderedPrefixes = new String[]{"", "get", "is"};
         for (String orderedPrefix : orderedPrefixes) {
             Method method = getMethod(source.getClass(), fieldName, orderedPrefix);
@@ -144,14 +162,7 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
                 return method.invoke(source);
             }
         }
-
-        Field field = getField(source.getClass(), fieldName);
-        if (field != null) {
-            field.setAccessible(true);
-            return field.get(source);
-        } else {
-            throw new NoSuchFieldException("No GraphQL field found");
-        }
+        return null;
     }
 
     private Method getMethod(Class<?> clazz, String name, String prefix) {
