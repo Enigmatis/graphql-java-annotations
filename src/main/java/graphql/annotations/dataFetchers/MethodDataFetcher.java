@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
-import static graphql.annotations.processor.util.PrefixesUtil.createPrefix;
+import static graphql.annotations.processor.util.PrefixesUtil.addPrefixToPropertyName;
 import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 
@@ -137,33 +137,30 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
     }
 
     private Object getGraphQLFieldValue(Object source, String fieldName) throws IllegalAccessException, NoSuchFieldException, InvocationTargetException {
-        Method method = getMethod(source.getClass(), fieldName, "");
-        Method getMethod = getMethod(source.getClass(), fieldName, "get");
-        Method isMethod = getMethod(source.getClass(), fieldName, "is");
-        if (method != null) {
-            return method.invoke(source);
-        } else if (getMethod != null) {
-            return getMethod.invoke(source);
-        } else if (isMethod != null) {
-            return isMethod.invoke(source);
-        } else {
-            Field field = getField(source.getClass(), fieldName);
-            if (field != null) {
-                field.setAccessible(true);
-                return field.get(source);
-            } else {
-                throw new NoSuchFieldException("No GraphQL field found");
+        String[] orderedPrefixes = new String[]{"", "get", "is"};
+        for (String orderedPrefix : orderedPrefixes) {
+            Method method = getMethod(source.getClass(), fieldName, orderedPrefix);
+            if (method != null) {
+                return method.invoke(source);
             }
+        }
+
+        Field field = getField(source.getClass(), fieldName);
+        if (field != null) {
+            field.setAccessible(true);
+            return field.get(source);
+        } else {
+            throw new NoSuchFieldException("No GraphQL field found");
         }
     }
 
     private Method getMethod(Class<?> clazz, String name, String prefix) {
-        String prefixedName = createPrefix(prefix, name);
+        String prefixedName = addPrefixToPropertyName(prefix, name);
         Method method = null;
         while (clazz != null && method == null) {
             try {
                 method = clazz.getDeclaredMethod(prefixedName);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
             clazz = clazz.getSuperclass();
         }
@@ -176,7 +173,7 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
         while (clazz != null && field == null) {
             try {
                 field = clazz.getDeclaredField(name);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
             clazz = clazz.getSuperclass();
         }

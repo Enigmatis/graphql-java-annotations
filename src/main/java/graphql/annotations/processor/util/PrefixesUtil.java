@@ -15,7 +15,7 @@
 package graphql.annotations.processor.util;
 
 public class PrefixesUtil {
-    public static String createPrefix(String prefix, String propertyName) {
+    public static String addPrefixToPropertyName(String prefix, String propertyName) {
         return prefix + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
     }
 }
