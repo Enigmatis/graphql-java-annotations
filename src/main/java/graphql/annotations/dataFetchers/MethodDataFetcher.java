@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
+import static graphql.annotations.processor.util.PrefixesUtil.addPrefixToPropertyName;
 import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 
@@ -58,7 +59,7 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
             }
 
             if (obj == null && environment.getSource() != null) {
-                Object value = getFieldValue(environment.getSource(), method.getName());
+                Object value = getGraphQLFieldValue(environment.getSource(), environment.getField().getName());
                 return (T) value;
             }
 
@@ -135,9 +136,59 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
         }
     }
 
-    private Object getFieldValue(Object source, String fieldName) throws IllegalAccessException, NoSuchFieldException {
-        Field field = source.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(source);
+    private Object getGraphQLFieldValue(Object source, String fieldName) throws IllegalAccessException, NoSuchFieldException, InvocationTargetException {
+        Object methodValue = getValueFromMethod(source, fieldName);
+        if (methodValue != null) return methodValue;
+
+        Field field = getField(source.getClass(), fieldName);
+        if (getValueFromField(field)) return field.get(source);
+
+        throw new NoSuchFieldException("No GraphQL field found");
     }
+
+    private boolean getValueFromField(Field field) throws IllegalAccessException {
+        if (field != null) {
+            field.setAccessible(true);
+            return true;
+        }
+        return false;
+    }
+
+    private Object getValueFromMethod(Object source, String fieldName) throws IllegalAccessException, InvocationTargetException {
+        String[] orderedPrefixes = new String[]{"", "get", "is"};
+        for (String orderedPrefix : orderedPrefixes) {
+            Method method = getMethod(source.getClass(), fieldName, orderedPrefix);
+            if (method != null) {
+                return method.invoke(source);
+            }
+        }
+        return null;
+    }
+
+    private Method getMethod(Class<?> clazz, String name, String prefix) {
+        String prefixedName = addPrefixToPropertyName(prefix, name);
+        Method method = null;
+        while (clazz != null && method == null) {
+            try {
+                method = clazz.getDeclaredMethod(prefixedName);
+            } catch (Exception ignored) {
+            }
+            clazz = clazz.getSuperclass();
+        }
+
+        return method;
+    }
+
+    private Field getField(Class<?> clazz, String name) {
+        Field field = null;
+        while (clazz != null && field == null) {
+            try {
+                field = clazz.getDeclaredField(name);
+            } catch (Exception ignored) {
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return field;
+    }
+
 }

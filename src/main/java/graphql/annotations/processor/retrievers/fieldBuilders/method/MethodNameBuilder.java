@@ -32,13 +32,13 @@ public class MethodNameBuilder implements Builder<String> {
     @Override
     public String build() {
         if (method.isAnnotationPresent(GraphQLPrettify.class) && !method.isAnnotationPresent(GraphQLName.class)) {
-            return toGraphqlName(pretifyName(method.getName()));
+            return toGraphqlName(prettifyName(method.getName()));
         }
         GraphQLName name = method.getAnnotation(GraphQLName.class);
         return toGraphqlName(name == null ? method.getName() : name.value());
     }
 
-    private String pretifyName(String originalName) {
+    private String prettifyName(String originalName) {
         String name = originalName.replaceFirst("^(is|get|set)(.+)", "$2");
         return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     }
