@@ -25,13 +25,20 @@ import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 public class FieldNameBuilder implements Builder<String> {
     private Field field;
 
+    private boolean alwaysPrettify = false;
+
     public FieldNameBuilder(Field field) {
         this.field = field;
     }
 
+    public FieldNameBuilder alwaysPrettify(boolean alwaysPrettify) {
+        this.alwaysPrettify = alwaysPrettify;
+        return this;
+    }
+
     @Override
     public String build() {
-        if (field.isAnnotationPresent(GraphQLPrettify.class) && !field.isAnnotationPresent(GraphQLName.class)) {
+        if ((alwaysPrettify || field.isAnnotationPresent(GraphQLPrettify.class)) && !field.isAnnotationPresent(GraphQLName.class)) {
             return toGraphqlName(prettifyName(field.getName()));
         }
         GraphQLName name = field.getAnnotation(GraphQLName.class);
