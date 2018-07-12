@@ -55,6 +55,8 @@ public class GraphQLFieldRetriever {
 
     private DataFetcherConstructor dataFetcherConstructor;
 
+    private boolean alwaysPrettify = false;
+
     public GraphQLFieldRetriever(DataFetcherConstructor dataFetcherConstructor) {
         this.dataFetcherConstructor = dataFetcherConstructor;
     }
@@ -66,7 +68,7 @@ public class GraphQLFieldRetriever {
     public GraphQLFieldDefinition getField(Method method, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLFieldDefinition.Builder builder = newFieldDefinition();
         TypeFunction typeFunction = getTypeFunction(method, container);
-        builder.name(new MethodNameBuilder(method).build());
+        builder.name(new MethodNameBuilder(method).alwaysPrettify(alwaysPrettify).build());
         GraphQLOutputType outputType = (GraphQLOutputType) new MethodTypeBuilder(method, typeFunction, container, false).build();
 
         boolean isConnection = ConnectionUtil.isConnection(method, outputType);
@@ -85,7 +87,7 @@ public class GraphQLFieldRetriever {
 
     public GraphQLFieldDefinition getField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLFieldDefinition.Builder builder = newFieldDefinition();
-        builder.name(new FieldNameBuilder(field).build());
+        builder.name(new FieldNameBuilder(field).alwaysPrettify(alwaysPrettify).build());
         TypeFunction typeFunction = getTypeFunction(field, container);
 
         GraphQLType outputType = typeFunction.buildType(field.getType(), field.getAnnotatedType(), container);
@@ -104,7 +106,7 @@ public class GraphQLFieldRetriever {
 
     public GraphQLInputObjectField getInputField(Method method, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLInputObjectField.Builder builder = newInputObjectField();
-        builder.name(new MethodNameBuilder(method).build());
+        builder.name(new MethodNameBuilder(method).alwaysPrettify(alwaysPrettify).build());
         TypeFunction typeFunction = getTypeFunction(method, container);
         GraphQLInputType inputType = (GraphQLInputType) new MethodTypeBuilder(method, typeFunction, container, true).build();
         return builder.type(inputType).description(new DescriptionBuilder(method).build()).build();
@@ -112,7 +114,7 @@ public class GraphQLFieldRetriever {
 
     public GraphQLInputObjectField getInputField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLInputObjectField.Builder builder = newInputObjectField();
-        builder.name(new FieldNameBuilder(field).build());
+        builder.name(new FieldNameBuilder(field).alwaysPrettify(alwaysPrettify).build());
         TypeFunction typeFunction = getTypeFunction(field, container);
         GraphQLType graphQLType = typeFunction.buildType(true, field.getType(), field.getAnnotatedType(), container);
         return builder.type((GraphQLInputType) graphQLType).description(new DescriptionBuilder(field).build()).build();
@@ -193,6 +195,10 @@ public class GraphQLFieldRetriever {
             typeRegistry.put(type.getName(), type);
         }
         return type;
+    }
+
+    public void setAlwaysPrettify(boolean alwaysPrettify) {
+        this.alwaysPrettify = alwaysPrettify;
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
