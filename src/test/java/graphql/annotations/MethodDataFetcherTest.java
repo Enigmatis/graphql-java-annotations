@@ -40,6 +40,24 @@ public class MethodDataFetcherTest {
         GraphQLAnnotations.getInstance().getTypeRegistry().clear();
     }
 
+    public static class StaticApi {
+        @GraphQLField
+        public static String name() {
+            return "osher";
+        }
+    }
+
+    @Test
+    public void query_staticMethod_valueIsDeterminedByMethod(){
+        GraphQLObjectType object = GraphQLAnnotations.object(StaticApi.class);
+        GraphQLSchema schema = newSchema().query(object).build();
+
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { name }").root(new StaticApi()));
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals(((Map<String, String>) result.getData()).get("name").toString(), "osher");
+    }
+
+
     /**
      * CASE 1 : Only Api class, value determined by field
      */

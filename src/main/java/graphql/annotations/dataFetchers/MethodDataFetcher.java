@@ -68,7 +68,10 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
     public T get(DataFetchingEnvironment environment) {
         try {
             T obj;
-            if (method.isAnnotationPresent(GraphQLBatched.class) || method.isAnnotationPresent(GraphQLInvokeDetached.class)) {
+            if (Modifier.isStatic(method.getModifiers())){
+                return (T) method.invoke(null, invocationArgs(environment, container));
+            }
+            else if (method.isAnnotationPresent(GraphQLBatched.class) || method.isAnnotationPresent(GraphQLInvokeDetached.class)) {
                 obj = newInstance((Class<T>) method.getDeclaringClass());
             } else if (!method.getDeclaringClass().isInstance(environment.getSource())) {
                 obj = newInstance((Class<T>) method.getDeclaringClass(), environment.getSource());
