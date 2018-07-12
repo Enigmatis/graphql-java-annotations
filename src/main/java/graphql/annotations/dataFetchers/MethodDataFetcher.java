@@ -23,14 +23,35 @@ import graphql.schema.*;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 import static graphql.annotations.processor.util.PrefixesUtil.addPrefixToPropertyName;
+import static graphql.annotations.processor.util.PrefixesUtil.extractPrefixedName;
 import static graphql.annotations.processor.util.ReflectionKit.constructNewInstance;
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 
+
+/**
+ * This class is determining how to return value of a method from an api entity
+ * The order of the mapping:
+ * 1. If no source is provided to map between - invoking the method implementation
+ * 2. If annotated with @GraphQLInvokeDetached - invoking the method implementation
+ * 3. else If source is provided, and method name is matching a method name in the source object - execute source implementation
+ * i.e method name is: `name` ; existing method in the source object with name: `name`
+ * 4. else If source is provided, and method name is matching a method name with a `get` prefix in the source object - execute source implementation
+ * i.e method name is: `name` ; existing method in the source object with name: `getName`
+ * 5. else If source is provided, and method name is matching a method name with a `is` prefix in the source object - execute source implementation
+ * i.e method name is: `name` ; existing method in the source object with name: isName
+ * 6. else If source is provided, and method name is matching a field name in the source object - return field value from the source object
+ * i.e method name is: `name` ; field name in source object is: `name`
+ * 7. else If source is provided, and method name is prefixed with `get` or `is` - and it matches to a field name (without the prefix) in the source object - return field value from the source object
+ * i.e method name is: `getName` ; field name in source object is: `name`
+ *
+ * @param <T> type of the returned value
+ */
 public class MethodDataFetcher<T> implements DataFetcher<T> {
     private final Method method;
     private final ProcessingElementsContainer container;
@@ -47,7 +68,10 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
     public T get(DataFetchingEnvironment environment) {
         try {
             T obj;
-            if (method.isAnnotationPresent(GraphQLBatched.class) || method.isAnnotationPresent(GraphQLInvokeDetached.class)) {
+            if (Modifier.isStatic(method.getModifiers())){
+                return (T) method.invoke(null, invocationArgs(environment, container));
+            }
+            else if (method.isAnnotationPresent(GraphQLBatched.class) || method.isAnnotationPresent(GraphQLInvokeDetached.class)) {
                 obj = newInstance((Class<T>) method.getDeclaringClass());
             } else if (!method.getDeclaringClass().isInstance(environment.getSource())) {
                 obj = newInstance((Class<T>) method.getDeclaringClass(), environment.getSource());
@@ -59,7 +83,7 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
             }
 
             if (obj == null && environment.getSource() != null) {
-                Object value = getGraphQLFieldValue(environment.getSource(), environment.getField().getName());
+                Object value = getGraphQLFieldValue(environment.getSource(), method.getName());
                 return (T) value;
             }
 
@@ -140,18 +164,41 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
         Object methodValue = getValueFromMethod(source, fieldName);
         if (methodValue != null) return methodValue;
 
-        Field field = getField(source.getClass(), fieldName);
-        if (getValueFromField(field)) return field.get(source);
+        Object fieldValue = getValueFromField(source, fieldName);
+        if (fieldValue != null) return fieldValue;
 
         throw new NoSuchFieldException("No GraphQL field found");
     }
 
-    private boolean getValueFromField(Field field) throws IllegalAccessException {
+    private Object getValueFromField(Object source, String fieldName) throws IllegalAccessException {
+        List<String> namesToSearchFor = Arrays.asList(fieldName, extractPrefixedName(fieldName));
+        for (String name : namesToSearchFor) {
+            Field field = getField(source.getClass(), name);
+            if (isFieldContainsValue(field)) {
+                return field.get(source);
+            }
+        }
+        return null;
+    }
+
+    private boolean isFieldContainsValue(Field field) throws IllegalAccessException {
         if (field != null) {
             field.setAccessible(true);
             return true;
         }
         return false;
+    }
+
+    private Field getField(Class<?> clazz, String name) {
+        Field field = null;
+        while (clazz != null && field == null) {
+            try {
+                field = clazz.getDeclaredField(name);
+            } catch (Exception ignored) {
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return field;
     }
 
     private Object getValueFromMethod(Object source, String fieldName) throws IllegalAccessException, InvocationTargetException {
@@ -166,7 +213,13 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
     }
 
     private Method getMethod(Class<?> clazz, String name, String prefix) {
-        String prefixedName = addPrefixToPropertyName(prefix, name);
+        String prefixedName;
+        if (prefix.isEmpty()) {
+            prefixedName = name;
+        } else {
+            prefixedName = addPrefixToPropertyName(prefix, name);
+        }
+
         Method method = null;
         while (clazz != null && method == null) {
             try {
@@ -177,18 +230,6 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
         }
 
         return method;
-    }
-
-    private Field getField(Class<?> clazz, String name) {
-        Field field = null;
-        while (clazz != null && field == null) {
-            try {
-                field = clazz.getDeclaredField(name);
-            } catch (Exception ignored) {
-            }
-            clazz = clazz.getSuperclass();
-        }
-        return field;
     }
 
 }
