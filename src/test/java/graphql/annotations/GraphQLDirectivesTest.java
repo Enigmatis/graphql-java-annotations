@@ -12,6 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
+package graphql.annotations; /**
+ * Copyright 2016 Yurii Rashkovskii
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ */
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -21,10 +35,11 @@ import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.AnnotationsWiringEnvironment;
 import graphql.annotations.directives.Directive;
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.introspection.Introspection;
 import graphql.schema.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -37,6 +52,18 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class GraphQLDirectivesTest {
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    }
+
+    @BeforeMethod
+    public void init() {
+        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        GraphQLAnnotations.getInstance().getContainer().getDirectiveRegistry().clear();
+    }
+
 
     public static class UpperWiring implements AnnotationsDirectiveWiring {
         @Override
@@ -102,7 +129,6 @@ public class GraphQLDirectivesTest {
 
     @Test(expectedExceptions = GraphQLAnnotationsException.class)
     public void queryName_noDirectivesProvidedToRegistry_exceptionIsThrown() throws Exception {
-        GraphQLAnnotations.getInstance().setContainer(new ProcessingElementsContainer());
         GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
@@ -111,7 +137,6 @@ public class GraphQLDirectivesTest {
 
     @Test
     public void queryName_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
-        GraphQLAnnotations.getInstance().setContainer(new ProcessingElementsContainer());
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLObjectType object = GraphQLAnnotations.object(Query.class, upperCase);
@@ -124,7 +149,6 @@ public class GraphQLDirectivesTest {
 
     @Test
     public void queryNameWithFalse_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
-        GraphQLAnnotations.getInstance().setContainer(new ProcessingElementsContainer());
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLObjectType object = GraphQLAnnotations.object(Query.class, upperCase);
@@ -137,7 +161,6 @@ public class GraphQLDirectivesTest {
 
     @Test
     public void queryNameWithNoArgs_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
-        GraphQLAnnotations.getInstance().setContainer(new ProcessingElementsContainer());
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean).defaultValue(true))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLObjectType object = GraphQLAnnotations.object(Query2.class, upperCase);
@@ -150,8 +173,6 @@ public class GraphQLDirectivesTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void queryNameWithNoArgs_noDefaultValue_exceptionIsThrown() throws Exception {
-        GraphQLAnnotations.getInstance().setContainer(new ProcessingElementsContainer());
-        GraphQLAnnotations.getInstance().getContainer().getDirectiveRegistry().clear();
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLObjectType object = GraphQLAnnotations.object(Query2.class, upperCase);
@@ -162,7 +183,6 @@ public class GraphQLDirectivesTest {
 
     @Test
     public void queryName_chainedDirectives_wiringIsActivatedInCorrectOrder() throws Exception {
-        GraphQLAnnotations.getInstance().setContainer(new ProcessingElementsContainer());
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean).defaultValue(true))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLDirective suffixDirective = GraphQLDirective.newDirective().name("suffix").argument(builder -> builder.name("suffix").type(GraphQLString))
