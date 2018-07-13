@@ -47,7 +47,7 @@ public class DirectiveWiringMapRetrieverTest {
     public static String fieldWithPrivateWiringClassThatShouldFail;
 
     @Test
-    public void getDirectiveWiringMap_noDirectivesInRegistry_throwAnException() throws Exception {
+    public void getDirectiveWiringMap_noDirectivesInRegistry_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         DirectiveWiringMapRetriever directiveWiringMapRetriever = new DirectiveWiringMapRetriever();
         ProcessingElementsContainer container = new ProcessingElementsContainer();
@@ -62,7 +62,7 @@ public class DirectiveWiringMapRetrieverTest {
     }
 
     @Test
-    public void getDirectiveWiringMap_wiringClassIsPrivate_throwAnException() throws Exception {
+    public void getDirectiveWiringMap_wiringClassIsPrivate_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         DirectiveWiringMapRetriever directiveWiringMapRetriever = new DirectiveWiringMapRetriever();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();

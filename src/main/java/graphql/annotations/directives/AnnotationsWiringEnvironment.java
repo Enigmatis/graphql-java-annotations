@@ -15,12 +15,13 @@
 package graphql.annotations.directives;
 
 import graphql.schema.GraphQLDirective;
+import graphql.schema.GraphQLDirectiveContainer;
 
-public interface AnnotationsWiringEnvironment<T> {
+public interface AnnotationsWiringEnvironment {
     /**
      * @return the runtime element in play
      */
-    T getElement();
+    GraphQLDirectiveContainer getElement();
 
     /**
      * @return the directive that is being examined

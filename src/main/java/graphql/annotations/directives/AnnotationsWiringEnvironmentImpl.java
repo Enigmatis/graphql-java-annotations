@@ -17,17 +17,17 @@ package graphql.annotations.directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLDirectiveContainer;
 
-public class AnnotationsWiringEnvironmentImpl<T extends GraphQLDirectiveContainer> implements AnnotationsWiringEnvironment<T> {
-    private final T element;
+public class AnnotationsWiringEnvironmentImpl implements AnnotationsWiringEnvironment {
+    private final GraphQLDirectiveContainer element;
     private final GraphQLDirective directive;
 
-    public AnnotationsWiringEnvironmentImpl(T element, GraphQLDirective directive) {
+    public AnnotationsWiringEnvironmentImpl(GraphQLDirectiveContainer element, GraphQLDirective directive) {
         this.element = element;
         this.directive = directive;
     }
 
     @Override
-    public T getElement() {
+    public GraphQLDirectiveContainer getElement() {
         return element;
     }
 
@@ -41,7 +41,7 @@ public class AnnotationsWiringEnvironmentImpl<T extends GraphQLDirectiveContaine
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        AnnotationsWiringEnvironmentImpl<?> that = (AnnotationsWiringEnvironmentImpl<?>) o;
+        AnnotationsWiringEnvironmentImpl that = (AnnotationsWiringEnvironmentImpl) o;
 
         if (element != null ? !element.equals(that.element) : that.element != null) return false;
         return directive != null ? directive.equals(that.directive) : that.directive == null;

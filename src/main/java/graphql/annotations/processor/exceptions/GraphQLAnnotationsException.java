@@ -22,4 +22,7 @@ public class GraphQLAnnotationsException extends RuntimeException {
         super(message, cause);
     }
 
+    public GraphQLAnnotationsException(Throwable cause) {
+        super(cause);
+    }
 }

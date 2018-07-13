@@ -48,23 +48,7 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
         }
 
         for (int i = 0; i < argumentValues.length; i++) {
-            int finalI = i;
-            GraphQLArgument graphQLArgument = arguments.get(i);
-
-            directiveBuilder.argument(graphQLArgument.transform(builder -> {
-                String argumentValue = argumentValues[finalI];
-                if (graphQLArgument.getType() instanceof GraphQLScalarType) {
-
-                    try {
-                        Object value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
-                        builder.value(value);
-                    } catch (Exception e) {
-                        throw new GraphQLAnnotationsException("Could not parse argument value to argument type", e);
-                    }
-                } else {
-                    throw new GraphQLAnnotationsException("Directive argument type must be a scalar!", null);
-                }
-            }));
+            transformArgument(argumentValues, directiveBuilder, arguments, i);
         }
 
         for (int i = argumentValues.length; i < arguments.size(); i++) {
@@ -72,6 +56,26 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
             directiveBuilder.argument(arguments.get(i).transform(builder -> builder.value(arguments.get(finalI).getDefaultValue())));
         }
         return directiveBuilder.build();
+    }
+
+    private void transformArgument(String[] argumentValues, GraphQLDirective.Builder directiveBuilder, List<GraphQLArgument> arguments, int i) {
+        int finalI = i;
+        GraphQLArgument graphQLArgument = arguments.get(i);
+
+        directiveBuilder.argument(graphQLArgument.transform(builder -> {
+            String argumentValue = argumentValues[finalI];
+            if (graphQLArgument.getType() instanceof GraphQLScalarType) {
+
+                try {
+                    Object value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
+                    builder.value(value);
+                } catch (Exception e) {
+                    throw new GraphQLAnnotationsException("Could not parse argument value to argument type", e);
+                }
+            } else {
+                throw new GraphQLAnnotationsException("Directive argument type must be a scalar!", null);
+            }
+        }));
     }
 
     @Override

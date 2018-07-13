@@ -61,7 +61,7 @@ public class DirectivesBuilderTest {
     // Field
 
     @Test(expectedExceptions = GraphQLAnnotationsException.class)
-    public void testDecoratedField_noDirectiveInRegistry_exceptionIsThrown() throws Exception {
+    public void testDecoratedField_noDirectiveInRegistry_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
         DirectivesBuilder directivesBuilder = new DirectivesBuilder(this.getClass().getField("decoratedField"), processingElementsContainer);
@@ -120,7 +120,7 @@ public class DirectivesBuilderTest {
     }
 
     @Test
-    public void testDecoratedFieldWithArguments_argumentsValuesLongerThanArgumentsNumber_exceptionIsThrown() throws Exception {
+    public void testDecoratedFieldWithArguments_argumentsValuesLongerThanArgumentsNumber_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
@@ -140,7 +140,7 @@ public class DirectivesBuilderTest {
     }
 
     @Test
-    public void testDecoratedFieldWithArguments_directiveArgumentIsNotAScalarType_exceptionIsThrown() throws Exception {
+    public void testDecoratedFieldWithArguments_directiveArgumentIsNotAScalarType_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
         GraphQLInputObjectType inputField = GraphQLInputObjectType.newInputObject().name("inputField").build();
@@ -159,7 +159,7 @@ public class DirectivesBuilderTest {
     }
 
     @Test
-    public void testDecoratedFieldWithArguments_argumentValueIsNotTheSameTypeAsArgument_exceptionIsThrown() throws Exception {
+    public void testDecoratedFieldWithArguments_argumentValueIsNotTheSameTypeAsArgument_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("arg").type(GraphQLInt)).build();
@@ -202,7 +202,7 @@ public class DirectivesBuilderTest {
 
     // Argument
     @Test(expectedExceptions = GraphQLAnnotationsException.class)
-    public void testDecoratedArgument_noDirectiveInRegistry_exceptionIsThrown() throws Exception {
+    public void testDecoratedArgument_noDirectiveInRegistry_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
         DirectivesBuilder directivesBuilder = new DirectivesBuilder(this.getClass().getMethod("forTestMethod", String.class).getParameters()[0], processingElementsContainer);
@@ -257,7 +257,7 @@ public class DirectivesBuilderTest {
 
     // Class
     @Test(expectedExceptions = GraphQLAnnotationsException.class)
-    public void testDecoratedClass_noDirectiveInRegistry_exceptionIsThrown() throws Exception {
+    public void testDecoratedClass_noDirectiveInRegistry_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
         DirectivesBuilder directivesBuilder = new DirectivesBuilder(DecoratedClass.class, processingElementsContainer);

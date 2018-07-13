@@ -25,8 +25,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLObjectType onObject(AnnotationsWiringEnvironment<GraphQLObjectType> environment) {
-        return environment.getElement();
+    default GraphQLObjectType onObject(AnnotationsWiringEnvironment environment) {
+        return (GraphQLObjectType) environment.getElement();
     }
 
     /**
@@ -37,8 +37,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLFieldDefinition onField(AnnotationsWiringEnvironment<GraphQLFieldDefinition> environment) {
-        return environment.getElement();
+    default GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
+        return (GraphQLFieldDefinition) environment.getElement();
     }
 
     /**
@@ -49,8 +49,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLArgument onArgument(AnnotationsWiringEnvironment<GraphQLArgument> environment) {
-        return environment.getElement();
+    default GraphQLArgument onArgument(AnnotationsWiringEnvironment environment) {
+        return (GraphQLArgument) environment.getElement();
     }
 
     /**
@@ -61,8 +61,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLInterfaceType onInterface(AnnotationsWiringEnvironment<GraphQLInterfaceType> environment) {
-        return environment.getElement();
+    default GraphQLInterfaceType onInterface(AnnotationsWiringEnvironment environment) {
+        return (GraphQLInterfaceType) environment.getElement();
     }
 
     /**
@@ -73,8 +73,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLUnionType onUnion(AnnotationsWiringEnvironment<GraphQLUnionType> environment) {
-        return environment.getElement();
+    default GraphQLUnionType onUnion(AnnotationsWiringEnvironment environment) {
+        return (GraphQLUnionType) environment.getElement();
     }
 
     /**
@@ -85,8 +85,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLEnumType onEnum(AnnotationsWiringEnvironment<GraphQLEnumType> environment) {
-        return environment.getElement();
+    default GraphQLEnumType onEnum(AnnotationsWiringEnvironment environment) {
+        return (GraphQLEnumType) environment.getElement();
     }
 
     /**
@@ -97,8 +97,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLEnumValueDefinition onEnumValue(AnnotationsWiringEnvironment<GraphQLEnumValueDefinition> environment) {
-        return environment.getElement();
+    default GraphQLEnumValueDefinition onEnumValue(AnnotationsWiringEnvironment environment) {
+        return (GraphQLEnumValueDefinition) environment.getElement();
     }
 
     /**
@@ -109,8 +109,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLScalarType onScalar(AnnotationsWiringEnvironment<GraphQLScalarType> environment) {
-        return environment.getElement();
+    default GraphQLScalarType onScalar(AnnotationsWiringEnvironment environment) {
+        return (GraphQLScalarType) environment.getElement();
     }
 
     /**
@@ -121,8 +121,8 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLInputObjectType onInputObjectType(AnnotationsWiringEnvironment<GraphQLInputObjectType> environment) {
-        return environment.getElement();
+    default GraphQLInputObjectType onInputObjectType(AnnotationsWiringEnvironment environment) {
+        return (GraphQLInputObjectType) environment.getElement();
     }
 
     /**
@@ -133,7 +133,7 @@ public interface AnnotationsDirectiveWiring {
      *
      * @return a non null element based on the original one
      */
-    default GraphQLInputObjectField onInputObjectField(AnnotationsWiringEnvironment<GraphQLInputObjectField> environment) {
-        return environment.getElement();
+    default GraphQLInputObjectField onInputObjectField(AnnotationsWiringEnvironment environment) {
+        return (GraphQLInputObjectField) environment.getElement();
     }
 }

@@ -39,7 +39,6 @@ public class DirectiveWiringMapRetriever {
                 throw new GraphQLAnnotationsException("Cannot create an instance of the wiring class " + x.wiringClass().getSimpleName(), e);
             }
         });
-        System.out.println(map);
         return map;
     }
 

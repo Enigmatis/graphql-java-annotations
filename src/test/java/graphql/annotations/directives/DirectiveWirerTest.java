@@ -14,6 +14,7 @@
  */
 package graphql.annotations.directives;
 
+import graphql.TypeResolutionEnvironment;
 import graphql.introspection.Introspection;
 import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
@@ -21,6 +22,8 @@ import org.testng.annotations.Test;
 
 import java.util.HashMap;
 
+import static graphql.Scalars.GraphQLInt;
+import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLDirective.newDirective;
 import static org.mockito.Mockito.*;
 
@@ -41,10 +44,11 @@ public class DirectiveWirerTest {
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
         AnnotationsDirectiveWiring lowerWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLFieldDefinition directiveContainer = mock(GraphQLFieldDefinition.class);
+        GraphQLFieldDefinition directiveContainer = GraphQLFieldDefinition.newFieldDefinition().name("bla")
+                .type(GraphQLString).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLFieldDefinition> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
-        AnnotationsWiringEnvironmentImpl<GraphQLFieldDefinition> lowerCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("lowerCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl lowerCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("lowerCase"));
 
         when(upperWiring.onField(upperCaseEnv)).thenReturn(directiveContainer);
         when(lowerWiring.onField(lowerCaseEnv)).thenReturn(directiveContainer);
@@ -69,9 +73,10 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLFieldDefinition directiveContainer = mock(GraphQLFieldDefinition.class);
+        GraphQLFieldDefinition directiveContainer = GraphQLFieldDefinition.newFieldDefinition().name("bla")
+                .type(GraphQLString).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLFieldDefinition> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onField(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -90,9 +95,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLObjectType directiveContainer = mock(GraphQLObjectType.class);
+        GraphQLObjectType directiveContainer = GraphQLObjectType.newObject().name("asdf").build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLObjectType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onObject(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -113,9 +118,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLObjectType directiveContainer = mock(GraphQLObjectType.class);
+        GraphQLObjectType directiveContainer = GraphQLObjectType.newObject().name("asdf00").build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLObjectType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onObject(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -134,9 +139,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLArgument directiveContainer = mock(GraphQLArgument.class);
+        GraphQLArgument directiveContainer = GraphQLArgument.newArgument().name("asdf").type(GraphQLString).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLArgument> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onArgument(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -157,9 +162,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLArgument directiveContainer = mock(GraphQLArgument.class);
+        GraphQLArgument directiveContainer = GraphQLArgument.newArgument().name("asdf0").type(GraphQLString).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLArgument> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onArgument(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -178,9 +183,14 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLInterfaceType directiveContainer = mock(GraphQLInterfaceType.class);
+        GraphQLInterfaceType directiveContainer = GraphQLInterfaceType.newInterface().name("asdf").typeResolver(new TypeResolver() {
+            @Override
+            public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+                return null;
+            }
+        }).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLInterfaceType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onInterface(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -201,9 +211,14 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLInterfaceType directiveContainer = mock(GraphQLInterfaceType.class);
+        GraphQLInterfaceType directiveContainer = GraphQLInterfaceType.newInterface().name("asdf").typeResolver(new TypeResolver() {
+            @Override
+            public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+                return null;
+            }
+        }).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLInterfaceType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onInterface(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -222,9 +237,10 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLUnionType directiveContainer = mock(GraphQLUnionType.class);
+        GraphQLUnionType directiveContainer = GraphQLUnionType.newUnionType().name("asdf")
+                .possibleType(GraphQLObjectType.newObject().name("Asdfaaaa").build()).typeResolver(env -> null).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLUnionType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onUnion(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -245,9 +261,11 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLUnionType directiveContainer = mock(GraphQLUnionType.class);
+        GraphQLUnionType directiveContainer = GraphQLUnionType.newUnionType().name("asdf")
+                .possibleType(GraphQLObjectType.newObject().name("Asdfaaaa").build()).typeResolver(env -> null).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLUnionType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onUnion(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -266,9 +284,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLEnumType directiveContainer = mock(GraphQLEnumType.class);
+        GraphQLEnumType directiveContainer = GraphQLEnumType.newEnum().name("asdf").value("asdfasdf").build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLEnumType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onEnum(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -289,9 +307,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLEnumType directiveContainer = mock(GraphQLEnumType.class);
+        GraphQLEnumType directiveContainer = GraphQLEnumType.newEnum().name("asdf").value("asdfasdf").build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLEnumType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onEnum(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -310,9 +328,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLEnumValueDefinition directiveContainer = mock(GraphQLEnumValueDefinition.class);
+        GraphQLEnumValueDefinition directiveContainer = GraphQLEnumValueDefinition.newEnumValueDefinition().name("asdf").build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLEnumValueDefinition> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onEnumValue(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -333,9 +351,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLEnumValueDefinition directiveContainer = mock(GraphQLEnumValueDefinition.class);
+        GraphQLEnumValueDefinition directiveContainer = GraphQLEnumValueDefinition.newEnumValueDefinition().name("asdf").build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLEnumValueDefinition> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onEnumValue(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -354,9 +372,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLScalarType directiveContainer = mock(GraphQLScalarType.class);
+        GraphQLScalarType directiveContainer = GraphQLString;
 
-        AnnotationsWiringEnvironmentImpl<GraphQLScalarType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onScalar(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -377,9 +395,9 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLScalarType directiveContainer = mock(GraphQLScalarType.class);
+        GraphQLScalarType directiveContainer = GraphQLString;
 
-        AnnotationsWiringEnvironmentImpl<GraphQLScalarType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onScalar(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -398,9 +416,10 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLInputObjectType directiveContainer = mock(GraphQLInputObjectType.class);
+        GraphQLInputObjectType directiveContainer = GraphQLInputObjectType.newInputObject().name("asdf")
+                .build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLInputObjectType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onInputObjectType(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -421,9 +440,10 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLInputObjectType directiveContainer = mock(GraphQLInputObjectType.class);
+        GraphQLInputObjectType directiveContainer = GraphQLInputObjectType.newInputObject().name("asdf")
+                .build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLInputObjectType> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onInputObjectType(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -442,9 +462,10 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLInputObjectField directiveContainer = mock(GraphQLInputObjectField.class);
+        GraphQLInputObjectField directiveContainer = GraphQLInputObjectField.newInputObjectField().name("asdf")
+                .type(GraphQLInputObjectType.newInputObject().name("dfdf").build()).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLInputObjectField> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onInputObjectField(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -465,9 +486,10 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLInputObjectField directiveContainer = mock(GraphQLInputObjectField.class);
+        GraphQLInputObjectField directiveContainer = GraphQLInputObjectField.newInputObjectField().name("asdf")
+                .type(GraphQLInputObjectType.newInputObject().name("dfdf").build()).build();
 
-        AnnotationsWiringEnvironmentImpl<GraphQLInputObjectField> upperCaseEnv = new AnnotationsWiringEnvironmentImpl<>(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
 
         when(upperWiring.onInputObjectField(upperCaseEnv)).thenReturn(directiveContainer);
 

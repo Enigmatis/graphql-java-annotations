@@ -67,8 +67,8 @@ public class GraphQLDirectivesTest {
 
     public static class UpperWiring implements AnnotationsDirectiveWiring {
         @Override
-        public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment<GraphQLFieldDefinition> environment) {
-            GraphQLFieldDefinition field = environment.getElement();
+        public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
+            GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
             boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
             DataFetcher dataFetcher = DataFetcherFactories.wrapDataFetcher(field.getDataFetcher(), (((dataFetchingEnvironment, value) -> {
                 if (value instanceof String && isActive) {
@@ -82,8 +82,8 @@ public class GraphQLDirectivesTest {
 
     public static class SuffixWiring implements AnnotationsDirectiveWiring {
         @Override
-        public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment<GraphQLFieldDefinition> environment) {
-            GraphQLFieldDefinition field = environment.getElement();
+        public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
+            GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
             String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
             DataFetcher dataFetcher = DataFetcherFactories.wrapDataFetcher(field.getDataFetcher(), (((dataFetchingEnvironment, value) -> {
                 if (value instanceof String) {
@@ -171,7 +171,7 @@ public class GraphQLDirectivesTest {
         assertEquals(((Map<String, String>) result.getData()).get("nameWithNoArgs").toString(), "YARIN");
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test(expectedExceptions = GraphQLAnnotationsException.class)
     public void queryNameWithNoArgs_noDefaultValue_exceptionIsThrown() throws Exception {
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
