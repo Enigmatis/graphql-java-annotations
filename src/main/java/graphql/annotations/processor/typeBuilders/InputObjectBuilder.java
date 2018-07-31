@@ -56,7 +56,7 @@ public class InputObjectBuilder {
 
     public GraphQLInputObjectType.Builder getInputObjectBuilder(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLInputObjectType.Builder builder = GraphQLInputObjectType.newInputObject();
-        builder.name(DEFAULT_INPUT_PREFIX + graphQLObjectInfoRetriever.getTypeName(object));
+        builder.name(container.getInputPrefix() + graphQLObjectInfoRetriever.getTypeName(object) + container.getInputPostfix());
         GraphQLDescription description = object.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());

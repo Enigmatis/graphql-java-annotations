@@ -40,6 +40,8 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static graphql.Scalars.GraphQLString;
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_POSTFIX;
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.*;
@@ -724,7 +726,24 @@ public class GraphQLObjectTest {
                 new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
                 getInputObjectBuilder(InputObject.class, GraphQLAnnotations.getInstance().getContainer()).build();
 
+        assertEquals(type.getName(), DEFAULT_INPUT_PREFIX + InputObject.class.getSimpleName(), "Type name prefix did not match expected value");
         assertEquals(type.getFields().size(), InputObject.class.getDeclaredFields().length);
+    }
+
+    @Test
+    public void inputObjectCustomPrefixes() {
+        GraphQLObjectInfoRetriever graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
+        ProcessingElementsContainer container = GraphQLAnnotations.getInstance().getContainer();
+        container.setInputPrefix("");
+        container.setInputPostfix("Input");
+        GraphQLInputObjectType type = new InputObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever),
+                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
+                getInputObjectBuilder(InputObject.class, GraphQLAnnotations.getInstance().getContainer()).build();
+
+        assertEquals(type.getName(), "" + InputObject.class.getSimpleName() + "Input", "Type name prefix did not match expected value");
+        assertEquals(type.getFields().size(), InputObject.class.getDeclaredFields().length);
+        container.setInputPrefix(DEFAULT_INPUT_PREFIX);
+        container.setInputPostfix(DEFAULT_INPUT_POSTFIX);
     }
 
     public static class UUIDTypeFunction implements TypeFunction {

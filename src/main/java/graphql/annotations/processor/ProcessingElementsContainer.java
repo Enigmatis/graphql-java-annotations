@@ -27,6 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_POSTFIX;
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
+
 public class ProcessingElementsContainer {
 
     private TypeFunction defaultTypeFunction;
@@ -35,6 +38,8 @@ public class ProcessingElementsContainer {
     private Map<String, graphql.schema.GraphQLDirective> directiveRegistry;
     private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry;
     private Stack<String> processing;
+    private String inputPrefix = DEFAULT_INPUT_PREFIX;
+    private String inputPostfix = DEFAULT_INPUT_POSTFIX;
 
     public Map<String, GraphQLDirective> getDirectiveRegistry() {
         return directiveRegistry;
@@ -99,5 +104,21 @@ public class ProcessingElementsContainer {
 
     public void setProcessing(Stack<String> processing) {
         this.processing = processing;
+    }
+
+    public String getInputPrefix() {
+        return inputPrefix;
+    }
+
+    public void setInputPrefix(String inputPrefix) {
+        this.inputPrefix = inputPrefix;
+    }
+
+    public String getInputPostfix() {
+        return inputPostfix;
+    }
+
+    public void setInputPostfix(String inputPostfix) {
+        this.inputPostfix = inputPostfix;
     }
 }
