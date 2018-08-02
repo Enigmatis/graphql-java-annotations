@@ -43,7 +43,6 @@ public class DirectiveArgumentCreator {
     }
 
     private GraphQLInputType getType(Field field) {
-        //todo check if primitive type, if not - throw an exception
         return (GraphQLInputType) typeFunction.buildType(true, field.getType(),
                 field.getAnnotatedType(), container);
     }

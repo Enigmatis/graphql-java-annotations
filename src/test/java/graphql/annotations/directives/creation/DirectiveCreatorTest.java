@@ -14,12 +14,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static graphql.Scalars.GraphQLBoolean;
-import static graphql.Scalars.GraphQLString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertNull;
 import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 public class DirectiveCreatorTest {
