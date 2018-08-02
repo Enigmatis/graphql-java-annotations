@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,9 @@
 package graphql.annotations.processor;
 
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.processor.directives.CommonPropertiesCreator;
+import graphql.annotations.processor.directives.DirectiveArgumentCreator;
+import graphql.annotations.processor.directives.DirectiveCreator;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.graphQLProcessors.GraphQLAnnotationsProcessor;
 import graphql.annotations.processor.graphQLProcessors.GraphQLInputProcessor;
@@ -42,6 +45,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     private GraphQLObjectHandler graphQLObjectHandler;
     private GraphQLExtensionsHandler graphQLExtensionsHandler;
+    private DirectiveCreator directiveCreator;
 
     private ProcessingElementsContainer container;
 
@@ -78,6 +82,10 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         this.graphQLObjectHandler = objectHandler;
         this.graphQLExtensionsHandler = extensionsHandler;
         this.container = new ProcessingElementsContainer(defaultTypeFunction);
+
+        DirectiveArgumentCreator directiveArgumentCreator = new DirectiveArgumentCreator(new CommonPropertiesCreator(),
+                container.getDefaultTypeFunction(), container);
+        this.directiveCreator = new DirectiveCreator(directiveArgumentCreator, new CommonPropertiesCreator());
     }
 
     public GraphQLAnnotations(TypeFunction defaultTypeFunction, GraphQLObjectHandler graphQLObjectHandler, GraphQLExtensionsHandler graphQLExtensionsHandler) {
@@ -118,6 +126,18 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         try {
             return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
+        } catch (GraphQLAnnotationsException e) {
+            instance.getContainer().getProcessing().clear();
+            instance.getTypeRegistry().clear();
+            throw e;
+        }
+    }
+
+    public static GraphQLDirective directive(Class<?> object) throws GraphQLAnnotationsException {
+        GraphQLAnnotations instance = getInstance();
+
+        try {
+            return instance.directiveCreator.getDirective(object);
         } catch (GraphQLAnnotationsException e) {
             instance.getContainer().getProcessing().clear();
             instance.getTypeRegistry().clear();
