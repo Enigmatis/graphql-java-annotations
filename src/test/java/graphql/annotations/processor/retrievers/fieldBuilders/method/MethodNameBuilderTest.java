@@ -68,6 +68,19 @@ public class MethodNameBuilderTest {
     }
 
     @Test
+    public void build_graphQLNameAnnotationNotExistsWithGetPrefixAndPrettify_returnCorrectName() throws NoSuchMethodException {
+        // arrange
+        Method method = getClass().getMethod("getTest");
+        MethodNameBuilder methodNameBuilder = new MethodNameBuilder(method);
+
+        // act
+        String name = methodNameBuilder.alwaysPrettify(true).build();
+
+        // assert
+        assertEquals(name, "test");
+    }
+
+    @Test
     public void build_graphQLNameAnnotationNotExistsWithIsPrefix_returnCorrectName() throws NoSuchMethodException{
         // arrange
         Method method = getClass().getMethod("isTest");
