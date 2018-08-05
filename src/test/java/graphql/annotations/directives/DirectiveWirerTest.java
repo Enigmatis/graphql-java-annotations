@@ -22,7 +22,6 @@ import org.testng.annotations.Test;
 
 import java.util.HashMap;
 
-import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLDirective.newDirective;
 import static org.mockito.Mockito.*;
@@ -69,7 +68,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireFieldDefinition_invalidLocations_exception() throws Exception {
+    public void wireFieldDefinition_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -114,7 +113,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLObjectType_invalidLocations_exception() throws Exception {
+    public void wireGraphQLObjectType_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -158,7 +157,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLArgument_invalidLocations_exception() throws Exception {
+    public void wireGraphQLArgument_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -207,7 +206,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLInterfaceType_invalidLocations_exception() throws Exception {
+    public void wireGraphQLInterfaceType_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -257,7 +256,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLUnionType_invalidLocations_exception() throws Exception {
+    public void wireGraphQLUnionType_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -303,7 +302,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLEnumType_invalidLocations_exception() throws Exception {
+    public void wireGraphQLEnumType_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -347,7 +346,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLEnumValueDefinition_invalidLocations_exception() throws Exception {
+    public void wireGraphQLEnumValueDefinition_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -391,7 +390,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLScalarType_invalidLocations_exception() throws Exception {
+    public void wireGraphQLScalarType_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -436,7 +435,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLInputObjectType_invalidLocations_exception() throws Exception {
+    public void wireGraphQLInputObjectType_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
@@ -482,7 +481,7 @@ public class DirectiveWirerTest {
     }
 
     @Test(expectedExceptions = InvalidDirectiveLocationException.class)
-    public void wireGraphQLInputObjectField_invalidLocations_exception() throws Exception {
+    public void wireGraphQLInputObjectField_invalidLocations_exceptionIsThrown() throws Exception {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
