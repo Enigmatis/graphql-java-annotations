@@ -322,6 +322,67 @@ GraphQLAnnotations.register(new UUIDTypeFunction())
 
 You can also specify custom type function for any field with `@GraphQLType` annotation.
 
+## Directives
+You can wire your fields using directives with annotations.
+We allow both defining directives using annotations, and wiring fields.
+
+### Creating/Defining a ``GraphQLDirective``
+In order to create a directive, you first have to create a class that the directive will be created from.
+For example:
+
+```java
+    @GraphQLName("upper")
+    @GraphQLDescription("upper")
+    @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
+    public static class UpperDirective {
+        private boolean isActive = true;
+    }
+```
+
+The name of the directive will be taken from the ``@GraphQLName`` annotation (if not specified, the name will be the class's name).
+The description of the directive will be taken from the ``@GraphQLDescription`` annotation's value.
+The valid locations of the directive (locations which the directive can be applied on) will be taken from ``@DirectiveLocations``.
+The arguments of the directive will be taken from the fields defined in the class - notice that you can only use primitive types as arguments of a directive.
+For example, we defined an ``isActive`` field - which is boolean, and it's default value is true. That's how the argument of the directive will be defined.
+You can also use ``@GraphQLName`` and ``@GraphQLDescription`` annotations on the field.
+
+After you created the class, you will be able to create the ``GraphQLDirective`` object with the following code:
+```java
+GraphQLAnnotations.directive(UpperDirective.class);
+```
+
+### Wiring with directives
+Using directives you will be able to wire fields and more, for example, changing the data fetchers of the fields.
+
+In order to define a wiring functionality, you have to create a Wiring class matching one of you directives. For example:
+```java
+public class UpperWiring implements AnnotationsDirectiveWiring {
+        @Override
+        public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
+            GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
+            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
+            DataFetcher dataFetcher = DataFetcherFactories.wrapDataFetcher(field.getDataFetcher(), (((dataFetchingEnvironment, value) -> {
+                if (value instanceof String && isActive) {
+                    return ((String) value).toUpperCase();
+                }
+                return value;
+            })));
+            return field.transform(builder -> builder.dataFetcher(dataFetcher));
+        }
+    }
+```
+This class turns you string field to upper case if the directive argument "isActive" is set to true.
+Now, you have to wire the field itself:
+```java
+@GraphQLField
+@GraphQLDirectives(@Directive(name = "upperCase", wiringClass = UpperWiring.class, argumentsValues = {"true"}))
+public static String name() {
+    return "yarin";
+}
+```
+We now wired the field "name" - so it will turn upper case when calling the field.
+The ``Directive`` annotations requires the name of the directive, the wiring class (the ``UpperWiring`` class defined earlier), and the values of the arguments. If an argument has a default value, you don't have to supply a value in the arguments values.
+
 ## Relay support
 
 ### Mutations
