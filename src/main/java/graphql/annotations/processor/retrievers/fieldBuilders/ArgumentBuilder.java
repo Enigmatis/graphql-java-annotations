@@ -17,6 +17,8 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 import graphql.annotations.annotationTypes.GraphQLDefaultValue;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.directives.DirectiveWirer;
+import graphql.annotations.directives.DirectiveWiringMapRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
@@ -39,7 +41,7 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
     private ProcessingElementsContainer container;
     private GraphQLOutputType outputType;
 
-    public ArgumentBuilder(Method method, TypeFunction typeFunction , GraphQLFieldDefinition.Builder builder, ProcessingElementsContainer container, GraphQLOutputType outputType) {
+    public ArgumentBuilder(Method method, TypeFunction typeFunction, GraphQLFieldDefinition.Builder builder, ProcessingElementsContainer container, GraphQLOutputType outputType) {
         this.method = method;
         this.typeFunction = typeFunction;
         this.builder = builder;
@@ -78,7 +80,8 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
         } else {
             argumentBuilder.name(toGraphqlName(parameter.getName()));
         }
-        return argumentBuilder.build();
+        argumentBuilder.withDirectives(new DirectivesBuilder(parameter, container).build());
+        return (GraphQLArgument) new DirectiveWirer().wire(argumentBuilder.build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(parameter, container));
     }
 
 }

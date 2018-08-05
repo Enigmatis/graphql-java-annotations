@@ -16,6 +16,8 @@ package graphql.annotations.processor.retrievers;
 
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.annotationTypes.GraphQLUnion;
+import graphql.annotations.directives.DirectiveWirer;
+import graphql.annotations.directives.DirectiveWiringMapRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -86,6 +88,11 @@ public class GraphQLTypeRetriever {
             }
         }
 
+        DirectiveWirer directiveWirer = new DirectiveWirer();
+
+        // wire the type with the directives and change the original type
+        type = directiveWirer.wire((GraphQLDirectiveContainer) type, new DirectiveWiringMapRetriever().getDirectiveWiringMap(object, container));
+
         container.getTypeRegistry().put(type.getName(), type);
         container.getProcessing().pop();
 
@@ -104,7 +111,7 @@ public class GraphQLTypeRetriever {
         return graphQLFieldRetriever;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setGraphQLObjectInfoRetriever(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
     }
@@ -113,7 +120,7 @@ public class GraphQLTypeRetriever {
         this.graphQLObjectInfoRetriever = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy= ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setGraphQLInterfaceRetriever(GraphQLInterfaceRetriever graphQLInterfaceRetriever) {
         this.graphQLInterfaceRetriever = graphQLInterfaceRetriever;
     }
@@ -122,7 +129,7 @@ public class GraphQLTypeRetriever {
         this.graphQLInterfaceRetriever = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setGraphQLFieldRetriever(GraphQLFieldRetriever graphQLFieldRetriever) {
         this.graphQLFieldRetriever = graphQLFieldRetriever;
     }
@@ -131,7 +138,7 @@ public class GraphQLTypeRetriever {
         this.graphQLFieldRetriever = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, target = "(type=field)", policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, target = "(type=field)", policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setFieldSearchAlgorithm(SearchAlgorithm fieldSearchAlgorithm) {
         this.fieldSearchAlgorithm = fieldSearchAlgorithm;
     }
@@ -140,7 +147,7 @@ public class GraphQLTypeRetriever {
         this.fieldSearchAlgorithm = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, target = "(type=method)", policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, target = "(type=method)", policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setMethodSearchAlgorithm(SearchAlgorithm methodSearchAlgorithm) {
         this.methodSearchAlgorithm = methodSearchAlgorithm;
     }
@@ -149,7 +156,7 @@ public class GraphQLTypeRetriever {
         this.methodSearchAlgorithm = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy=ReferencePolicy.DYNAMIC, policyOption= ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     public void setExtensionsHandler(GraphQLExtensionsHandler extensionsHandler) {
         this.extensionsHandler = extensionsHandler;
     }
@@ -157,4 +164,5 @@ public class GraphQLTypeRetriever {
     public void unsetExtensionsHandler(GraphQLExtensionsHandler extensionsHandler) {
         this.extensionsHandler = null;
     }
+
 }

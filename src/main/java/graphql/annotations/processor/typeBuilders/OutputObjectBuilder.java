@@ -58,7 +58,7 @@ public class OutputObjectBuilder {
     /**
      * This will examine the object class and return a {@link GraphQLObjectType.Builder} ready for further definition
      *
-     * @param object the object class to examine
+     * @param object    the object class to examine
      * @param container a class that hold several members that are required in order to build schema
      * @return a {@link GraphQLObjectType.Builder} that represents that object class
      * @throws GraphQLAnnotationsException if the object class cannot be examined
@@ -77,7 +77,7 @@ public class OutputObjectBuilder {
                 continue;
             }
             if (methodSearchAlgorithm.isFound(method)) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method,container);
+                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method, container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
@@ -88,7 +88,7 @@ public class OutputObjectBuilder {
                 continue;
             }
             if (fieldSearchAlgorithm.isFound(field)) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field,container);
+                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field, container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }

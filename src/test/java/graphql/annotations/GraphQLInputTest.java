@@ -147,8 +147,6 @@ public class GraphQLInputTest {
         public TestIface object() {
             return new TestObject();
         }
-
-        ;
     }
 
     public static class QueryRecursion {
@@ -179,7 +177,8 @@ public class GraphQLInputTest {
 
     @Test
     public void query() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
+        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class))
+                .additionalType(GraphQLAnnotations.object(TestObject.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }", new Query());
@@ -330,29 +329,37 @@ public class GraphQLInputTest {
         String in;
     }
 
-    public static class QuerySameNameWithChildren{
+    public static class QuerySameNameWithChildren {
         @GraphQLField
-        public BOut getBout(){return null;}
+        public BOut getBout() {
+            return null;
+        }
 
         @GraphQLField
-        public AOut getAout(){return null;}
+        public AOut getAout() {
+            return null;
+        }
 
         @GraphQLField
-        public String getA(@GraphQLName("input") AIn input){return "asdfa";}
+        public String getA(@GraphQLName("input") AIn input) {
+            return "asdfa";
+        }
 
         @GraphQLField
-        public String getB(@GraphQLName("input") BIn input){return "asdfasdf";}
+        public String getB(@GraphQLName("input") BIn input) {
+            return "asdfasdf";
+        }
     }
 
     @Test
-    public void testInputAndOutputWithSameNameWithChildrenWithSameName(){
+    public void testInputAndOutputWithSameNameWithChildrenWithSameName() {
         // arrange + act
         GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QuerySameNameWithChildren.class)).build();
         // assert
         assertEquals(schema.getQueryType().getFieldDefinition("getAout").getType().getName(), "A");
-        assertEquals(schema.getQueryType().getFieldDefinition("getAout").getType().getClass(),GraphQLObjectType.class);
+        assertEquals(schema.getQueryType().getFieldDefinition("getAout").getType().getClass(), GraphQLObjectType.class);
         assertEquals(schema.getQueryType().getFieldDefinition("getBout").getType().getName(), "B");
-        assertEquals(schema.getQueryType().getFieldDefinition("getBout").getType().getClass(),GraphQLObjectType.class);
+        assertEquals(schema.getQueryType().getFieldDefinition("getBout").getType().getClass(), GraphQLObjectType.class);
         assertEquals(schema.getQueryType().getFieldDefinition("getA").getArgument("input").getType().getName(), "InputA");
         assertEquals(schema.getQueryType().getFieldDefinition("getA").getArgument("input").getType().getClass(), GraphQLInputObjectType.class);
         assertEquals(schema.getQueryType().getFieldDefinition("getB").getArgument("input").getType().getClass(), GraphQLInputObjectType.class);
