@@ -17,6 +17,7 @@ package graphql.annotations.processor.retrievers.fieldBuilders.method;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLPrettify;
 import graphql.annotations.processor.retrievers.fieldBuilders.Builder;
+import graphql.annotations.processor.retrievers.fieldBuilders.field.FieldNameBuilder;
 
 import java.lang.reflect.Method;
 
@@ -25,20 +26,27 @@ import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 public class MethodNameBuilder implements Builder<String> {
     private Method method;
 
+    private boolean alwaysPrettify = false;
+
     public MethodNameBuilder(Method method) {
         this.method = method;
     }
 
+    public MethodNameBuilder alwaysPrettify(boolean alwaysPrettify) {
+        this.alwaysPrettify = alwaysPrettify;
+        return this;
+    }
+
     @Override
     public String build() {
-        if (method.isAnnotationPresent(GraphQLPrettify.class) && !method.isAnnotationPresent(GraphQLName.class)) {
-            return toGraphqlName(pretifyName(method.getName()));
+        if ((alwaysPrettify || method.isAnnotationPresent(GraphQLPrettify.class)) && !method.isAnnotationPresent(GraphQLName.class)) {
+            return toGraphqlName(prettifyName(method.getName()));
         }
         GraphQLName name = method.getAnnotation(GraphQLName.class);
         return toGraphqlName(name == null ? method.getName() : name.value());
     }
 
-    private String pretifyName(String originalName) {
+    private String prettifyName(String originalName) {
         String name = originalName.replaceFirst("^(is|get|set)(.+)", "$2");
         return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     }
