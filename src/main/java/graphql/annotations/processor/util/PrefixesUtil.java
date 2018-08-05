@@ -18,4 +18,13 @@ public class PrefixesUtil {
     public static String addPrefixToPropertyName(String prefix, String propertyName) {
         return prefix + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
     }
+
+    public static String extractPrefixedName(String name) {
+        if (name.startsWith("is")) {
+            return name.replaceFirst("^is", "").toLowerCase();
+        } else if (name.startsWith("get")) {
+            return name.replaceFirst("^get", "").toLowerCase();
+        }
+        return name;
+    }
 }
