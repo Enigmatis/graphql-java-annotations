@@ -22,7 +22,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Directive {
-    //    Class<? extends BasicDirectiveInfo> info();
     String name();
 
     Class<? extends AnnotationsDirectiveWiring> wiringClass();
