@@ -343,10 +343,10 @@ The name of the directive will be taken from the ``@GraphQLName`` annotation (if
 The description of the directive will be taken from the ``@GraphQLDescription`` annotation's value.
 The valid locations of the directive (locations which the directive can be applied on) will be taken from ``@DirectiveLocations``.
 The arguments of the directive will be taken from the fields defined in the class - notice that you can only use primitive types as arguments of a directive.
-For example, we defined an ``isActive`` field - which is boolean, and it's default value is true. That's how the argument of the directive will be defined.
+For example, we defined an ``isActive`` field - which is boolean, and its default value is true. That's how the argument of the directive will be defined.
 You can also use ``@GraphQLName`` and ``@GraphQLDescription`` annotations on the field.
 
-After you created the class, you will be able to create the ``GraphQLDirective`` object with the following code:
+After you created the class, you will be able to create the ``GraphQLDirective`` object using the following code:
 ```java
 GraphQLAnnotations.directive(UpperDirective.class);
 ```
@@ -371,7 +371,7 @@ public class UpperWiring implements AnnotationsDirectiveWiring {
         }
     }
 ```
-This class turns you string field to upper case if the directive argument "isActive" is set to true.
+This class turns your string field to upper case if the directive argument "isActive" is set to true.
 Now, you have to wire the field itself:
 ```java
 @GraphQLField

@@ -35,9 +35,9 @@ public class DirectiveCreator {
     }
 
     public GraphQLDirective getDirective(Class<?> annotatedClass) {
-        GraphQLDirective.Builder builder = newDirective();
-        builder.name(commonPropertiesCreator.getName(annotatedClass));
-        builder.description(commonPropertiesCreator.getDescription(annotatedClass));
+        GraphQLDirective.Builder builder = newDirective()
+        .name(commonPropertiesCreator.getName(annotatedClass))
+        .description(commonPropertiesCreator.getDescription(annotatedClass));
         Introspection.DirectiveLocation[] validLocations = getValidLocations(annotatedClass);
         if (validLocations == null || validLocations.length == 0) {
             throw new GraphQLAnnotationsException("No valid locations defined on directive", null);
