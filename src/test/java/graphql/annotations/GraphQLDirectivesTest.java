@@ -31,9 +31,11 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDirectives;
 import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.AnnotationsWiringEnvironment;
 import graphql.annotations.directives.Directive;
+import graphql.annotations.directives.creation.DirectiveLocations;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.introspection.Introspection;
@@ -135,10 +137,15 @@ public class GraphQLDirectivesTest {
         GraphQL.newGraphQL(schema).build().execute("query { name }");
     }
 
+    @GraphQLName("upperCase")
+    @DirectiveLocations(Introspection.DirectiveLocation.FIELD_DEFINITION)
+    public static class UpperCase{
+        boolean isActive;
+    }
+
     @Test
     public void queryName_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
-                .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
+        GraphQLDirective upperCase = GraphQLAnnotations.directive(UpperCase.class);
         GraphQLObjectType object = GraphQLAnnotations.object(Query.class, upperCase);
         GraphQLSchema schema = newSchema().query(object).build();
 
