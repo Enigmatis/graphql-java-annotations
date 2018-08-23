@@ -26,8 +26,6 @@ import graphql.annotations.processor.typeBuilders.*;
 import graphql.schema.*;
 import org.osgi.service.component.annotations.*;
 
-import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
-
 @Component(service = GraphQLTypeRetriever.class, immediate = true)
 public class GraphQLTypeRetriever {
 
@@ -62,7 +60,7 @@ public class GraphQLTypeRetriever {
         GraphQLType type;
 
         if (isInput) {
-            typeName = container.getInputPrefix() + typeName + container.getInputPostfix();
+            typeName = container.getInputPrefix() + typeName + container.getInputSuffix();
         }
 
         if (container.getProcessing().contains(typeName)) {

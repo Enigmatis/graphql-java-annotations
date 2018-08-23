@@ -40,7 +40,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static graphql.Scalars.GraphQLString;
-import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_POSTFIX;
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_SUFFIX;
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLSchema.newSchema;
@@ -735,7 +735,7 @@ public class GraphQLObjectTest {
         GraphQLObjectInfoRetriever graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
         ProcessingElementsContainer container = GraphQLAnnotations.getInstance().getContainer();
         container.setInputPrefix("");
-        container.setInputPostfix("Input");
+        container.setInputSuffix("Input");
         GraphQLInputObjectType type = new InputObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever),
                 new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
                 getInputObjectBuilder(InputObject.class, GraphQLAnnotations.getInstance().getContainer()).build();
@@ -743,7 +743,7 @@ public class GraphQLObjectTest {
         assertEquals(type.getName(), "" + InputObject.class.getSimpleName() + "Input", "Type name prefix did not match expected value");
         assertEquals(type.getFields().size(), InputObject.class.getDeclaredFields().length);
         container.setInputPrefix(DEFAULT_INPUT_PREFIX);
-        container.setInputPostfix(DEFAULT_INPUT_POSTFIX);
+        container.setInputSuffix(DEFAULT_INPUT_SUFFIX);
     }
 
     public static class UUIDTypeFunction implements TypeFunction {
