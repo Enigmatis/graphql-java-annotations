@@ -47,6 +47,7 @@ idea {
 release {
     tagTemplate = 'v${version}'
     failOnPublishNeeded = false
+    failOnCommitNeeded = false
 }
 
 jar {
