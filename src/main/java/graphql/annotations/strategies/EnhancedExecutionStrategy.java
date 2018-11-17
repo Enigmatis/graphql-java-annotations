@@ -31,7 +31,7 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
 
     @Override
     protected CompletableFuture<ExecutionResult> resolveField(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
-        GraphQLObjectType parentType = (GraphQLObjectType) parameters.getTypeInfo().getType();
+        GraphQLObjectType parentType = (GraphQLObjectType) parameters.getExecutionStepInfo().getType();
         GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, parameters.getField().get(0));
         if (fieldDef == null) return null;
 
@@ -52,12 +52,12 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
                 clientMutationId = clientMutationIdVal.getValue();
             }
 
-            ExecutionTypeInfo fieldTypeInfo = ExecutionTypeInfo.newTypeInfo().type(fieldDef.getType()).parentInfo(parameters.getTypeInfo()).build();
+            ExecutionStepInfo fieldTypeInfo = ExecutionStepInfo.newExecutionStepInfo().type(fieldDef.getType()).parentInfo(parameters.getExecutionStepInfo()).build();
             ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
                     .arguments(parameters.getArguments())
                     .fields(parameters.getFields())
                     .nonNullFieldValidator(parameters.getNonNullFieldValidator())
-                    .typeInfo(fieldTypeInfo)
+                    .executionStepInfo(fieldTypeInfo)
                     .source(clientMutationId)
                     .build();
 
@@ -70,7 +70,7 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
 
     @Override
     protected FieldValueInfo completeValue(ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws NonNullableFieldWasNullException {
-        graphql.schema.GraphQLType fieldType = parameters.getTypeInfo().getType();
+        graphql.schema.GraphQLType fieldType = parameters.getExecutionStepInfo().getType();
         Object result = parameters.getSource();
         if (result instanceof Enum && fieldType instanceof GraphQLEnumType) {
             Object value = ((GraphQLEnumType) fieldType).getCoercing().parseValue(((Enum) result).name());
@@ -91,7 +91,7 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
                 .arguments(parameters.getArguments())
                 .fields(parameters.getFields())
                 .nonNullFieldValidator(parameters.getNonNullFieldValidator())
-                .typeInfo(parameters.getTypeInfo())
+                .executionStepInfo(parameters.getExecutionStepInfo())
                 .source(source)
                 .build();
     }

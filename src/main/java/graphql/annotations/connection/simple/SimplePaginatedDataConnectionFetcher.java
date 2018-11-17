@@ -26,7 +26,7 @@ public class SimplePaginatedDataConnectionFetcher<T> implements SimpleConnection
     }
 
     @Override
-    public SimpleConnection<T> get(DataFetchingEnvironment environment) {
+    public SimpleConnection<T> get(DataFetchingEnvironment environment) throws Exception {
         return simplePaginatedDataDataFetcher.get(environment);
     }
 }

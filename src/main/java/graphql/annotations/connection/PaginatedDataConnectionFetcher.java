@@ -41,7 +41,7 @@ public class PaginatedDataConnectionFetcher<T> implements ConnectionFetcher<T> {
     }
 
     @Override
-    public Connection<T> get(DataFetchingEnvironment environment) {
+    public Connection<T> get(DataFetchingEnvironment environment) throws Exception{
         PaginatedData<T> paginatedData = paginationDataFetcher.get(environment);
         if (paginatedData == null) {
             return new DefaultConnection<>(Collections.emptyList(), new DefaultPageInfo(null,null,false,false));
