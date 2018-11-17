@@ -34,7 +34,7 @@ public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T> {
     }
 
     @Override
-    public T get(DataFetchingEnvironment environment) {
+    public T get(DataFetchingEnvironment environment) throws Exception {
         Object source = environment.getSource();
         if (source != null && (!declaringClass.isInstance(source)) && !(source instanceof Map)) {
             environment = new DataFetchingEnvironmentImpl(newInstance(declaringClass, source),
@@ -43,7 +43,7 @@ public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T> {
                     environment.getFields(), environment.getFieldType(), environment.getParentType(),
                     environment.getGraphQLSchema(),
                     environment.getFragmentsByName(), environment.getExecutionId(),
-                    environment.getSelectionSet(), environment.getFieldTypeInfo(),
+                    environment.getSelectionSet(), environment.getExecutionStepInfo(),
                     environment.getExecutionContext());
         }
 

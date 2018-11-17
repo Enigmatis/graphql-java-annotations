@@ -44,7 +44,7 @@ public class ConnectionDataFetcher<T> implements DataFetcher<graphql.relay.Conne
     }
 
     @Override
-    public graphql.relay.Connection<T> get(DataFetchingEnvironment environment) {
+    public graphql.relay.Connection<T> get(DataFetchingEnvironment environment) throws Exception {
         ConnectionFetcher<T> conn = constructNewInstance(constructor, actualDataFetcher);
         return conn.get(environment);
     }
