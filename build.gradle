@@ -11,7 +11,7 @@ buildscript {
     }
 }
 plugins {
-    id "com.jfrog.bintray" version "1.7"
+    id "com.jfrog.bintray" version "1.+"
     id 'net.researchgate.release' version '2.3.4'
     id "com.github.hierynomus.license" version "0.14.0"
 }
@@ -143,7 +143,7 @@ publishing {
                             id 'guy120494'
                             name 'Guy Smorodinsky'
                         }
-                        developer{
+                        developer {
                             id 'osher-sade'
                             name 'Osher Sade'
                         }
@@ -157,8 +157,8 @@ publishing {
 afterReleaseBuild.dependsOn bintrayUpload
 
 bintray {
-    user = System.getenv('BINTRAY_USER') ?: project.findProperty('BINTRAY_USER') ?: ''
-    key = System.getenv('BINTRAY_KEY') ?: project.findProperty('BINTRAY_KEY') ?: ''
+    user = property('user') ?: System.getenv('BINTRAY_USER') ?: project.findProperty('BINTRAY_USER') ?: ''
+    key = property('key') ?: System.getenv('BINTRAY_KEY') ?: project.findProperty('BINTRAY_KEY') ?: ''
     publications = ['maven']
     publish = true
     pkg {
