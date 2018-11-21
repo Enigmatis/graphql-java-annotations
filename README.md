@@ -5,8 +5,6 @@
 [GraphQL-Java](https://github.com/andimarek/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
 syntax for GraphQL schema definition.
 
-ATTENTION THAT VER 6.0 WAS NOT RELEASED CORRECTLY AND WILL BE FIXED SOON
-
 ## Getting Started
 
 
