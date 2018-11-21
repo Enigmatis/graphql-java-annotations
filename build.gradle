@@ -170,12 +170,12 @@ bintray {
         version {
             name = project.version
             released = new Date()
-            mavenCentralSync {
-                sync = true //[Default: true] Determines whether to sync the version to Maven Central.
-                user = mavenUser
-                password = mavenPass
-                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
-            }
+//            mavenCentralSync {
+//                sync = false //[Default: true] Determines whether to sync the version to Maven Central.
+//                user = mavenUser
+//                password = mavenPass
+//                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+//            }
         }
     }
 }
