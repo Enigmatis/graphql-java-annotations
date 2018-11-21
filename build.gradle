@@ -11,7 +11,7 @@ buildscript {
     }
 }
 plugins {
-    id "com.jfrog.bintray" version "1.+"
+    id "com.jfrog.bintray" version "1.7"
     id 'net.researchgate.release' version '2.3.4'
     id "com.github.hierynomus.license" version "0.14.0"
 }
@@ -24,8 +24,8 @@ apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
-def releaseVersion = System.properties.RELEASE_VERSION
-version = releaseVersion ? releaseVersion : new SimpleDateFormat('yyyy-MM-dd\'T\'HH-mm-ss').format(new Date())
+//def releaseVersion = System.properties.RELEASE_VERSION
+//version = releaseVersion ? releaseVersion : new SimpleDateFormat('yyyy-MM-dd\'T\'HH-mm-ss').format(new Date())
 
 // custom tasks for creating source/javadoc jars
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -157,8 +157,8 @@ publishing {
 afterReleaseBuild.dependsOn bintrayUpload
 
 bintray {
-    user = property('user') ?: System.getenv('BINTRAY_USER') ?: project.findProperty('BINTRAY_USER') ?: ''
-    key = property('key') ?: System.getenv('BINTRAY_KEY') ?: project.findProperty('BINTRAY_KEY') ?: ''
+    user = System.getenv('BINTRAY_USER') ?: project.findProperty('BINTRAY_USER') ?: ''
+    key = System.getenv('BINTRAY_KEY') ?: project.findProperty('BINTRAY_KEY') ?: ''
     publications = ['maven']
     publish = true
     pkg {
@@ -170,6 +170,12 @@ bintray {
         version {
             name = project.version
             released = new Date()
+            mavenCentralSync {
+                sync = true //[Default: true] Determines whether to sync the version to Maven Central.
+                user = mavenUser
+                password = mavenPass
+                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+            }
         }
     }
 }
