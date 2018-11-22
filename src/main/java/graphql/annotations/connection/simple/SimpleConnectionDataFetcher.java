@@ -44,7 +44,7 @@ public class SimpleConnectionDataFetcher<T> implements SimpleConnectionFetcher<T
     }
 
     @Override
-    public Connection<T> get(DataFetchingEnvironment environment) {
+    public Connection<T> get(DataFetchingEnvironment environment) throws Exception {
         SimpleConnectionFetcher<T> conn = constructNewInstance(constructor, actualDataFetcher);
         return conn.get(environment);
     }

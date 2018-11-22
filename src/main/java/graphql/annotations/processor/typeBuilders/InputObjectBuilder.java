@@ -29,7 +29,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
 
 public class InputObjectBuilder {
@@ -56,7 +55,7 @@ public class InputObjectBuilder {
 
     public GraphQLInputObjectType.Builder getInputObjectBuilder(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLInputObjectType.Builder builder = GraphQLInputObjectType.newInputObject();
-        builder.name(DEFAULT_INPUT_PREFIX + graphQLObjectInfoRetriever.getTypeName(object));
+        builder.name(container.getInputPrefix() + graphQLObjectInfoRetriever.getTypeName(object) + container.getInputSuffix());
         GraphQLDescription description = object.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());

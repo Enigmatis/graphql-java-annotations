@@ -34,7 +34,7 @@ public class DispatchingConnection implements DataFetcher, Connection {
     }
 
     @Override
-    public Object get(DataFetchingEnvironment environment) {
+    public Object get(DataFetchingEnvironment environment) throws Exception {
         return connection.get(environment);
     }
 }

@@ -26,8 +26,6 @@ import graphql.annotations.processor.typeBuilders.*;
 import graphql.schema.*;
 import org.osgi.service.component.annotations.*;
 
-import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
-
 @Component(service = GraphQLTypeRetriever.class, immediate = true)
 public class GraphQLTypeRetriever {
 
@@ -48,6 +46,7 @@ public class GraphQLTypeRetriever {
      *
      * @param object    the object class to examine*
      * @param container a class that hold several members that are required in order to build schema
+     * @param isInput true if the type is an input type, false otherwise
      * @return a {@link GraphQLType} that represents that object class
      * @throws graphql.annotations.processor.exceptions.GraphQLAnnotationsException if the object class cannot be examined
      * @throws graphql.annotations.processor.exceptions.CannotCastMemberException   if the object class cannot be examined
@@ -61,7 +60,7 @@ public class GraphQLTypeRetriever {
         GraphQLType type;
 
         if (isInput) {
-            typeName = DEFAULT_INPUT_PREFIX + typeName;
+            typeName = container.getInputPrefix() + typeName + container.getInputSuffix();
         }
 
         if (container.getProcessing().contains(typeName)) {

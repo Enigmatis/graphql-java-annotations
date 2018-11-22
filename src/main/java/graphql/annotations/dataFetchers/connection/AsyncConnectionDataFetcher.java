@@ -30,7 +30,13 @@ public class AsyncConnectionDataFetcher<T> implements DataFetcher<CompletableFut
     }
 
     @Override
-    public CompletableFuture<graphql.relay.Connection<T>> get(DataFetchingEnvironment environment) {
-        return supplyAsync(() -> connectionDataFetcher.get(environment));
+    public CompletableFuture<graphql.relay.Connection<T>> get(DataFetchingEnvironment environment) throws Exception {
+        return supplyAsync(() -> {
+            try {
+                return connectionDataFetcher.get(environment);
+            } catch (Exception e) {
+                throw new RuntimeException("Error in AsyncConnectionDataFetcher", e);
+            }
+        });
     }
 }
