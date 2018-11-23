@@ -1,4 +1,3 @@
-import java.text.SimpleDateFormat
 import aQute.bnd.gradle.Bundle
 
 buildscript {
@@ -185,3 +184,8 @@ task bundle(type: Bundle) {
     from sourceSets.main.output
     bndfile = file('bundle.bnd')
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
