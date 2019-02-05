@@ -118,7 +118,8 @@ public class GraphQLFieldRetriever {
         builder.name(new MethodNameBuilder(method).alwaysPrettify(alwaysPrettify).build());
         TypeFunction typeFunction = getTypeFunction(method, container);
         GraphQLInputType inputType = (GraphQLInputType) new MethodTypeBuilder(method, typeFunction, container, true).build();
-        return builder.type(inputType).description(new DescriptionBuilder(method).build()).build();
+        builder.withDirectives(new DirectivesBuilder(method, container).build());
+        return (GraphQLInputObjectField) new DirectiveWirer().wire(builder.type(inputType).description(new DescriptionBuilder(method).build()).build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(method, container));
     }
 
     public GraphQLInputObjectField getInputField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
@@ -126,7 +127,10 @@ public class GraphQLFieldRetriever {
         builder.name(new FieldNameBuilder(field).alwaysPrettify(alwaysPrettify).build());
         TypeFunction typeFunction = getTypeFunction(field, container);
         GraphQLType graphQLType = typeFunction.buildType(true, field.getType(), field.getAnnotatedType(), container);
-        return builder.type((GraphQLInputType) graphQLType).description(new DescriptionBuilder(field).build()).build();
+        builder.withDirectives(new DirectivesBuilder(field, container).build());
+//        return builder.type((GraphQLInputType) graphQLType).description(new DescriptionBuilder(field).build()).build();
+        return (GraphQLInputObjectField) new DirectiveWirer().wire(builder.type((GraphQLInputType) graphQLType).description(new DescriptionBuilder(field).build()).build(),
+                new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container));
     }
 
     private GraphQLFieldDefinition handleRelayArguments(Method method, ProcessingElementsContainer container, GraphQLFieldDefinition.Builder builder, GraphQLOutputType outputType, List<GraphQLArgument> args) {
