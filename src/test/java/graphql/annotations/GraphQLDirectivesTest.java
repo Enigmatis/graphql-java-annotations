@@ -51,6 +51,7 @@ import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLDirective.newDirective;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class GraphQLDirectivesTest {
@@ -185,10 +186,9 @@ public class GraphQLDirectivesTest {
                 .validLocations(Introspection.DirectiveLocation.INPUT_FIELD_DEFINITION, Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLObjectType object = GraphQLAnnotations.object(Query5.class, suffixDirective);
         GraphQLSchema schema = newSchema().query(object).build();
-
-        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { nameWithInputObject" +
-                "(inputObject: {acoolSuffix: \"magnificent\", b: 5}) }");
-        assertTrue(result.getErrors().isEmpty());
+        GraphQLFieldDefinition nameWithInputObject = schema.getQueryType().getFieldDefinition("nameWithInputObject");
+        GraphQLInputObjectField field = ((GraphQLInputObjectType) nameWithInputObject.getArgument("inputObject").getType()).getField("acoolSuffix");
+        assertNotNull(field);
     }
 
     @Test
