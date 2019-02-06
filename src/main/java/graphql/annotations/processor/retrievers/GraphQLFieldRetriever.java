@@ -128,7 +128,6 @@ public class GraphQLFieldRetriever {
         TypeFunction typeFunction = getTypeFunction(field, container);
         GraphQLType graphQLType = typeFunction.buildType(true, field.getType(), field.getAnnotatedType(), container);
         builder.withDirectives(new DirectivesBuilder(field, container).build());
-//        return builder.type((GraphQLInputType) graphQLType).description(new DescriptionBuilder(field).build()).build();
         return (GraphQLInputObjectField) new DirectiveWirer().wire(builder.type((GraphQLInputType) graphQLType).description(new DescriptionBuilder(field).build()).build(),
                 new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container));
     }
