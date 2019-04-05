@@ -22,6 +22,10 @@ import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
@@ -364,5 +368,92 @@ public class GraphQLInputTest {
         assertEquals(schema.getQueryType().getFieldDefinition("getA").getArgument("input").getType().getClass(), GraphQLInputObjectType.class);
         assertEquals(schema.getQueryType().getFieldDefinition("getB").getArgument("input").getType().getClass(), GraphQLInputObjectType.class);
 
+    }
+
+    @GraphQLName("Data")
+    static class DataObject {
+        @GraphQLField
+        String name;
+
+        public DataObject(String name) {
+            this.name = name;
+        }
+
+        public static DataObject fromGQL(Map<String, Object> gql) {
+            return new DataObject((String) gql.get("name"));
+        }
+    }
+
+    @GraphQLName("Complex")
+    static class ComplexObject {
+        @GraphQLField
+        Long id;
+
+        @GraphQLField
+        String description;
+
+        @GraphQLField
+        DataObject data;
+
+        public ComplexObject(Long id, String description, DataObject data) {
+            this.id = id;
+            this.description = description;
+            this.data = data;
+        }
+
+        public static ComplexObject fromGQL(Map<String, Object> gql) {
+            Map<String, Object> complex = (Map<String,Object>) gql.get("item");
+            return new ComplexObject(
+              (Long) complex.get("id"),
+              (String) complex.get("description"),
+              DataObject.fromGQL((Map<String,Object>) complex.get("data"))
+            );
+        }
+    }
+
+    @Test
+    public void explicitFieldDefinitionsWithSameInputAndOutputType() {
+        // arrange
+        final long generatedId = 10L;
+
+        DataFetcher<ComplexObject> mutator = environment -> {
+            ComplexObject i = ComplexObject.fromGQL(environment.getArguments());
+            return new ComplexObject(
+              generatedId,
+              i.description,
+              i.data
+            );
+        };
+
+        GraphQLFieldDefinition insert = GraphQLFieldDefinition.newFieldDefinition()
+          .type(GraphQLAnnotations.object(ComplexObject.class))
+          .name("insert")
+          .argument(
+            GraphQLArgument.newArgument()
+              .name("item")
+              .type(GraphQLAnnotations.inputObject(ComplexObject.class)))
+          .dataFetcher(mutator)
+          .build();
+
+        GraphQLObjectType mutationRoot = GraphQLObjectType.newObject()
+          .name("mutationRoot")
+          .field(insert)
+          .build();
+
+        GraphQLObjectType queryRoot = GraphQLObjectType.newObject()
+          .name("queryRoot")
+          .build();
+
+        GraphQLSchema schema = newSchema()
+          .query(queryRoot)
+          .mutation(mutationRoot)
+          .build();
+
+        // act
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("mutation{ insert(item: { description: \"hello\" data: { name: \"world\"}  }) { id } }");
+
+        // assert
+        assertEquals(result.getData().toString(), "{insert={id=" + generatedId + "}}");
     }
 }

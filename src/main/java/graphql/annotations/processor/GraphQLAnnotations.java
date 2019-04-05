@@ -30,6 +30,8 @@ import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
 import graphql.schema.GraphQLDirective;
+import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLObjectType;
 
 import java.util.Arrays;
@@ -138,6 +140,17 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
         try {
             return instance.directiveCreator.getDirective(object);
+        } catch (GraphQLAnnotationsException e) {
+            instance.getContainer().getProcessing().clear();
+            instance.getTypeRegistry().clear();
+            throw e;
+        }
+    }
+
+    public static GraphQLInputObjectType inputObject(Class<?> object) throws GraphQLAnnotationsException {
+        GraphQLAnnotations instance = getInstance();
+        try {
+            return instance.graphQLObjectHandler.getInputObject(object, instance.getContainer());
         } catch (GraphQLAnnotationsException e) {
             instance.getContainer().getProcessing().clear();
             instance.getTypeRegistry().clear();

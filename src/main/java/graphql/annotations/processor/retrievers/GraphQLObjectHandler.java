@@ -17,8 +17,11 @@ package graphql.annotations.processor.retrievers;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLType;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -30,12 +33,11 @@ public class GraphQLObjectHandler {
     private GraphQLTypeRetriever typeRetriever;
 
     public GraphQLObjectType getObject(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException, CannotCastMemberException {
-        GraphQLOutputType type = (GraphQLOutputType) typeRetriever.getGraphQLType(object, container, false);
-        if (type instanceof GraphQLObjectType) {
-            return (GraphQLObjectType) type;
-        } else {
-            throw new IllegalArgumentException("Object resolve to a " + type.getClass().getSimpleName());
-        }
+        return (GraphQLObjectType) getObject(object, container, false);
+    }
+
+    public GraphQLInputObjectType getInputObject(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException, CannotCastMemberException {
+        return (GraphQLInputObjectType) getObject(object, container, true);
     }
 
     public GraphQLTypeRetriever getTypeRetriever() {
@@ -51,5 +53,18 @@ public class GraphQLObjectHandler {
         this.typeRetriever = null;
     }
 
+    private GraphQLType getObject(Class<?> object, ProcessingElementsContainer container, boolean isInput) {
+        GraphQLType type = typeRetriever.getGraphQLType(object, container, isInput);
+        if (isObjectType(type)) {
+            return type;
+        } else {
+            throw new IllegalArgumentException("Object resolve to a " + type.getClass().getSimpleName());
+        }
 
+    }
+
+    private boolean isObjectType(GraphQLType type) {
+        return type instanceof GraphQLInputObjectType ||
+               type instanceof GraphQLObjectType;
+    }
 }
