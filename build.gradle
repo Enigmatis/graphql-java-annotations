@@ -47,6 +47,10 @@ release {
     tagTemplate = 'v${version}'
     failOnPublishNeeded = false
     failOnCommitNeeded = false
+    git {
+        pushToCurrentBranch = true
+        requireBranch = 'bintray-release'
+    }
 }
 
 jar {
@@ -169,8 +173,11 @@ bintray {
         version {
             name = project.version
             released = new Date()
+            gpg {
+                sign = true
+            }
             mavenCentralSync {
-                sync = true //[Default: true] Determines whether to sync the version to Maven Central.
+                sync = false //[Default: true] Determines whether to sync the version to Maven Central.
                 user = System.getenv('OSS_USER') ?: project.findProperty('OSS_USER') ?: ''
                 password = System.getenv('OSS_PASS') ?: project.findProperty('OSS_PASS') ?: ''
                 close = '1'
