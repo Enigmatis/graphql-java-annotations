@@ -1,6 +1,7 @@
+![logo](polaris-iconsmalredl.png?raw=true) 
+# GraphQL Annotations for Java
 [![Build Status](https://travis-ci.org/graphql-java/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/graphql-java/graphql-java-annotations)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.graphql-java/graphql-java-annotations.svg?maxAge=3000)]()
-# GraphQL Annotations for Java
 
 [GraphQL-Java](https://github.com/andimarek/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
 syntax for GraphQL schema definition.
@@ -12,7 +13,7 @@ syntax for GraphQL schema definition.
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:6.1"
+  compile "io.github.graphql-java:graphql-java-annotations:6.2"
 }
 ```
 
