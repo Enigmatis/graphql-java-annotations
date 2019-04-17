@@ -6,6 +6,26 @@
 [GraphQL-Java](https://github.com/andimarek/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
 syntax for GraphQL schema definition.
 
+
+## Table Of Contents
+- [Getting Started](#getting-started)
+- [Defining Objects](#defining-objects)
+- [Defining Interfaces](#defining-interfaces)
+- [Defining Unions](#defining-unions)
+- [Fields](#fields)
+    - [Custom DataFetcher](#custom-data-fetcher)
+- [Type Extensions](#type-extensions)
+    - [Defining Extensions in Annotation](#defining-extensions-in-annotations)
+    - [Data Fetching with Extensions](#data-fetching-with-extensions)
+- [Type Inference](#type-inference)
+- [Directives](#directives)
+    - [Creating/Defining a GraphQL Directive](#creatingdefining-a-graphqldirective)
+    - [Wiring with Directives](#wiring-with-directives)
+- [Relay Support](#relay-support)
+    - [Mutations](#mutations)
+    - [Connection](#connection)
+    - [Customizing Relay Schema](#customizing-relay-schema)     
+
 ## Getting Started
 
 
