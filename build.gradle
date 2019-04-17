@@ -177,7 +177,7 @@ bintray {
                 sign = false
             }
             mavenCentralSync {
-                sync = false //[Default: true] Determines whether to sync the version to Maven Central.
+                sync = true //[Default: true] Determines whether to sync the version to Maven Central.
                 user = System.getenv('OSS_USER') ?: project.findProperty('OSS_USER') ?: ''
                 password = System.getenv('OSS_PASS') ?: project.findProperty('OSS_PASS') ?: ''
                 close = '1'
