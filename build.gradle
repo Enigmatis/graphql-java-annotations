@@ -174,7 +174,7 @@ bintray {
             name = project.version
             released = new Date()
             gpg {
-                sign = true
+                sign = false
             }
             mavenCentralSync {
                 sync = false //[Default: true] Determines whether to sync the version to Maven Central.
