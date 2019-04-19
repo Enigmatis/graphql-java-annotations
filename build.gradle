@@ -47,10 +47,6 @@ release {
     tagTemplate = 'v${version}'
     failOnPublishNeeded = false
     failOnCommitNeeded = false
-    git {
-        pushToCurrentBranch = true
-        requireBranch = 'bintray-release'
-    }
 }
 
 jar {
