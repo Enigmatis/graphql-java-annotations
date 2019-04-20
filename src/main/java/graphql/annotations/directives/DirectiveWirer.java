@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,9 @@ import java.util.Map;
 public class DirectiveWirer {
     @FunctionalInterface
     interface WiringFunction {
-        GraphQLDirectiveContainer apply(GraphQLDirective a, GraphQLDirectiveContainer b, AnnotationsDirectiveWiring wiring) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException;
+        GraphQLDirectiveContainer apply(GraphQLDirective a, GraphQLDirectiveContainer b,
+                                        AnnotationsDirectiveWiring wiring, GraphQLCodeRegistry.Builder codeRegistryBuilder, String parentName)
+                throws NoSuchMethodException, InvocationTargetException, IllegalAccessException;
     }
 
     private Map<Class, WiringFunction> functionMap;
@@ -37,11 +39,12 @@ public class DirectiveWirer {
 
     private void putInMap(Map<Class, WiringFunction> map, Class clazz, String functionName,
                           Introspection.DirectiveLocation... locations) {
-        map.put(clazz, (d, e, wiring) -> {
+        map.put(clazz, (d, e, wiring, codeRegistryBuilder, parentName) -> {
             assertLocation(d, e, locations);
             AnnotationsWiringEnvironmentImpl environment =
-                    new AnnotationsWiringEnvironmentImpl(e, e.getDirective(d.getName()));
-            return (GraphQLDirectiveContainer) wiring.getClass().getMethod(functionName, AnnotationsWiringEnvironment.class).invoke(wiring, environment);
+                    new AnnotationsWiringEnvironmentImpl(e, e.getDirective(d.getName()), parentName);
+            return (GraphQLDirectiveContainer) wiring.getClass().getMethod(functionName,  AnnotationsWiringEnvironment.class, GraphQLCodeRegistry.Builder.class)
+                    .invoke(wiring, environment, codeRegistryBuilder);
         });
     }
 
@@ -61,14 +64,15 @@ public class DirectiveWirer {
         return functionMap;
     }
 
-    public GraphQLDirectiveContainer wire(GraphQLDirectiveContainer element, HashMap<GraphQLDirective, AnnotationsDirectiveWiring> directiveWiringMap) {
+    public GraphQLDirectiveContainer wire(GraphQLDirectiveContainer element, HashMap<GraphQLDirective, AnnotationsDirectiveWiring> directiveWiringMap
+            , GraphQLCodeRegistry.Builder codeRegistryBuilder, String parentName) {
         for (Map.Entry<GraphQLDirective, AnnotationsDirectiveWiring> entry : directiveWiringMap.entrySet()) {
             GraphQLDirective graphQLDirective = entry.getKey();
             AnnotationsDirectiveWiring wiring = entry.getValue();
 
             Class<? extends GraphQLDirectiveContainer> aClass = element.getClass();
             try {
-                element = functionMap.get(aClass).apply(graphQLDirective, element, wiring);
+                element = functionMap.get(aClass).apply(graphQLDirective, element, wiring, codeRegistryBuilder, parentName);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 throw new GraphQLAnnotationsException(e.getMessage(), e);
             }

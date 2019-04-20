@@ -90,14 +90,11 @@ public class GraphQLFieldRetriever {
                 .build();
 
         DataFetcher dataFetcher = new MethodDataFetcherBuilder(method, outputType, typeFunction, container, relayFieldDefinition, args, dataFetcherConstructor, isConnection).build();
-//        String typeName = outputType.getName();
-//        if (outputType instanceof GraphQLList) {
-//            typeName = ((GraphQLList) outputType).getWrappedType().getName();
-//        }
         container.getCodeRegistryBuilder().dataFetcher(coordinates(parentName, fieldName), dataFetcher);
 
-        return (GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(method, container));
-//        return new GraphQLFieldDefinitionWrapper();
+        return (GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(),
+                new DirectiveWiringMapRetriever().getDirectiveWiringMap(method, container),
+                container.getCodeRegistryBuilder(), parentName);
     }
 
     public GraphQLFieldDefinition getField(String parentName, Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
@@ -126,27 +123,33 @@ public class GraphQLFieldRetriever {
         GraphQLDirective[] graphQLDirectives = new DirectivesBuilder(field, container).build();
         builder.withDirectives(graphQLDirectives);
 
-        return (GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container));
+        return (GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(),
+                new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container),
+                container.getCodeRegistryBuilder(), parentName);
 //        return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container)));
     }
 
-    public GraphQLInputObjectField getInputField(Method method, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
+    public GraphQLInputObjectField getInputField(Method method, ProcessingElementsContainer container, String parentName) throws GraphQLAnnotationsException {
         GraphQLInputObjectField.Builder builder = newInputObjectField();
         builder.name(new MethodNameBuilder(method).alwaysPrettify(alwaysPrettify).build());
         TypeFunction typeFunction = getTypeFunction(method, container);
         GraphQLInputType inputType = (GraphQLInputType) new MethodTypeBuilder(method, typeFunction, container, true).build();
         builder.withDirectives(new DirectivesBuilder(method, container).build());
-        return (GraphQLInputObjectField) new DirectiveWirer().wire(builder.type(inputType).description(new DescriptionBuilder(method).build()).build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(method, container));
+        return (GraphQLInputObjectField) new DirectiveWirer().wire(builder.type(inputType)
+                        .description(new DescriptionBuilder(method).build()).build(),
+                new DirectiveWiringMapRetriever().getDirectiveWiringMap(method, container), container.getCodeRegistryBuilder(), parentName
+        );
     }
 
-    public GraphQLInputObjectField getInputField(Field field, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
+    public GraphQLInputObjectField getInputField(Field field, ProcessingElementsContainer container, String parentName) throws GraphQLAnnotationsException {
         GraphQLInputObjectField.Builder builder = newInputObjectField();
         builder.name(new FieldNameBuilder(field).alwaysPrettify(alwaysPrettify).build());
         TypeFunction typeFunction = getTypeFunction(field, container);
         GraphQLType graphQLType = typeFunction.buildType(true, field.getType(), field.getAnnotatedType(), container);
         builder.withDirectives(new DirectivesBuilder(field, container).build());
-        return (GraphQLInputObjectField) new DirectiveWirer().wire(builder.type((GraphQLInputType) graphQLType).description(new DescriptionBuilder(field).build()).build(),
-                new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container));
+        return (GraphQLInputObjectField) new DirectiveWirer().wire(builder.type((GraphQLInputType) graphQLType)
+                        .description(new DescriptionBuilder(field).build()).build(),
+                new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container), container.getCodeRegistryBuilder(), parentName);
     }
 
     private GraphQLFieldDefinition handleRelayArguments(Method method, ProcessingElementsContainer container, GraphQLFieldDefinition.Builder builder, GraphQLOutputType outputType, List<GraphQLArgument> args) {

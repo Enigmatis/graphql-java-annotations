@@ -27,4 +27,10 @@ public interface AnnotationsWiringEnvironment {
      * @return the directive that is being examined
      */
     GraphQLDirective getDirective();
+
+    /**
+     *
+     * @return the parent name of the element
+     */
+    String getParentName();
 }

@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -122,10 +122,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
     }
 
-    public static GraphQLObjectType object(Class<?> object, GraphQLDirective... directives) throws GraphQLAnnotationsException {
+    public static GraphQLObjectType object(Class<?> object, GraphQLCodeRegistry.Builder codeRegistryBuilder, GraphQLDirective... directives) throws GraphQLAnnotationsException {
         GraphQLAnnotations instance = getInstance();
         Arrays.stream(directives).forEach(x -> instance.getContainer().getDirectiveRegistry().put(x.getName(), x));
-
         try {
             return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
         } catch (GraphQLAnnotationsException e) {
@@ -139,7 +138,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         GraphQLAnnotations instance = getInstance();
 
         try {
-            return instance.directiveCreator.getDirective(object);
+            GraphQLDirective directive = instance.directiveCreator.getDirective(object);
+            instance.getContainer().getDirectiveRegistry().put(directive.getName(), directive);
+            return directive;
         } catch (GraphQLAnnotationsException e) {
             instance.getContainer().getProcessing().clear();
             instance.getTypeRegistry().clear();

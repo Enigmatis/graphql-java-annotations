@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,7 +46,7 @@ public class GraphQLTypeRetriever {
      *
      * @param object    the object class to examine*
      * @param container a class that hold several members that are required in order to build schema
-     * @param isInput true if the type is an input type, false otherwise
+     * @param isInput   true if the type is an input type, false otherwise
      * @return a {@link GraphQLType} that represents that object class
      * @throws graphql.annotations.processor.exceptions.GraphQLAnnotationsException if the object class cannot be examined
      * @throws graphql.annotations.processor.exceptions.CannotCastMemberException   if the object class cannot be examined
@@ -90,7 +90,9 @@ public class GraphQLTypeRetriever {
         DirectiveWirer directiveWirer = new DirectiveWirer();
 
         // wire the type with the directives and change the original type
-        type = directiveWirer.wire((GraphQLDirectiveContainer) type, new DirectiveWiringMapRetriever().getDirectiveWiringMap(object, container));
+        type = directiveWirer.wire((GraphQLDirectiveContainer) type,
+                new DirectiveWiringMapRetriever().getDirectiveWiringMap(object, container),
+                container.getCodeRegistryBuilder(), null);
 
         container.getTypeRegistry().put(type.getName(), type);
         container.getProcessing().pop();
