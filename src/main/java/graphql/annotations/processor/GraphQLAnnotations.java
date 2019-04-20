@@ -29,6 +29,7 @@ import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
+import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLObjectType;
 
@@ -109,9 +110,10 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return toGraphqlName(name == null ? objectClass.getSimpleName() : name.value());
     }
 
-    public static GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
+    public static GraphQLObjectType object(Class<?> object, GraphQLCodeRegistry.Builder codeRegistryBuilder) throws GraphQLAnnotationsException {
         GraphQLAnnotations instance = getInstance();
         try {
+            instance.getContainer().setCodeRegistryBuilder(codeRegistryBuilder);
             return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
         } catch (GraphQLAnnotationsException e) {
             instance.getContainer().getProcessing().clear();

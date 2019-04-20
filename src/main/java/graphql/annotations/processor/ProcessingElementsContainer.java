@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
 import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.relay.Relay;
+import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLDirective;
 
 import java.util.HashMap;
@@ -27,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_SUFFIX;
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_SUFFIX;
 
 public class ProcessingElementsContainer {
 
@@ -37,6 +38,7 @@ public class ProcessingElementsContainer {
     private Map<String, graphql.schema.GraphQLType> typeRegistry;
     private Map<String, graphql.schema.GraphQLDirective> directiveRegistry;
     private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry;
+    private GraphQLCodeRegistry.Builder codeRegistryBuilder;
     private Stack<String> processing;
     private String inputPrefix = DEFAULT_INPUT_PREFIX;
     private String inputSuffix = DEFAULT_INPUT_SUFFIX;
@@ -120,5 +122,13 @@ public class ProcessingElementsContainer {
 
     public void setInputSuffix(String inputSuffix) {
         this.inputSuffix = inputSuffix;
+    }
+
+    public void setCodeRegistryBuilder(GraphQLCodeRegistry.Builder builder) {
+        this.codeRegistryBuilder = builder;
+    }
+
+    public GraphQLCodeRegistry.Builder getCodeRegistryBuilder() {
+        return this.codeRegistryBuilder;
     }
 }

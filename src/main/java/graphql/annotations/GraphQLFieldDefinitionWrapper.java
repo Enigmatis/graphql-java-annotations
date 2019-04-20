@@ -14,23 +14,20 @@
  */
 package graphql.annotations;
 
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetcherFactories;
-import graphql.schema.GraphQLFieldDefinition;
-
-public class GraphQLFieldDefinitionWrapper extends GraphQLFieldDefinition {
-
-    public GraphQLFieldDefinitionWrapper(GraphQLFieldDefinition fieldDefinition) {
-        super(fieldDefinition.getName(), fieldDefinition.getDescription(), fieldDefinition.getType(),
-                DataFetcherFactories.useDataFetcher((DataFetcher<?>) fieldDefinition.getDataFetcher()),
-                fieldDefinition.getArguments(), fieldDefinition.getDeprecationReason(),
-                fieldDefinition.getDirectives(),
-                fieldDefinition.getDefinition());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof GraphQLFieldDefinition &&
-                ((GraphQLFieldDefinition) obj).getName().contentEquals(getName());
-    }
-}
+//public class GraphQLFieldDefinitionWrapper extends GraphQLFieldDefinition {
+//
+//    public GraphQLFieldDefinitionWrapper(GraphQLFieldDefinition fieldDefinition) {
+//
+//        super(fieldDefinition.getName(), fieldDefinition.getDescription(), fieldDefinition.getType(),
+//                DataFetcherFactories.useDataFetcher((DataFetcher<?>) fieldDefinition.getDataFetcher()),
+//                fieldDefinition.getArguments(), fieldDefinition.getDeprecationReason(),
+//                fieldDefinition.getDirectives(),
+//                fieldDefinition.getDefinition());
+//    }
+//
+//    @Override
+//    public boolean equals(Object obj) {
+//        return obj instanceof GraphQLFieldDefinition &&
+//                ((GraphQLFieldDefinition) obj).getName().contentEquals(getName());
+//    }
+//}
