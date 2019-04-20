@@ -42,9 +42,9 @@ public class DirectiveWirer {
         map.put(clazz, (d, e, wiring, codeRegistryBuilder, parentName) -> {
             assertLocation(d, e, locations);
             AnnotationsWiringEnvironmentImpl environment =
-                    new AnnotationsWiringEnvironmentImpl(e, e.getDirective(d.getName()), parentName);
-            return (GraphQLDirectiveContainer) wiring.getClass().getMethod(functionName,  AnnotationsWiringEnvironment.class, GraphQLCodeRegistry.Builder.class)
-                    .invoke(wiring, environment, codeRegistryBuilder);
+                    new AnnotationsWiringEnvironmentImpl(e, e.getDirective(d.getName()), parentName, codeRegistryBuilder);
+            return (GraphQLDirectiveContainer) wiring.getClass().getMethod(functionName, AnnotationsWiringEnvironment.class)
+                    .invoke(wiring, environment);
         });
     }
 

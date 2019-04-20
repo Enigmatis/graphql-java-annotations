@@ -21,11 +21,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when an object is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the codeRegistry Builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLObjectType onObject(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLObjectType onObject(AnnotationsWiringEnvironment environment) {
         return (GraphQLObjectType) environment.getElement();
     }
 
@@ -33,11 +32,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when a field is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the code registry builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
         return (GraphQLFieldDefinition) environment.getElement();
     }
 
@@ -45,11 +43,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when an argument is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the code registry builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLArgument onArgument(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLArgument onArgument(AnnotationsWiringEnvironment environment) {
         return (GraphQLArgument) environment.getElement();
     }
 
@@ -57,11 +54,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when an interface is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the code registry builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLInterfaceType onInterface(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLInterfaceType onInterface(AnnotationsWiringEnvironment environment) {
         return (GraphQLInterfaceType) environment.getElement();
     }
 
@@ -69,11 +65,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when a union is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the code registry builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLUnionType onUnion(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLUnionType onUnion(AnnotationsWiringEnvironment environment) {
         return (GraphQLUnionType) environment.getElement();
     }
 
@@ -84,7 +79,7 @@ public interface AnnotationsDirectiveWiring {
      * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLEnumType onEnum(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLEnumType onEnum(AnnotationsWiringEnvironment environment) {
         return (GraphQLEnumType) environment.getElement();
     }
 
@@ -92,11 +87,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when an enum value is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the code registry builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLEnumValueDefinition onEnumValue(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLEnumValueDefinition onEnumValue(AnnotationsWiringEnvironment environment) {
         return (GraphQLEnumValueDefinition) environment.getElement();
     }
 
@@ -104,11 +98,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when a custom scalar is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the code registry builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLScalarType onScalar(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLScalarType onScalar(AnnotationsWiringEnvironment environment) {
         return (GraphQLScalarType) environment.getElement();
     }
 
@@ -116,11 +109,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when an input object is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the code registry builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLInputObjectType onInputObjectType(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLInputObjectType onInputObjectType(AnnotationsWiringEnvironment environment) {
         return (GraphQLInputObjectType) environment.getElement();
     }
 
@@ -128,11 +120,10 @@ public interface AnnotationsDirectiveWiring {
      * This is called when an input object field is encountered, which gives the schema directive a chance to modify the shape and behaviour
      * of that DSL  element
      *
-     * @param environment         the wiring element
-     * @param codeRegistryBuilder the code registry builder
+     * @param environment the wiring element
      * @return a non null element based on the original one
      */
-    default GraphQLInputObjectField onInputObjectField(AnnotationsWiringEnvironment environment, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    default GraphQLInputObjectField onInputObjectField(AnnotationsWiringEnvironment environment) {
         return (GraphQLInputObjectField) environment.getElement();
     }
 }
