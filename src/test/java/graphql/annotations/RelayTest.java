@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.*;
 
 @SuppressWarnings("unchecked")
@@ -69,7 +70,6 @@ public class RelayTest {
             this.i = i;
         }
 
-        @GraphQLField
         public int getI() {
             return i;
         }
@@ -129,7 +129,7 @@ public class RelayTest {
         assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
-        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).mutation(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
@@ -151,7 +151,7 @@ public class RelayTest {
 
         assertNotNull(doSomething);
 
-        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).mutation(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
@@ -190,7 +190,7 @@ public class RelayTest {
         assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
-        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).codeRegistry(this.graphQLAnnotations.getContainer().getCodeRegistryBuilder().build()).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).mutation(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
@@ -227,7 +227,7 @@ public class RelayTest {
         assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
-        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).mutation(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 

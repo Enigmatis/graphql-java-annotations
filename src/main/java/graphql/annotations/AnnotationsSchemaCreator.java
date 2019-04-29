@@ -82,6 +82,15 @@ public class AnnotationsSchemaCreator {
             return this;
         }
 
+        public Builder setAlwaysPrettify(Boolean shouldAlwaysPrettify) {
+            this.graphQLAnnotations.getObjectHandler().getTypeRetriever().getGraphQLFieldRetriever().setAlwaysPrettify(shouldAlwaysPrettify);
+            return this;
+        }
+
+        public GraphQLAnnotations getGraphQLAnnotations() {
+            return this.graphQLAnnotations;
+        }
+
         public GraphQLSchema build() {
             assert this.queryObject != null;
 

@@ -31,6 +31,7 @@ import graphql.annotations.processor.retrievers.fieldBuilders.method.MethodDataF
 import graphql.annotations.processor.retrievers.fieldBuilders.method.MethodNameBuilder;
 import graphql.annotations.processor.retrievers.fieldBuilders.method.MethodTypeBuilder;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
+import graphql.annotations.processor.util.CodeRegistryUtil;
 import graphql.annotations.processor.util.ConnectionUtil;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
@@ -151,6 +152,14 @@ public class GraphQLFieldRetriever {
         GraphQLFieldDefinition relayFieldDefinition = null;
         if (method.isAnnotationPresent(GraphQLRelayMutation.class)) {
             relayFieldDefinition = buildRelayMutation(method, container, builder, outputType, args);
+
+            // Getting the data fetcher from the old field type and putting it as the new type
+            String newParentType = relayFieldDefinition.getType().getName();
+            relayFieldDefinition.getType().getChildren().forEach(field -> {
+                DataFetcher dataFetcher = CodeRegistryUtil.getDataFetcher(container.getCodeRegistryBuilder(), outputType.getName(), (GraphQLFieldDefinition) field);
+                container.getCodeRegistryBuilder().dataFetcher(coordinates(newParentType, field.getName()), dataFetcher);
+            });
+
         } else {
             builder.arguments(args);
         }
