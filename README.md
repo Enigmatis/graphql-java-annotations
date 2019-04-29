@@ -58,27 +58,27 @@ graphql-java-annotations also allow you to wire your objects with data fetchers 
 ## GraphQLAnnotations class
 
 You can create an instance of the `GraphQLAnnotations` class in order to create the GraphQL types.
-``java
+```java
 GraphQLAnnotations graphqlAnnotations = new GraphQLAnnotations();
-``
+```
 
 Using this object, you will be able to create the GraphQL types.
 There are few types that can be generated - a `GraphQLObjectType`, a `GraphQLInterfaceType` and a `GraphQLDirective`.
 
-``java
+```java
 GraphQLObjectType query = graphqlAnnotations.object(Query.class);
 GraphQLDirective upperDirective = graphqlAnnotations.directive(UpperDirective.class);
 GraphQLInterfaceType myInterface = graphqlAnnotations.generateInterface(MyInterface.class); 
-``
+```
 
 Then you can use these types in order to create a graphql-java schema.
 But, in order to create a graphql-java schema, you need also the ``GraphQLCodeRegistry``, which contains all of the data fetchers mapped to their fields (and also type resolvers).
 
 You can obtain the code registry this way:
 
-``java
+```java
 graphqlAnnotations.getContainer().getCodeRegistryBuilder().build();
-``
+```
 
 ## Annotations Schema Creator
 
