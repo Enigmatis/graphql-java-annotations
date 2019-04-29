@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,25 +18,12 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
-import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
-import graphql.schema.GraphQLObjectType;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.assertEquals;
 
 public class GraphQLSimpleSchemaTest {
-
-    private GraphQLAnnotations graphQLAnnotations;
-
-    @BeforeMethod
-    public void init() {
-        this.graphQLAnnotations = new GraphQLAnnotations();
-    }
-
-
     public static class User {
 
         private String name;
@@ -75,9 +62,7 @@ public class GraphQLSimpleSchemaTest {
 
     @Test
     public void detachedCall() {
-        GraphQLObjectHandler graphQLObjectHandler = graphQLAnnotations.getObjectHandler();
-        GraphQLObjectType queryObject = graphQLObjectHandler.getGraphQLType(Query.class,graphQLAnnotations.getContainer());
-        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
+        GraphQL graphql = GraphQL.newGraphQL(newAnnotationsSchema().query(Query.class).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
         String actual = result.getData().toString();
@@ -86,9 +71,7 @@ public class GraphQLSimpleSchemaTest {
 
     @Test
     public void staticCall() {
-        GraphQLObjectHandler graphQLObjectHandler = graphQLAnnotations.getObjectHandler();
-        GraphQLObjectType queryObject = graphQLObjectHandler.getGraphQLType(Query.class,graphQLAnnotations.getContainer());
-        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
+        GraphQL graphql = GraphQL.newGraphQL(newAnnotationsSchema().query(Query.class).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser2{ name } }");
         String actual = result.getData().toString();
