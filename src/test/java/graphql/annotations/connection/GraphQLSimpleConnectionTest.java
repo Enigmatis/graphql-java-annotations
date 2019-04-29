@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,15 +39,17 @@ import static org.testng.Assert.assertEquals;
 
 public class GraphQLSimpleConnectionTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-        GraphQLAnnotations.getInstance().getContainer().getProcessing().clear();
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
     @Test
     public void simpleConnection_buildSchema_TypeOfSimpleConnectionIsGraphQLList() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(MainConnection.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(MainConnection.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
         String objsTypeName = schema.getQueryType().getFieldDefinition("objs").getType().getName();
@@ -57,17 +59,17 @@ public class GraphQLSimpleConnectionTest {
 
     @Test(expectedExceptions = GraphQLConnectionException.class)
     public void simpleConnection_fieldDoesNotHaveDataFetcherAnnotation_throwsError() {
-        GraphQLAnnotations.object(TestConnectionOnField.class);
+        this.graphQLAnnotations.object(TestConnectionOnField.class);
     }
 
     @Test(expectedExceptions = GraphQLConnectionException.class)
     public void simpleConnection_returnTypeIsNotValid_throwsError() {
-        GraphQLAnnotations.object(TestConnectionNotGoodReturnType.class);
+        this.graphQLAnnotations.object(TestConnectionNotGoodReturnType.class);
     }
 
     @Test
     public void simpleConnection_queryForOverAll_getCorrectAnswer() {
-        GraphQLObjectType object = GraphQLAnnotations.object(MainConnection.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(MainConnection.class);
         GraphQLSchema schema = newSchema().query(object).build();
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
@@ -81,7 +83,7 @@ public class GraphQLSimpleConnectionTest {
 
     @Test
     public void simpleConnection_queryForTwoObject_getTwoObject() {
-        GraphQLObjectType object = GraphQLAnnotations.object(MainConnection.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(MainConnection.class);
         GraphQLSchema schema = newSchema().query(object).build();
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 

@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static graphql.Scalars.GraphQLBoolean;
@@ -29,6 +30,13 @@ import static org.testng.AssertJUnit.*;
 import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 public class GraphQLDirectiveCreationTest {
+
+    private GraphQLAnnotations graphQLAnnotations;
+
+    @BeforeMethod
+    public void setUp() {
+        this.graphQLAnnotations = new GraphQLAnnotations();
+    }
 
     @GraphQLName("upper")
     @GraphQLDescription("makes string upper case")
@@ -45,7 +53,7 @@ public class GraphQLDirectiveCreationTest {
     @Test
     public void test_directive_creation() {
         // Act
-        GraphQLDirective directive = GraphQLAnnotations.directive(UpperDirective.class);
+        GraphQLDirective directive = this.graphQLAnnotations.directive(UpperDirective.class);
 
         // Assert
         assertEquals(directive.getName(), "upper");

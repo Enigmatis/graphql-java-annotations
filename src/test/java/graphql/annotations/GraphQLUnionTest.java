@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,18 +39,20 @@ import static org.testng.Assert.assertTrue;
 @SuppressWarnings({"WeakerAccess", "unchecked", "AssertEqualsBetweenInconvertibleTypesTestNG"})
 public class GraphQLUnionTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        graphQLAnnotations = new GraphQLAnnotations();
     }
 
     @Test
     public void getGraphQLType_typeIsUnion_returnsUnionType() throws Exception {
         //Arrange
-        GraphQLInterfaceRetriever graphQLInterfaceRetriever = GraphQLAnnotations.getInstance().getObjectHandler().getTypeRetriever().getGraphQLInterfaceRetriever();
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever = this.graphQLAnnotations.getObjectHandler().getTypeRetriever().getGraphQLInterfaceRetriever();
 
         //Act
-        GraphQLOutputType unionType = graphQLInterfaceRetriever.getInterface(Hardware.class, GraphQLAnnotations.getInstance().getContainer());
+        GraphQLOutputType unionType = graphQLInterfaceRetriever.getInterface(Hardware.class, this.graphQLAnnotations.getContainer());
 
         //Assert
         assertThat(unionType, instanceOf(GraphQLUnionType.class));
@@ -59,11 +61,11 @@ public class GraphQLUnionTest {
     @Test
     public void getResolver_resolverIsDefaultOne_returnsUnionTypeResolver() throws Exception {
         //Arrange
-        GraphQLInterfaceRetriever graphQLInterfaceRetriever = GraphQLAnnotations.getInstance().getObjectHandler().getTypeRetriever().getGraphQLInterfaceRetriever();
+        GraphQLInterfaceRetriever graphQLInterfaceRetriever = this.graphQLAnnotations.getObjectHandler().getTypeRetriever().getGraphQLInterfaceRetriever();
 
         //Act
-        GraphQLUnionType unionType = (GraphQLUnionType) graphQLInterfaceRetriever.getInterface(Hardware.class, GraphQLAnnotations.getInstance().getContainer());
-        TypeResolver typeResolver = unionType.getTypeResolver();
+        GraphQLUnionType unionType = (GraphQLUnionType) graphQLInterfaceRetriever.getInterface(Hardware.class, this.graphQLAnnotations.getContainer());
+        TypeResolver typeResolver = this.graphQLAnnotations.getContainer().getCodeRegistryBuilder().getTypeResolver(unionType);
 
         //Assert
         assertThat(typeResolver, instanceOf(UnionTypeResolver.class));
@@ -72,7 +74,7 @@ public class GraphQLUnionTest {
     @Test
     public void unionType_buildSchema_unionIsAFieldOfQuery() throws Exception {
         //Act
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
         List<GraphQLFieldDefinition> unions = object.getFieldDefinitions();
 
         //Assert
@@ -81,7 +83,7 @@ public class GraphQLUnionTest {
 
     @Test
     public void unionQuery_returnTypeIsComputer_getComputer() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
+        GraphQLSchema schema = newAnnotationsSchema().query((Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         String query = "{ getHardwareComputer{ ... on Computer {name}, ... on Screen{resolution}} }";
@@ -92,7 +94,7 @@ public class GraphQLUnionTest {
 
     @Test
     public void unionQuery_returnTypeIsScreen_getScreen() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
+        GraphQLSchema schema = newAnnotationsSchema().query((Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         String query = "{ getHardwareScreen{ ... on Computer {name}, ... on Screen{resolution}} }";
@@ -103,7 +105,7 @@ public class GraphQLUnionTest {
 
     @Test
     public void unionQueryWithCustomTypeResolver_askForDog_getDog() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
+        GraphQLSchema schema = newAnnotationsSchema().query((Query.class)).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         String query = "{ getPet(kindOfPet:\"dog\"){ ... on Cat {mew}, ... on Dog{waf}} }";
@@ -114,7 +116,7 @@ public class GraphQLUnionTest {
 
     @Test
     public void unionQueryWithCustomTypeResolver_askForCat_getCat() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class)).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         String query = "{ getPet(kindOfPet:\"cat\"){ ... on Cat {mew}, ... on Dog{waf}} }";
@@ -166,23 +168,28 @@ public class GraphQLUnionTest {
 
         @GraphQLField
         @GraphQLDataFetcher(PetDataFetcher.class)
-        public Pet getPet(@GraphQLName("kindOfPet") @GraphQLNonNull String kindOfPet){return null;}
+        public Pet getPet(@GraphQLName("kindOfPet") @GraphQLNonNull String kindOfPet) {
+            return null;
+        }
 
     }
+
     static class Computer implements Hardware {
 
         @GraphQLField
         String name;
+
         public Computer(String name) {
             this.name = name;
         }
 
     }
+
     @GraphQLUnion(typeResolver = PetResolver.class, possibleTypes = {Cat.class, Dog.class})
     interface Pet {
     }
 
-    static class Cat implements Pet{
+    static class Cat implements Pet {
         @GraphQLField
         String mew;
 
@@ -191,7 +198,7 @@ public class GraphQLUnionTest {
         }
     }
 
-    static class Dog implements Pet{
+    static class Dog implements Pet {
         @GraphQLField
         String waf;
 
@@ -204,10 +211,9 @@ public class GraphQLUnionTest {
         @Override
         public GraphQLObjectType getType(TypeResolutionEnvironment env) {
             Object object = env.getObject();
-            if(object instanceof Dog) {
+            if (object instanceof Dog) {
                 return env.getSchema().getObjectType("Dog");
-            }
-            else {
+            } else {
                 return env.getSchema().getObjectType("Cat");
             }
         }
@@ -217,10 +223,9 @@ public class GraphQLUnionTest {
         @Override
         public Pet get(DataFetchingEnvironment environment) {
             String nameOfPet = environment.getArgument("kindOfPet");
-            if(nameOfPet.toLowerCase().equals("dog")) {
+            if (nameOfPet.toLowerCase().equals("dog")) {
                 return new Dog("waf");
-            }
-            else {
+            } else {
                 return new Cat("mew");
             }
         }

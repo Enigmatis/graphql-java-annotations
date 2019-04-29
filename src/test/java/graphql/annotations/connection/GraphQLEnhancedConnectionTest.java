@@ -26,7 +26,6 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -41,20 +40,16 @@ import static org.testng.Assert.assertEquals;
 public class GraphQLEnhancedConnectionTest {
 
     private static GraphQL graphQL;
+    private GraphQLAnnotations graphQLAnnotations;
 
 
     @BeforeClass
-    public static void setUp() throws Exception {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-        GraphQLObjectType object = GraphQLAnnotations.object(TestListField.class);
+    public void setUp() throws Exception {
+        this.graphQLAnnotations = new GraphQLAnnotations();
+        GraphQLObjectType object = this.graphQLAnnotations.object(TestListField.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
         graphQL = GraphQL.newGraphQL(schema).build();
-    }
-
-    @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
     }
 
     public static class Obj {
@@ -139,7 +134,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     @Test(expectedExceptions = GraphQLConnectionException.class)
     public void ConnectionFieldDoesntReturnPaginatedData_tryToBuildSchema_getException() throws Exception {
         //Act + Assert
-        GraphQLAnnotations.object(NotValidConnectionField.class);
+        this.graphQLAnnotations.object(NotValidConnectionField.class);
     }
 
     @Test

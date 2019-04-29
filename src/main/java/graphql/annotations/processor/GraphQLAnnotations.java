@@ -30,6 +30,7 @@ import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
 import graphql.schema.GraphQLDirective;
+import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 
 import java.util.Arrays;
@@ -103,9 +104,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return toGraphqlName(name == null ? objectClass.getSimpleName() : name.value());
     }
 
-    public GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
+    public GraphQLInterfaceType generateInterface(Class<?> object) throws GraphQLAnnotationsException {
         try {
-            return this.graphQLObjectHandler.getObject(object, this.getContainer());
+            return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
             this.getContainer().getProcessing().clear();
             this.getTypeRegistry().clear();
@@ -113,10 +114,21 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
     }
 
+    public GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
+        try {
+            return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
+        } catch (GraphQLAnnotationsException e) {
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
+            throw e;
+        }
+    }
+
+    @Deprecated
     public GraphQLObjectType object(Class<?> object, GraphQLDirective... directives) throws GraphQLAnnotationsException {
         Arrays.stream(directives).forEach(x -> this.getContainer().getDirectiveRegistry().put(x.getName(), x));
         try {
-            return this.graphQLObjectHandler.getObject(object, this.getContainer());
+            return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
             this.getContainer().getProcessing().clear();
             this.getTypeRegistry().clear();

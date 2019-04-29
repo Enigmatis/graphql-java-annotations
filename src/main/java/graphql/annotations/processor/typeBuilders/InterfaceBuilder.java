@@ -86,7 +86,7 @@ public class InterfaceBuilder {
         builder.fields(extensionsHandler.getExtensionFields(iface, definedFields, container));
 
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
-        builder.typeResolver(newInstance(typeResolver.value()));
+        container.getCodeRegistryBuilder().typeResolver(typeName, newInstance(typeResolver.value()));
         return builder;
     }
 }

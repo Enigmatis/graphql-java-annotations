@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,26 +18,29 @@ import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.*;
-import graphql.annotations.annotationTypes.GraphQLType;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.schema.*;
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
+import static graphql.schema.DataFetchingEnvironmentImpl.newDataFetchingEnvironment;
 import static org.testng.Assert.*;
 
 @SuppressWarnings("unchecked")
 public class MethodDataFetcherTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
     public static class StaticApi {
@@ -48,9 +51,8 @@ public class MethodDataFetcherTest {
     }
 
     @Test
-    public void query_staticMethod_valueIsDeterminedByMethod(){
-        GraphQLObjectType object = GraphQLAnnotations.object(StaticApi.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+    public void query_staticMethod_valueIsDeterminedByMethod() {
+        GraphQLSchema schema = newAnnotationsSchema().query(StaticApi.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { name }").root(new StaticApi()));
         assertTrue(result.getErrors().isEmpty());
@@ -75,8 +77,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void query_onlyApiClass_valueIsDeterminedByField() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query1.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query1.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { name } }").root(new Query1()));
         assertTrue(result.getErrors().isEmpty());
@@ -103,8 +104,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void query_onlyApiClass_valueIsDeterminedByMethod() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query2.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query2.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { name } }").root(new Query2()));
         assertTrue(result.getErrors().isEmpty());
@@ -147,8 +147,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void query_apiAndDbClass_valueIsDeterminedByDBField() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query3.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query3.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { nameX } }").root(new Query3()));
         assertTrue(result.getErrors().isEmpty());
@@ -195,8 +194,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void query_apiAndDbClass_valueIsDeterminedByGetPrefixDBMethod() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query4.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query4.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { nameX } }").root(new Query4()));
         assertTrue(result.getErrors().isEmpty());
@@ -243,8 +241,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void query_apiAndDbClass_valueIsDeterminedByIsPrefixDBMethod() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query6.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query6.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { nameX } }").root(new Query6()));
         assertTrue(result.getErrors().isEmpty());
@@ -295,8 +292,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void query_apiAndDbClass_valueIsDeterminedByDBMethod() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query7.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query7.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { nameX } }").root(new Query7()));
         assertTrue(result.getErrors().isEmpty());
@@ -339,8 +335,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void query_apiAndDbClassAndApiIsInvokeDetached_valueIsDeterminedByApiMethod() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query5.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query5.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(builder -> builder.query("query { queryField { name } }").root(new Query5()));
         assertTrue(result.getErrors().isEmpty());
@@ -362,10 +357,7 @@ public class MethodDataFetcherTest {
     public void exceptionRethrowing() {
         try {
             MethodDataFetcher methodDataFetcher = new MethodDataFetcher(getClass().getMethod("method"), null, null);
-            methodDataFetcher.get(new DataFetchingEnvironmentImpl(this, new HashMap<>(),
-                    null, null, null, new ArrayList<>(),
-                    null, null, null, null,
-                    null, null, null, null));
+            methodDataFetcher.get(newDataFetchingEnvironment().source(this).arguments(new HashMap<>()).build());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -456,8 +448,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void queryingOneFieldNotAnnotatedWithGraphQLInvokeDetached_valueIsDeterminedByEntity() {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { a } }");
         assertTrue(result.getErrors().isEmpty());
@@ -467,8 +458,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void queryingOneCanonizedFieldNotAnnotatedWithGraphQLInvokeDetached_valueIsDeterminedByEntity() {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { canonizedType { m } } }");
         assertTrue(result.getErrors().isEmpty());
@@ -477,8 +467,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void queryingOneFieldNotAnnotatedWithGraphQLInvokeDetachedAndNameIsPrettified_valueIsDeterminedByEntity() {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { x } }");
         assertTrue(result.getErrors().isEmpty());
@@ -487,8 +476,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void queryingOneFieldAnnotatedWithGraphQLInvokeDetached_valueIsDeterminedByApiEntity() {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { b } }");
         assertTrue(result.getErrors().isEmpty());
@@ -497,8 +485,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void queryingFieldsFromApiEntityFetcher_valueIsDeterminedByApiEntity() {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { apiField { a b } }");
         assertTrue(result.getErrors().isEmpty());
@@ -508,8 +495,7 @@ public class MethodDataFetcherTest {
 
     @Test
     public void queryingFieldsFromNoApiEntityFetcher_noMatchingFieldInEntity_throwException() {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { field { c } }");
         assertFalse(result.getErrors().isEmpty());

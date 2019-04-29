@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,13 +26,14 @@ import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.TypeResolver;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -40,12 +41,21 @@ import static org.testng.Assert.assertTrue;
 @SuppressWarnings("unchecked")
 public class GraphQLInputTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+    private static GraphQLObjectType testObjectType;
+
+    @BeforeMethod
+    public void setUp() {
+        this.graphQLAnnotations = new GraphQLAnnotations();
+        testObjectType = this.graphQLAnnotations.object(TestObject.class);
+    }
+
     public static class Resolver implements TypeResolver {
 
         @Override
         public GraphQLObjectType getType(TypeResolutionEnvironment env) {
             try {
-                return GraphQLAnnotations.object(TestObject.class);
+                return testObjectType;
             } catch (GraphQLAnnotationsException e) {
                 return null;
             }
@@ -177,8 +187,8 @@ public class GraphQLInputTest {
 
     @Test
     public void query() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(Query.class))
-                .additionalType(GraphQLAnnotations.object(TestObject.class)).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(Query.class)
+                .additionalType(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }", new Query());
@@ -188,7 +198,7 @@ public class GraphQLInputTest {
 
     @Test
     public void queryMultipleDefinitions() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryMultipleDefinitions.class)).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(QueryMultipleDefinitions.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ something(code: {firstField:\"a\",secondField:\"b\"}) somethingElse(code: {firstField:\"c\",secondField:\"d\"}) }", new QueryMultipleDefinitions());
@@ -199,7 +209,7 @@ public class GraphQLInputTest {
 
     @Test
     public void queryWithRecursion() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryRecursion.class)).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(QueryRecursion.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }", new QueryRecursion());
@@ -213,7 +223,7 @@ public class GraphQLInputTest {
 
     @Test
     public void queryWithList() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryList.class)).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(QueryList.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ object { value(input:[[[{key:\"test\", complex:[{subKey:\"subtest\"},{subKey:\"subtest2\"}]}]]]) } }", new QueryList());
@@ -222,7 +232,7 @@ public class GraphQLInputTest {
 
     @Test
     public void queryWithInterface() {
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryIface.class)).build(Collections.singleton(GraphQLAnnotations.object(TestObject.class)));
+        GraphQLSchema schema = newAnnotationsSchema().query(QueryIface.class).additionalType(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ iface { value(input:{key:\"test\"}) } }", new QueryIface());
@@ -285,7 +295,7 @@ public class GraphQLInputTest {
     @Test
     public void testInputAndOutputWithSameName() {
         // arrange + act
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryInputAndOutput.class)).build();
+        GraphQLSchema schema = newSchema().query(this.graphQLAnnotations.object(QueryInputAndOutput.class)).build();
         // assert
         assertEquals(schema.getQueryType().getFieldDefinition("getHero").getType().getName(), "hero");
         assertEquals(schema.getQueryType().getFieldDefinition("getString").getArgument("input").getType().getName(), "Inputhero");
@@ -296,7 +306,7 @@ public class GraphQLInputTest {
     @Test
     public void testInputAndOutputSameClass() {
         // arrange + act
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QueryInputAndOutput2.class)).build();
+        GraphQLSchema schema = newSchema().query(this.graphQLAnnotations.object(QueryInputAndOutput2.class)).build();
         // assert
         assertEquals(schema.getQueryType().getFieldDefinition("getSkill").getType().getName(), "Skill");
         assertEquals(schema.getQueryType().getFieldDefinition("getA").getArgument("skill").getType().getName(), "InputSkill");
@@ -354,7 +364,7 @@ public class GraphQLInputTest {
     @Test
     public void testInputAndOutputWithSameNameWithChildrenWithSameName() {
         // arrange + act
-        GraphQLSchema schema = newSchema().query(GraphQLAnnotations.object(QuerySameNameWithChildren.class)).build();
+        GraphQLSchema schema = newSchema().query(this.graphQLAnnotations.object(QuerySameNameWithChildren.class)).build();
         // assert
         assertEquals(schema.getQueryType().getFieldDefinition("getAout").getType().getName(), "A");
         assertEquals(schema.getQueryType().getFieldDefinition("getAout").getType().getClass(), GraphQLObjectType.class);

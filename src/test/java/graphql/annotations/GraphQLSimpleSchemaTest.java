@@ -29,9 +29,11 @@ import static org.testng.Assert.assertEquals;
 
 public class GraphQLSimpleSchemaTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
 
@@ -73,9 +75,8 @@ public class GraphQLSimpleSchemaTest {
 
     @Test
     public void detachedCall() {
-        GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
         GraphQLObjectHandler graphQLObjectHandler = graphQLAnnotations.getObjectHandler();
-        GraphQLObjectType queryObject = graphQLObjectHandler.getObject(Query.class,graphQLAnnotations.getContainer());
+        GraphQLObjectType queryObject = graphQLObjectHandler.getGraphQLType(Query.class,graphQLAnnotations.getContainer());
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
@@ -85,9 +86,8 @@ public class GraphQLSimpleSchemaTest {
 
     @Test
     public void staticCall() {
-        GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
         GraphQLObjectHandler graphQLObjectHandler = graphQLAnnotations.getObjectHandler();
-        GraphQLObjectType queryObject = graphQLObjectHandler.getObject(Query.class,graphQLAnnotations.getContainer());
+        GraphQLObjectType queryObject = graphQLObjectHandler.getGraphQLType(Query.class,graphQLAnnotations.getContainer());
         GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser2{ name } }");
