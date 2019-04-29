@@ -23,7 +23,6 @@ import graphql.annotations.connection.simple.*;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,7 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.assertEquals;
@@ -49,8 +48,7 @@ public class GraphQLSimpleConnectionTest {
 
     @Test
     public void simpleConnection_buildSchema_TypeOfSimpleConnectionIsGraphQLList() throws Exception {
-        GraphQLObjectType object = this.graphQLAnnotations.object(MainConnection.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(MainConnection.class).build();
 
         String objsTypeName = schema.getQueryType().getFieldDefinition("objs").getType().getName();
 
@@ -69,8 +67,7 @@ public class GraphQLSimpleConnectionTest {
 
     @Test
     public void simpleConnection_queryForOverAll_getCorrectAnswer() {
-        GraphQLObjectType object = this.graphQLAnnotations.object(MainConnection.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(MainConnection.class).build();
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
 
@@ -83,8 +80,7 @@ public class GraphQLSimpleConnectionTest {
 
     @Test
     public void simpleConnection_queryForTwoObject_getTwoObject() {
-        GraphQLObjectType object = this.graphQLAnnotations.object(MainConnection.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(MainConnection.class).build();
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
 

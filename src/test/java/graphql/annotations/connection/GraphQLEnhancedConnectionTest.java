@@ -135,7 +135,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     public void validDatafetcher_queryForCursors_getValidCursors() throws Exception {
         //Arrange
         ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { edges { cursor } } }",
-                null, "CONTEXT", null, null);
+                null, "CONTEXT", null, new HashMap<>());
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
