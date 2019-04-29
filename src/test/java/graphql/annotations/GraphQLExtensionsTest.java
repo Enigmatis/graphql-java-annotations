@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.Scalars.GraphQLString;
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.*;
 
 public class GraphQLExtensionsTest {
@@ -114,13 +114,7 @@ public class GraphQLExtensionsTest {
 
     @Test
     public void values() {
-        GraphQLAnnotations instance = new GraphQLAnnotations();
-        instance.registerTypeExtension(TestObjectExtension.class);
-        GraphQLObjectHandler graphQLObjectHandler = instance.getObjectHandler();
-        GraphQLObjectType object = graphQLObjectHandler.getGraphQLType(GraphQLExtensionsTest.TestObject.class, instance.getContainer());
-
-        GraphQLSchema schema = newSchema().query(object).build();
-        GraphQLSchema schemaInherited = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).typeExtension(TestObjectExtension.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field field2 field3 field4 field5}", new GraphQLExtensionsTest.TestObject());
         Map<String, Object> data = result.getData();
@@ -136,7 +130,7 @@ public class GraphQLExtensionsTest {
         GraphQLAnnotations instance = new GraphQLAnnotations();
         GraphQLObjectHandler graphQLObjectHandler = instance.getObjectHandler();
         instance.registerTypeExtension(TestObjectExtensionInvalid.class);
-        GraphQLAnnotationsException e = expectThrows(GraphQLAnnotationsException.class, () -> graphQLObjectHandler.getGraphQLType(TestObject.class,instance.getContainer()));
+        GraphQLAnnotationsException e = expectThrows(GraphQLAnnotationsException.class, () -> graphQLObjectHandler.getGraphQLType(TestObject.class, instance.getContainer()));
         assertTrue(e.getMessage().startsWith("Duplicate field"));
     }
 }

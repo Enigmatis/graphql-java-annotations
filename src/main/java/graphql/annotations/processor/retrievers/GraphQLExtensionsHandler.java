@@ -51,7 +51,7 @@ public class GraphQLExtensionsHandler {
                         continue;
                     }
                     if (methodSearchAlgorithm.isFound(method)) {
-                        addExtensionField(fieldRetriever.getField(object.getTypeName(), method, container), fields, definedFields);
+                        addExtensionField(fieldRetriever.getField(object.getSimpleName(), method, container), fields, definedFields);
                     }
                 }
                 for (Field field : getAllFields(aClass).values()) {
@@ -59,7 +59,7 @@ public class GraphQLExtensionsHandler {
                         continue;
                     }
                     if (fieldSearchAlgorithm.isFound(field)) {
-                        addExtensionField(fieldRetriever.getField(object.getTypeName(), field, container), fields, definedFields);
+                        addExtensionField(fieldRetriever.getField(object.getSimpleName(), field, container), fields, definedFields);
                     }
                 }
             }
