@@ -29,7 +29,6 @@ import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
-import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLObjectType;
 
@@ -95,12 +94,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         this.container = new ProcessingElementsContainer(defaultTypeFunction);
     }
 
-    public static GraphQLAnnotations instance = new GraphQLAnnotations();
-
-    public static GraphQLAnnotations getInstance() {
-        return instance;
-    }
-
     public void setRelay(Relay relay) {
         this.container.setRelay(relay);
     }
@@ -110,40 +103,35 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return toGraphqlName(name == null ? objectClass.getSimpleName() : name.value());
     }
 
-    public static GraphQLObjectType object(Class<?> object, GraphQLCodeRegistry.Builder codeRegistryBuilder) throws GraphQLAnnotationsException {
-        GraphQLAnnotations instance = getInstance();
+    public GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
         try {
-            instance.getContainer().setCodeRegistryBuilder(codeRegistryBuilder);
-            return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
+            return this.graphQLObjectHandler.getObject(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
-            instance.getContainer().getProcessing().clear();
-            instance.getTypeRegistry().clear();
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
             throw e;
         }
     }
 
-    public static GraphQLObjectType object(Class<?> object, GraphQLCodeRegistry.Builder codeRegistryBuilder, GraphQLDirective... directives) throws GraphQLAnnotationsException {
-        GraphQLAnnotations instance = getInstance();
-        Arrays.stream(directives).forEach(x -> instance.getContainer().getDirectiveRegistry().put(x.getName(), x));
+    public GraphQLObjectType object(Class<?> object, GraphQLDirective... directives) throws GraphQLAnnotationsException {
+        Arrays.stream(directives).forEach(x -> this.getContainer().getDirectiveRegistry().put(x.getName(), x));
         try {
-            return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
+            return this.graphQLObjectHandler.getObject(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
-            instance.getContainer().getProcessing().clear();
-            instance.getTypeRegistry().clear();
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
             throw e;
         }
     }
 
-    public static GraphQLDirective directive(Class<?> object) throws GraphQLAnnotationsException {
-        GraphQLAnnotations instance = getInstance();
-
+    public GraphQLDirective directive(Class<?> object) throws GraphQLAnnotationsException {
         try {
-            GraphQLDirective directive = instance.directiveCreator.getDirective(object);
-            instance.getContainer().getDirectiveRegistry().put(directive.getName(), directive);
+            GraphQLDirective directive = this.directiveCreator.getDirective(object);
+            this.getContainer().getDirectiveRegistry().put(directive.getName(), directive);
             return directive;
         } catch (GraphQLAnnotationsException e) {
-            instance.getContainer().getProcessing().clear();
-            instance.getTypeRegistry().clear();
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
             throw e;
         }
     }
@@ -156,8 +144,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         ((DefaultTypeFunction) container.getDefaultTypeFunction()).register(typeFunction);
     }
 
-    public static void register(TypeFunction typeFunction) {
-        getInstance().registerType(typeFunction);
+    @Deprecated
+    public void register(TypeFunction typeFunction) {
+        this.registerType(typeFunction);
     }
 
     public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {

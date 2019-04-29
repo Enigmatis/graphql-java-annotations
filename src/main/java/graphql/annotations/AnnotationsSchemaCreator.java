@@ -1,6 +1,6 @@
 package graphql.annotations;
 
-import graphql.schema.GraphQLCodeRegistry;
+import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLSchema;
 
@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static graphql.annotations.processor.GraphQLAnnotations.directive;
-import static graphql.annotations.processor.GraphQLAnnotations.object;
-import static graphql.schema.GraphQLCodeRegistry.newCodeRegistry;
 import static graphql.schema.GraphQLSchema.newSchema;
 
 public class AnnotationsSchemaCreator {
@@ -25,7 +22,7 @@ public class AnnotationsSchemaCreator {
         private Class<?> mutationObject;
         private Class<?> subscriptionObject;
         private List<Class<?>> directivesObjectList = new ArrayList<>();
-        private GraphQLCodeRegistry.Builder graphqlCodeRegistryBuilder = newCodeRegistry();
+        private GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
 
         public Builder queryObject(Class<?> object) {
             this.queryObject = object;
@@ -53,13 +50,13 @@ public class AnnotationsSchemaCreator {
         }
 
         public GraphQLSchema build() {
-            Set<GraphQLDirective> directives = directivesObjectList.stream().map(dir -> directive(dir)).collect(Collectors.toSet());
+            Set<GraphQLDirective> directives = directivesObjectList.stream().map(dir -> graphQLAnnotations.directive(dir)).collect(Collectors.toSet());
             GraphQLSchema.Builder builder = newSchema();
-            builder.query(object(queryObject, graphqlCodeRegistryBuilder))
-                    .mutation(object(mutationObject, graphqlCodeRegistryBuilder))
-                    .codeRegistry(graphqlCodeRegistryBuilder.build());
+            builder.query(graphQLAnnotations.object(queryObject))
+                    .mutation(graphQLAnnotations.object(mutationObject))
+                    .codeRegistry(graphQLAnnotations.getContainer().getCodeRegistryBuilder().build());
             if (this.subscriptionObject != null) {
-                builder.subscription(object(subscriptionObject, graphqlCodeRegistryBuilder));
+                builder.subscription(graphQLAnnotations.object(subscriptionObject));
             }
             if (!this.directivesObjectList.isEmpty()) {
                 builder.additionalDirectives(directives);

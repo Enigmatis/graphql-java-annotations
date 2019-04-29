@@ -30,6 +30,7 @@ import java.util.Stack;
 
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_SUFFIX;
+import static graphql.schema.GraphQLCodeRegistry.newCodeRegistry;
 
 public class ProcessingElementsContainer {
 
@@ -51,21 +52,25 @@ public class ProcessingElementsContainer {
         this.directiveRegistry = directiveRegistry;
     }
 
-    public ProcessingElementsContainer(TypeFunction defaultTypeFunction, Relay relay, Map<String, graphql.schema.GraphQLType> typeRegistry, Map<String, graphql.schema.GraphQLDirective> directiveRegistry, Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry, Stack<String> processing) {
+    public ProcessingElementsContainer(TypeFunction defaultTypeFunction, Relay relay, Map<String,
+            graphql.schema.GraphQLType> typeRegistry, Map<String, graphql.schema.GraphQLDirective> directiveRegistry,
+                                       Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry, Stack<String> processing,
+                                       GraphQLCodeRegistry.Builder codeRegistryBuilder) {
         this.defaultTypeFunction = defaultTypeFunction;
         this.relay = relay;
         this.typeRegistry = typeRegistry;
         this.directiveRegistry = directiveRegistry;
         this.extensionsTypeRegistry = extensionsTypeRegistry;
         this.processing = processing;
+        this.codeRegistryBuilder = codeRegistryBuilder;
     }
 
     public ProcessingElementsContainer(TypeFunction typeFunction) {
-        this(typeFunction, new Relay(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Stack<>());
+        this(typeFunction, new Relay(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Stack<>(), newCodeRegistry());
     }
 
     public ProcessingElementsContainer() {
-        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new Relay(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Stack<>());
+        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new Relay(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Stack<>(), newCodeRegistry());
     }
 
     public Relay getRelay() {
