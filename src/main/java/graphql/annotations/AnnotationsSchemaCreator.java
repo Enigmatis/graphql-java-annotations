@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import static graphql.schema.GraphQLSchema.newSchema;
 
-public class AnnotationsSchema {
+public class AnnotationsSchemaCreator {
 
     public static Builder newAnnotationsSchema() {
         return new Builder();
