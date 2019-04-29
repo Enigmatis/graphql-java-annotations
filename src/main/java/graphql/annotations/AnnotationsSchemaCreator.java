@@ -16,6 +16,7 @@ package graphql.annotations;
 
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
+import graphql.relay.Relay;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
@@ -98,7 +99,7 @@ public class AnnotationsSchemaCreator {
             if (!this.directivesObjectList.isEmpty()) {
                 builder.additionalDirectives(directives);
             }
-            builder.additionalTypes(additionalTypes)
+            builder.additionalTypes(additionalTypes).additionalType(Relay.pageInfoType)
                     .codeRegistry(graphQLAnnotations.getContainer().getCodeRegistryBuilder().build());
             return builder.build();
         }
