@@ -114,10 +114,6 @@ public class GraphQLFieldRetriever {
         builder.type((GraphQLOutputType) outputType).description(new DescriptionBuilder(field).build())
                 .deprecate(new DeprecateBuilder(field).build());
 
-//        String typeName = outputType.getName();
-//        if (outputType instanceof GraphQLList) {
-//            typeName = ((GraphQLList) outputType).getWrappedType().getName();
-//        }
         container.getCodeRegistryBuilder().dataFetcher(coordinates(parentName, fieldName), dataFetcher);
 
         GraphQLDirective[] graphQLDirectives = new DirectivesBuilder(field, container).build();
@@ -126,7 +122,6 @@ public class GraphQLFieldRetriever {
         return (GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(),
                 new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container),
                 container.getCodeRegistryBuilder(), parentName);
-//        return new GraphQLFieldDefinitionWrapper((GraphQLFieldDefinition) new DirectiveWirer().wire(builder.build(), new DirectiveWiringMapRetriever().getDirectiveWiringMap(field, container)));
     }
 
     public GraphQLInputObjectField getInputField(Method method, ProcessingElementsContainer container, String parentName) throws GraphQLAnnotationsException {
