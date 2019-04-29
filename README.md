@@ -1,5 +1,5 @@
 ![logo](polaris-iconsmalredl.png?raw=true) 
-# GraphQL Annotations for Java
+# GraphQL-Java Annotations
 [![Build Status](https://travis-ci.org/graphql-java/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/graphql-java/graphql-java-annotations)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.graphql-java/graphql-java-annotations.svg?maxAge=3000)]()
 
