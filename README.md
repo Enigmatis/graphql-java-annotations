@@ -82,7 +82,7 @@ graphqlAnnotations.getContainer().getCodeRegistryBuilder().build();
 
 ## Annotations Schema Creator
 
-Using the `GraphQLAnnotations` processor object can be a little bit confused if you wish to use it to create a GraphQL schema.
+Using the `GraphQLAnnotations` processor object can be a little bit confusing if you wish to use it to create a GraphQL schema.
 So we created a util class to help you create your desired GraphQL schema, in a syntax similiar to the graphql-java syntax.
 
 In order to do so you can use the ``AnnotationsSchemaCreator.Builder`` in the following way:

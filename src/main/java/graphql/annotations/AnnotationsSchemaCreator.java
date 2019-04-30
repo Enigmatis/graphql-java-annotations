@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -112,31 +112,32 @@ public class AnnotationsSchemaCreator {
         public GraphQLSchema build() {
             assert this.queryObject != null;
 
-            if (graphQLAnnotations == null) {
-                graphQLAnnotations = new GraphQLAnnotations();
+            if (this.graphQLAnnotations == null) {
+                this.graphQLAnnotations = new GraphQLAnnotations();
             }
 
-            if (graphqlSchemaBuilder == null) {
-                graphqlSchemaBuilder = new GraphQLSchema.Builder();
+            if (this.graphqlSchemaBuilder == null) {
+                this.graphqlSchemaBuilder = new GraphQLSchema.Builder();
             }
 
             Set<GraphQLDirective> directives = directivesObjectList.stream().map(dir -> graphQLAnnotations.directive(dir)).collect(Collectors.toSet());
-            Set<GraphQLType> additionalTypes = additionalTypesList.stream().map(x -> x.isInterface() ?
-                    graphQLAnnotations.generateInterface(x) : graphQLAnnotations.object(x)).collect(Collectors.toSet());
+            Set<GraphQLType> additionalTypes = additionalTypesList.stream().map(additionalType ->
+                    additionalType.isInterface() ?
+                            graphQLAnnotations.generateInterface(additionalType) : graphQLAnnotations.object(additionalType)).collect(Collectors.toSet());
 
-            graphqlSchemaBuilder.query(graphQLAnnotations.object(queryObject));
+            this.graphqlSchemaBuilder.query(graphQLAnnotations.object(queryObject));
             if (this.mutationObject != null) {
-                graphqlSchemaBuilder.mutation(graphQLAnnotations.object(mutationObject));
+                this.graphqlSchemaBuilder.mutation(graphQLAnnotations.object(mutationObject));
             }
             if (this.subscriptionObject != null) {
-                graphqlSchemaBuilder.subscription(graphQLAnnotations.object(subscriptionObject));
+                this.graphqlSchemaBuilder.subscription(graphQLAnnotations.object(subscriptionObject));
             }
             if (!this.directivesObjectList.isEmpty()) {
                 graphqlSchemaBuilder.additionalDirectives(directives);
             }
-            graphqlSchemaBuilder.additionalTypes(additionalTypes).additionalType(Relay.pageInfoType)
+            this.graphqlSchemaBuilder.additionalTypes(additionalTypes).additionalType(Relay.pageInfoType)
                     .codeRegistry(graphQLAnnotations.getContainer().getCodeRegistryBuilder().build());
-            return graphqlSchemaBuilder.build();
+            return this.graphqlSchemaBuilder.build();
         }
     }
 }
