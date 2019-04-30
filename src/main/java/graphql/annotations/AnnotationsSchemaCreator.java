@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,12 +21,9 @@ import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static graphql.schema.GraphQLSchema.newSchema;
 
 public class AnnotationsSchemaCreator {
 
@@ -38,9 +35,20 @@ public class AnnotationsSchemaCreator {
         private Class<?> queryObject;
         private Class<?> mutationObject;
         private Class<?> subscriptionObject;
-        private List<Class<?>> directivesObjectList = new ArrayList<>();
-        private List<Class<?>> additionalTypesList = new ArrayList<>();
-        private GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
+        private Set<Class<?>> directivesObjectList = new HashSet<>();
+        private Set<Class<?>> additionalTypesList = new HashSet<>();
+        private GraphQLAnnotations graphQLAnnotations;
+        private GraphQLSchema.Builder graphqlSchemaBuilder;
+
+        public Builder setGraphQLSchemaBuilder(GraphQLSchema.Builder schemaBuilder) {
+            this.graphqlSchemaBuilder = schemaBuilder;
+            return this;
+        }
+
+        public Builder setAnnotationsProcessor(GraphQLAnnotations annotationsProcessor) {
+            this.graphQLAnnotations = annotationsProcessor;
+            return this;
+        }
 
         public Builder query(Class<?> object) {
             this.queryObject = object;
@@ -57,7 +65,7 @@ public class AnnotationsSchemaCreator {
             return this;
         }
 
-        public Builder directives(List<Class<?>> directivesObjectList) {
+        public Builder directives(Set<Class<?>> directivesObjectList) {
             this.directivesObjectList.addAll(directivesObjectList);
             return this;
         }
@@ -69,6 +77,11 @@ public class AnnotationsSchemaCreator {
 
         public Builder additionalType(Class<?> additionalObject) {
             this.additionalTypesList.add(additionalObject);
+            return this;
+        }
+
+        public Builder additionalTypes(Set<Class<?>> additionalTypes) {
+            this.additionalTypesList.addAll(additionalTypes);
             return this;
         }
 
@@ -99,23 +112,31 @@ public class AnnotationsSchemaCreator {
         public GraphQLSchema build() {
             assert this.queryObject != null;
 
+            if (graphQLAnnotations == null) {
+                graphQLAnnotations = new GraphQLAnnotations();
+            }
+
+            if (graphqlSchemaBuilder == null) {
+                graphqlSchemaBuilder = new GraphQLSchema.Builder();
+            }
+
             Set<GraphQLDirective> directives = directivesObjectList.stream().map(dir -> graphQLAnnotations.directive(dir)).collect(Collectors.toSet());
             Set<GraphQLType> additionalTypes = additionalTypesList.stream().map(x -> x.isInterface() ?
                     graphQLAnnotations.generateInterface(x) : graphQLAnnotations.object(x)).collect(Collectors.toSet());
-            GraphQLSchema.Builder builder = newSchema();
-            builder.query(graphQLAnnotations.object(queryObject));
+
+            graphqlSchemaBuilder.query(graphQLAnnotations.object(queryObject));
             if (this.mutationObject != null) {
-                builder.mutation(graphQLAnnotations.object(mutationObject));
+                graphqlSchemaBuilder.mutation(graphQLAnnotations.object(mutationObject));
             }
             if (this.subscriptionObject != null) {
-                builder.subscription(graphQLAnnotations.object(subscriptionObject));
+                graphqlSchemaBuilder.subscription(graphQLAnnotations.object(subscriptionObject));
             }
             if (!this.directivesObjectList.isEmpty()) {
-                builder.additionalDirectives(directives);
+                graphqlSchemaBuilder.additionalDirectives(directives);
             }
-            builder.additionalTypes(additionalTypes).additionalType(Relay.pageInfoType)
+            graphqlSchemaBuilder.additionalTypes(additionalTypes).additionalType(Relay.pageInfoType)
                     .codeRegistry(graphQLAnnotations.getContainer().getCodeRegistryBuilder().build());
-            return builder.build();
+            return graphqlSchemaBuilder.build();
         }
     }
 }
