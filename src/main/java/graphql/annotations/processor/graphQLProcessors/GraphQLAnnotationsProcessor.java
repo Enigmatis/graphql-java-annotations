@@ -38,5 +38,5 @@ public interface GraphQLAnnotationsProcessor {
      *
      * @param typeFunction The extension class to register
      */
-    void registerType(TypeFunction typeFunction);
+    void registerTypeFunction(TypeFunction typeFunction);
 }

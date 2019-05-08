@@ -46,7 +46,7 @@ public class AnnotationsSchemaCreatorTest {
     }
 
     @Test(expectedExceptions = AssertionError.class)
-    public void testBuild_queryIsNotProvided_ExceptionIsThrown() {
+    public void build_QueryIsNotProvided_ExceptionIsThrown() {
         // act
         builder.build();
     }
@@ -60,7 +60,7 @@ public class AnnotationsSchemaCreatorTest {
     }
 
     @Test
-    public void testBuild_queryIsProvided_SchemaIsCreatedWithQuery() {
+    public void build_QueryIsProvided_SchemaIsCreatedWithQuery() {
         // arrange + act
         GraphQLSchema schema = builder.query(QueryTest.class).build();
 
@@ -79,12 +79,12 @@ public class AnnotationsSchemaCreatorTest {
     }
 
     @Test
-    public void testBuild_mutation_SchemaIsCreatedWithMutation() {
+    public void build_Mutation_SchemaIsCreatedWithMutation() {
         // arrange + act
         GraphQLSchema schema = builder.query(QueryTest.class).mutation(MutationTest.class).build();
+        GraphQLObjectType mutationType = schema.getMutationType();
 
         /// assert
-        GraphQLObjectType mutationType = schema.getMutationType();
         assertThat(mutationType.getFieldDefinition("mutate"), notNullValue());
         assertThat(mutationType.getFieldDefinitions().size(), is(1));
     }
@@ -97,12 +97,12 @@ public class AnnotationsSchemaCreatorTest {
     }
 
     @Test
-    public void testBuild_subscription_SchemaIsCreatedWithSubscription() {
+    public void build_Subscription_SchemaIsCreatedWithSubscription() {
         // arrange + act
         GraphQLSchema schema = builder.query(QueryTest.class).subscription(SubscriptionTest.class).build();
+        GraphQLObjectType subscriptionType = schema.getSubscriptionType();
 
         // assert
-        GraphQLObjectType subscriptionType = schema.getSubscriptionType();
         assertThat(subscriptionType.getFieldDefinition("subscribe"), notNullValue());
         assertThat(subscriptionType.getFieldDefinitions().size(), is(1));
     }
@@ -114,7 +114,7 @@ public class AnnotationsSchemaCreatorTest {
     }
 
     @Test
-    public void testBuild_directive_SchemaIsCreatedWithDirective() {
+    public void build_Directive_SchemaIsCreatedWithDirective() {
         // arrange + act
         GraphQLSchema schema = builder.query(QueryTest.class).directive(DirectiveDefinitionTest.class).build();
 
@@ -132,7 +132,7 @@ public class AnnotationsSchemaCreatorTest {
     }
 
     @Test
-    public void testBuild_multipleDirectives_SchemaIsCreatedWithDirectives() {
+    public void build_MultipleDirectives_SchemaIsCreatedWithDirectives() {
         // arrange + act
         Set<Class<?>> directives = new HashSet<>();
         directives.add(DirectiveDefinitionTest.class);
@@ -154,7 +154,7 @@ public class AnnotationsSchemaCreatorTest {
     }
 
     @Test
-    public void testBuild_additionalType_SchemaIsCreatedWithAdditionalType() {
+    public void build_AdditionalType_SchemaIsCreatedWithAdditionalType() {
         // arrange + act
         GraphQLSchema schema = builder.query(QueryTest.class).additionalType(AdditionalTypeTest.class).build();
         GraphQLObjectType additionalType = graphQLAnnotations.object(AdditionalTypeTest.class);

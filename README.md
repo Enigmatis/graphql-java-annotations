@@ -35,7 +35,7 @@ syntax for GraphQL schema definition.
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:XX"
+  compile "io.github.graphql-java:graphql-java-annotations:6.2"
 }
 ```
 
@@ -45,14 +45,14 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>XX</version>
+    <version>6.2</version>
 </dependency>
 ```
 
-The graphql-java-annotations library is able to create GraphQLType objects out of you Java classes.
+The graphql-java-annotations library is able to create GraphQLType objects out of your Java classes.
 These GraphQLType objects can be later injected into the graphql-java schema.
 
-graphql-java-annotations also allow you to wire your objects with data fetchers and type resolvers while annotating your fields/types. The result of this process will be a ``GraphQLCodeRegistry.Builder`` object that can be later built and injected to the graphql-java schema.
+graphql-java-annotations also allows you to wire your objects with data fetchers and type resolvers while annotating your fields/types. The result of this process will be a ``GraphQLCodeRegistry.Builder`` object that can be later built and injected to the graphql-java schema.
 
 
 ## GraphQLAnnotations class
@@ -72,7 +72,7 @@ GraphQLInterfaceType myInterface = graphqlAnnotations.generateInterface(MyInterf
 ```
 
 Then you can use these types in order to create a graphql-java schema.
-But, in order to create a graphql-java schema, you need also the ``GraphQLCodeRegistry``, which contains all of the data fetchers mapped to their fields (and also type resolvers).
+But, in order to create a graphql-java schema, you need also the ``GraphQLCodeRegistry``, which contains all the data fetchers mapped to their fields (and also type resolvers).
 
 You can obtain the code registry this way:
 

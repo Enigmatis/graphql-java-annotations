@@ -622,7 +622,7 @@ public class GraphQLObjectTest {
 
     @Test
     public void customType() {
-        this.graphQLAnnotations.registerType(new UUIDTypeFunction());
+        this.graphQLAnnotations.registerTypeFunction(new UUIDTypeFunction());
         GraphQLObjectType object = this.graphQLAnnotations.object(TestCustomType.class);
         assertEquals(object.getFieldDefinition("id").getType(), GraphQLString);
     }

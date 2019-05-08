@@ -23,7 +23,7 @@ import static graphql.schema.GraphQLObjectType.newObject;
 
 public class CodeRegistryUtil {
     /**
-     * This util method helps you to wrap your datafetcher with some lambda code
+     * This util method helps you wrap your datafetcher with some lambda code
      *
      * @param fieldDefinition The field you want to wrap its datafetcher
      * @param environment     the environment object of the Wiring process
@@ -38,7 +38,7 @@ public class CodeRegistryUtil {
     }
 
     /**
-     * this util method helps you to retrieve the data fetcher from the code registry if you do not have the whole parent object (only parent name)
+     * this util method helps you retrieve the data fetcher from the code registry if you do not have the whole parent object (only parent name)
      *
      * @param codeRegistryBuilder the code registry builder
      * @param parentName          the parent name

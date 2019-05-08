@@ -126,7 +126,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     @Deprecated
     public GraphQLObjectType object(Class<?> object, GraphQLDirective... directives) throws GraphQLAnnotationsException {
-        Arrays.stream(directives).forEach(x -> this.getContainer().getDirectiveRegistry().put(x.getName(), x));
+        Arrays.stream(directives).forEach(directive -> this.getContainer().getDirectiveRegistry().put(directive.getName(), directive));
         try {
             return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
@@ -152,13 +152,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         graphQLExtensionsHandler.registerTypeExtension(objectClass, container);
     }
 
-    public void registerType(TypeFunction typeFunction) {
+    public void registerTypeFunction(TypeFunction typeFunction) {
         ((DefaultTypeFunction) container.getDefaultTypeFunction()).register(typeFunction);
     }
 
     @Deprecated
     public void register(TypeFunction typeFunction) {
-        this.registerType(typeFunction);
+        this.registerTypeFunction(typeFunction);
     }
 
     public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {

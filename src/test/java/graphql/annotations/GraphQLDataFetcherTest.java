@@ -148,11 +148,7 @@ public class GraphQLDataFetcherTest {
 
         @Override
         public Object get(DataFetchingEnvironment environment) {
-            if (flip) {
-                return !flip;
-            } else {
-                return flip;
-            }
+            return !flip;
         }
     }
 
