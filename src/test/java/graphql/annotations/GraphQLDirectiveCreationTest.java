@@ -21,6 +21,7 @@ import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static graphql.Scalars.GraphQLBoolean;
@@ -29,6 +30,13 @@ import static org.testng.AssertJUnit.*;
 import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 public class GraphQLDirectiveCreationTest {
+
+    private GraphQLAnnotations graphQLAnnotations;
+
+    @BeforeMethod
+    public void setUp() {
+        this.graphQLAnnotations = new GraphQLAnnotations();
+    }
 
     @GraphQLName("upper")
     @GraphQLDescription("makes string upper case")
@@ -45,7 +53,7 @@ public class GraphQLDirectiveCreationTest {
     @Test
     public void test_directive_creation() {
         // Act
-        GraphQLDirective directive = GraphQLAnnotations.directive(UpperDirective.class);
+        GraphQLDirective directive = this.graphQLAnnotations.directive(UpperDirective.class);
 
         // Assert
         assertEquals(directive.getName(), "upper");

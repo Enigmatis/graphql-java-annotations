@@ -16,11 +16,11 @@ package graphql.annotations.dataFetchers;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.DataFetchingEnvironmentImpl;
 
 import java.util.Map;
 
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
+import static graphql.schema.DataFetchingEnvironmentImpl.newDataFetchingEnvironment;
 
 public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T> {
 
@@ -37,16 +37,8 @@ public class ExtensionDataFetcherWrapper<T> implements DataFetcher<T> {
     public T get(DataFetchingEnvironment environment) throws Exception {
         Object source = environment.getSource();
         if (source != null && (!declaringClass.isInstance(source)) && !(source instanceof Map)) {
-            environment = new DataFetchingEnvironmentImpl(newInstance(declaringClass, source),
-                    environment.getArguments(), environment.getContext(),
-                    environment.getRoot(), environment.getFieldDefinition(),
-                    environment.getFields(), environment.getFieldType(), environment.getParentType(),
-                    environment.getGraphQLSchema(),
-                    environment.getFragmentsByName(), environment.getExecutionId(),
-                    environment.getSelectionSet(), environment.getExecutionStepInfo(),
-                    environment.getExecutionContext());
+            environment = newDataFetchingEnvironment(environment).source(newInstance(declaringClass, source)).build();
         }
-
         return dataFetcher.get(environment);
     }
 

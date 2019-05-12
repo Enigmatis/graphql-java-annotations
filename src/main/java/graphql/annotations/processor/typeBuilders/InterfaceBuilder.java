@@ -18,10 +18,10 @@ import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
-import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
@@ -33,6 +33,7 @@ import java.util.List;
 
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 import static graphql.schema.GraphQLInterfaceType.newInterface;
+
 /**
  * Copyright 2016 Yurii Rashkovskii
  *
@@ -55,7 +56,7 @@ public class InterfaceBuilder {
 
     public InterfaceBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, GraphQLFieldRetriever graphQLFieldRetriever, GraphQLExtensionsHandler extensionsHandler) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
-        this.graphQLFieldRetriever=graphQLFieldRetriever;
+        this.graphQLFieldRetriever = graphQLFieldRetriever;
         this.extensionsHandler = extensionsHandler;
     }
 
@@ -66,7 +67,8 @@ public class InterfaceBuilder {
         }
         GraphQLInterfaceType.Builder builder = newInterface();
 
-        builder.name(graphQLObjectInfoRetriever.getTypeName(iface));
+        String typeName = graphQLObjectInfoRetriever.getTypeName(iface);
+        builder.name(typeName);
         GraphQLDescription description = iface.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());
@@ -76,15 +78,15 @@ public class InterfaceBuilder {
             boolean valid = !Modifier.isStatic(method.getModifiers()) &&
                     method.getAnnotation(GraphQLField.class) != null;
             if (valid) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method,container);
+                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(typeName, method, container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
         }
-        builder.fields(extensionsHandler.getExtensionFields(iface, definedFields,container));
+        builder.fields(extensionsHandler.getExtensionFields(iface, definedFields, container));
 
         GraphQLTypeResolver typeResolver = iface.getAnnotation(GraphQLTypeResolver.class);
-        builder.typeResolver(newInstance(typeResolver.value()));
+        container.getCodeRegistryBuilder().typeResolver(typeName, newInstance(typeResolver.value()));
         return builder;
     }
 }

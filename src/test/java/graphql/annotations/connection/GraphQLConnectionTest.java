@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static graphql.annotations.processor.util.RelayKit.EMPTY_CONNECTION;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static java.util.Collections.emptyList;
@@ -46,9 +47,11 @@ import static org.testng.Assert.*;
 @SuppressWarnings("unchecked")
 public class GraphQLConnectionTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
     public static class Obj {
@@ -127,17 +130,17 @@ public class GraphQLConnectionTest {
 
     @Test(expectedExceptions = GraphQLConnectionException.class)
     public void fieldList() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestConnectionOnField.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(TestConnectionOnField.class);
         GraphQLSchema schema = newSchema().query(object).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ objs(first: 1) { edges { cursor node { id, val } } } }",
                 new TestListField(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
     }
+
     @Test
     public void methodList() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestConnections.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ getObjs(first: 1) { edges { cursor node { id, val } } } }",
@@ -152,8 +155,8 @@ public class GraphQLConnectionTest {
     @Test
     public void customRelayMethodList() {
         try {
-            GraphQLAnnotations.getInstance().setRelay(new CustomRelay());
-            GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
+            this.graphQLAnnotations.setRelay(new CustomRelay());
+            GraphQLObjectType object = this.graphQLAnnotations.object(TestConnections.class);
             GraphQLSchema schema = newSchema().query(object).build();
 
             graphql.schema.GraphQLObjectType f = (GraphQLObjectType) schema.getType("ObjConnection");
@@ -164,7 +167,7 @@ public class GraphQLConnectionTest {
             GraphQLObjectType pageInfo = (GraphQLObjectType) schema.getType("PageInfo");
             assertTrue(pageInfo.getFieldDefinition("additionalInfo") != null);
         } finally {
-            GraphQLAnnotations.getInstance().setRelay(new Relay());
+            this.graphQLAnnotations.setRelay(new Relay());
         }
     }
 
@@ -179,8 +182,7 @@ public class GraphQLConnectionTest {
 
     @Test
     public void methodStream() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestConnections.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ getObjStream(first: 1) { edges { cursor node { id, val } } } }",
@@ -193,8 +195,7 @@ public class GraphQLConnectionTest {
 
     @Test
     public void methodNonNull() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestConnections.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ getNonNullObjs(first: 1) { edges { cursor node { id, val } } } }",
@@ -207,8 +208,7 @@ public class GraphQLConnectionTest {
 
     @Test
     public void methodNull() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestConnections.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ getNullObj(first: 1) { edges { cursor node { id, val } } } }",
@@ -223,8 +223,7 @@ public class GraphQLConnectionTest {
 
     @Test
     public void emptyListData() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestConnections.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ getObjStreamWithParam(first: 1, filter:\"hel\") { edges { cursor node { id, val } } } }",
@@ -239,8 +238,7 @@ public class GraphQLConnectionTest {
 
     @Test
     public void methodListWithParam() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestConnections.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestConnections.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ getObjStreamWithParam(first: 2, filter:\"hel\") { edges { cursor node { id, val } } } }",
@@ -291,8 +289,7 @@ public class GraphQLConnectionTest {
 
     @Test
     public void customConnection() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestCustomConnection.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestCustomConnection.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         ExecutionResult result = graphQL.execute("{ getObjs(first: 1) { edges { cursor node { id, val } } } }",
@@ -308,8 +305,7 @@ public class GraphQLConnectionTest {
     @Test
     public void duplicateConnection() {
         try {
-            GraphQLObjectType object = GraphQLAnnotations.object(DuplicateTest.class);
-            newSchema().query(object).build();
+            newAnnotationsSchema().query(DuplicateTest.class).build();
         } catch (GraphQLAnnotationsException e) {
             fail("Schema cannot be created", e);
         }

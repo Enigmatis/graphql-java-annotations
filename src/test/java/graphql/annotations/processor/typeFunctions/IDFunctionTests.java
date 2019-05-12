@@ -14,25 +14,18 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.annotationTypes.GraphQLID;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import static graphql.Scalars.GraphQLID;
-import static org.testng.Assert.assertEquals;
 import static graphql.annotations.processor.typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
+import static org.testng.Assert.assertEquals;
 
 
 public class IDFunctionTests {
-
-    @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-    }
 
     public @graphql.annotations.annotationTypes.GraphQLID String idStringMethod() {
         return "asd";
@@ -57,7 +50,7 @@ public class IDFunctionTests {
         Method idStringMethod = IDFunctionTests.class.getMethod("idStringMethod");
 
         // Act+Assert
-        assertEquals(instance.buildType(idStringMethod.getReturnType(), idStringMethod.getAnnotatedReturnType(),null), GraphQLID);
+        assertEquals(instance.buildType(idStringMethod.getReturnType(), idStringMethod.getAnnotatedReturnType(), null), GraphQLID);
     }
 
     @Test
@@ -67,7 +60,7 @@ public class IDFunctionTests {
         Method idIntegerMethod = IDFunctionTests.class.getMethod("idIntegerMethod");
 
         // Act+Assert
-        assertEquals(instance.buildType(idIntegerMethod.getReturnType(), idIntegerMethod.getAnnotatedReturnType(),null), GraphQLID);
+        assertEquals(instance.buildType(idIntegerMethod.getReturnType(), idIntegerMethod.getAnnotatedReturnType(), null), GraphQLID);
     }
 
     @Test
@@ -77,7 +70,7 @@ public class IDFunctionTests {
         Method idIntMethod = IDFunctionTests.class.getMethod("idIntMethod");
 
         // Act+Assert
-        assertEquals(instance.buildType(idIntMethod.getReturnType(), idIntMethod.getAnnotatedReturnType(),null), GraphQLID);
+        assertEquals(instance.buildType(idIntMethod.getReturnType(), idIntMethod.getAnnotatedReturnType(), null), GraphQLID);
     }
 
     @Test
@@ -87,7 +80,7 @@ public class IDFunctionTests {
         Field idStringField = IDFunctionTests.class.getField("idStringField");
 
         // Act+Assert
-        assertEquals(instance.buildType(idStringField.getType(), idStringField.getAnnotatedType(),null), GraphQLID);
+        assertEquals(instance.buildType(idStringField.getType(), idStringField.getAnnotatedType(), null), GraphQLID);
     }
 
     @Test
@@ -97,7 +90,7 @@ public class IDFunctionTests {
         Field idIntegerField = IDFunctionTests.class.getField("idIntegerField");
 
         // Act+Assert
-        assertEquals(instance.buildType(idIntegerField.getType(), idIntegerField.getAnnotatedType(),null), GraphQLID);
+        assertEquals(instance.buildType(idIntegerField.getType(), idIntegerField.getAnnotatedType(), null), GraphQLID);
     }
 
     @Test
@@ -107,7 +100,7 @@ public class IDFunctionTests {
         Field idIntField = IDFunctionTests.class.getField("idIntField");
 
         // Act+Assert
-        assertEquals(instance.buildType(idIntField.getType(), idIntField.getAnnotatedType(),null), GraphQLID);
+        assertEquals(instance.buildType(idIntField.getType(), idIntField.getAnnotatedType(), null), GraphQLID);
     }
 
 

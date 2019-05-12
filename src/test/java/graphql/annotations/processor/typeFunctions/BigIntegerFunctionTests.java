@@ -14,8 +14,6 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.annotations.processor.GraphQLAnnotations;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.math.BigInteger;
@@ -25,11 +23,6 @@ import static graphql.annotations.processor.typeFunctions.DefaultTypeFunctionTes
 import static org.testng.Assert.assertEquals;
 
 public class BigIntegerFunctionTests {
-    @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-    }
-
     @Test
     public void buildType_bigIntegerType_returnsGraphQLBigInteger() {
         //arrange

@@ -21,7 +21,6 @@ import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,14 +30,17 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class GraphQLIterableAndArrayTest {
+
+    private GraphQLAnnotations graphQLAnnotations;
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
     static class TestMappedObject {
@@ -103,8 +105,7 @@ public class GraphQLIterableAndArrayTest {
 
     @Test
     public void queryWithArray() {
-        GraphQLObjectType object = GraphQLAnnotations.object(IterableAndArrayTestQuery.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(IterableAndArrayTestQuery.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{array {name foo}}");
         assertTrue(result.getErrors().isEmpty());
@@ -114,8 +115,7 @@ public class GraphQLIterableAndArrayTest {
 
     @Test
     public void queryWithList() {
-        GraphQLObjectType object = GraphQLAnnotations.object(IterableAndArrayTestQuery.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(IterableAndArrayTestQuery.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{list {name foo}}");
         assertTrue(result.getErrors().isEmpty());
@@ -125,8 +125,7 @@ public class GraphQLIterableAndArrayTest {
 
     @Test
     public void queryWithArrayWithinAnArray() {
-        GraphQLObjectType object = GraphQLAnnotations.object(IterableAndArrayTestQuery.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(IterableAndArrayTestQuery.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{arrayWithinArray {name foo}}");
         assertTrue(result.getErrors().isEmpty());

@@ -22,7 +22,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLObjectType onObject(AnnotationsWiringEnvironment environment) {
@@ -34,7 +33,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
@@ -46,7 +44,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLArgument onArgument(AnnotationsWiringEnvironment environment) {
@@ -58,7 +55,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLInterfaceType onInterface(AnnotationsWiringEnvironment environment) {
@@ -70,7 +66,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLUnionType onUnion(AnnotationsWiringEnvironment environment) {
@@ -82,7 +77,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLEnumType onEnum(AnnotationsWiringEnvironment environment) {
@@ -94,7 +88,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLEnumValueDefinition onEnumValue(AnnotationsWiringEnvironment environment) {
@@ -106,7 +99,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLScalarType onScalar(AnnotationsWiringEnvironment environment) {
@@ -118,7 +110,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLInputObjectType onInputObjectType(AnnotationsWiringEnvironment environment) {
@@ -130,7 +121,6 @@ public interface AnnotationsDirectiveWiring {
      * of that DSL  element
      *
      * @param environment the wiring element
-     *
      * @return a non null element based on the original one
      */
     default GraphQLInputObjectField onInputObjectField(AnnotationsWiringEnvironment environment) {

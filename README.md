@@ -1,9 +1,32 @@
+![logo](polaris-iconsmalredl.png?raw=true) 
+# GraphQL-Java Annotations
 [![Build Status](https://travis-ci.org/graphql-java/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/graphql-java/graphql-java-annotations)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.graphql-java/graphql-java-annotations.svg?maxAge=3000)]()
-# GraphQL Annotations for Java
 
 [GraphQL-Java](https://github.com/andimarek/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
 syntax for GraphQL schema definition.
+
+
+## Table Of Contents
+- [Getting Started](#getting-started)
+- [GraphQLAnnotations class](#graphqlannotations-class)
+- [Annotations Schema Creator](#annotations-schema-creator)
+- [Defining Objects](#defining-objects)
+- [Defining Interfaces](#defining-interfaces)
+- [Defining Unions](#defining-unions)
+- [Fields](#fields)
+    - [Custom DataFetcher](#custom-data-fetcher)
+- [Type Extensions](#type-extensions)
+    - [Defining Extensions in Annotation](#defining-extensions-in-annotations)
+    - [Data Fetching with Extensions](#data-fetching-with-extensions)
+- [Type Inference](#type-inference)
+- [Directives](#directives)
+    - [Creating/Defining a GraphQL Directive](#creatingdefining-a-graphqldirective)
+    - [Wiring with Directives](#wiring-with-directives)
+- [Relay Support](#relay-support)
+    - [Mutations](#mutations)
+    - [Connection](#connection)
+    - [Customizing Relay Schema](#customizing-relay-schema)     
 
 ## Getting Started
 
@@ -12,7 +35,7 @@ syntax for GraphQL schema definition.
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:6.1"
+  compile "io.github.graphql-java:graphql-java-annotations:7.0"
 }
 ```
 
@@ -22,10 +45,65 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>6.1</version>
+    <version>7.0</version>
 </dependency>
 ```
 
+The graphql-java-annotations library is able to create GraphQLType objects out of your Java classes.
+These GraphQLType objects can be later injected into the graphql-java schema.
+
+graphql-java-annotations also allows you to wire your objects with data fetchers and type resolvers while annotating your fields/types. The result of this process will be a ``GraphQLCodeRegistry.Builder`` object that can be later built and injected to the graphql-java schema.
+
+
+## GraphQLAnnotations class
+
+You can create an instance of the `GraphQLAnnotations` class in order to create the GraphQL types.
+```java
+GraphQLAnnotations graphqlAnnotations = new GraphQLAnnotations();
+```
+
+Using this object, you will be able to create the GraphQL types.
+There are few types that can be generated - a `GraphQLObjectType`, a `GraphQLInterfaceType` and a `GraphQLDirective`.
+
+```java
+GraphQLObjectType query = graphqlAnnotations.object(Query.class);
+GraphQLDirective upperDirective = graphqlAnnotations.directive(UpperDirective.class);
+GraphQLInterfaceType myInterface = graphqlAnnotations.generateInterface(MyInterface.class); 
+```
+
+Then you can use these types in order to create a graphql-java schema.
+But, in order to create a graphql-java schema, you need also the ``GraphQLCodeRegistry``, which contains all the data fetchers mapped to their fields (and also type resolvers).
+
+You can obtain the code registry this way:
+
+```java
+graphqlAnnotations.getContainer().getCodeRegistryBuilder().build();
+```
+
+## Annotations Schema Creator
+
+Using the `GraphQLAnnotations` processor object can be a little bit confusing if you wish to use it to create a GraphQL schema.
+So we created a util class to help you create your desired GraphQL schema, in a syntax similiar to the graphql-java syntax.
+
+In order to do so you can use the ``AnnotationsSchemaCreator.Builder`` in the following way:
+
+```java
+    GraphQLSchema schema = AnnotationsSchemaCreator.newAnnotationsSchema()
+        .query(Query.class) // to create you query object
+        .mutation(Mutation.class) // to create your mutation object
+        .subscription(Subscription.class) // to create your subscription object
+        .directive(UpperDirective.class) // to create a directive
+        .additionalType(AdditionalType.class) // to create some additional type and add it to the schema
+        .typeFunction(CustomType.class) // to add a typefunction
+        .setAlwaysPrettify(true) // to set the global prettifier of field names (removes get/set/is prefixes from names)
+        .setRelay(customRelay) // to add a custom relay object
+        .build();  
+```
+
+Of course you can use this builder with only some of the properties, but the query class must be provided.
+note - The GraphQLSchema is a graphql-java type.
+
+Continue reading in order to understand how your java classes should look in order to be provided to the annotations schema creator.
 
 ## Defining Objects
 
@@ -39,7 +117,8 @@ public class SomeObject {
 }
 
 // ...
-GraphQLObjectType object = GraphQLAnnotations.object(SomeObject.class);
+GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
+GraphQLObjectType object = graphQLAnnotations.object(SomeObject.class);
 ```
 
 ## Defining Interfaces
@@ -58,7 +137,8 @@ public class MyTypeResolver implements TypeResolver {
 }
 
 // ...
-GraphQLInterfaceType object = GraphQLAnnotations.iface(SomeInterface.class);
+GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
+GraphQLInterfaceType object = graphQLAnnotations.generateInterface(SomeInterface.class);
 ```
 
 An instance of the type resolver will be created from the specified class. If a `getInstance` method is present on the
@@ -262,13 +342,11 @@ public class HumanExtension {
 Classes marked as "extensions" will actually not define a new type, but rather set new fields on the class it extends when it will be created. 
 All GraphQL annotations can be used on extension classes.
 
-Extensions are registered in GraphQLAnnotationProcessor by using `registerTypeExtension`. Note that extensions must be registered before the type itself is requested with `getObject()` :
+Extensions are registered in GraphQLAnnotations object by using `registerTypeExtension`. Note that extensions must be registered before the type itself is requested with `getObject()` :
 
 ```
-GraphQLAnnotationsProcessor processor = GraphQLAnnotations.getInstance(); 
-
 // Register extensions
-processor.registerTypeExtension(HumanExtension.class);
+graphqlAnnotations.registerTypeExtension(HumanExtension.class);
 
 // Create type
 GraphQLObjectType type = processor.getObject(Human.class);
@@ -314,7 +392,7 @@ public class UUIDTypeFunction implements TypeFunction {
 And register it with `GraphQLAnnotations`:
 
 ```java
-GraphQLAnnotations.register(new UUIDTypeFunction())
+graphqlAnnotations.registerType(new UUIDTypeFunction())
 
 // or if not using a static version of GraphQLAnnotations:
 // new GraphQLAnnotations().registerType(new UUIDTypeFunction())
@@ -348,7 +426,7 @@ You can also use ``@GraphQLName`` and ``@GraphQLDescription`` annotations on the
 
 After you created the class, you will be able to create the ``GraphQLDirective`` object using the following code:
 ```java
-GraphQLAnnotations.directive(UpperDirective.class);
+graphqlAnnotations.directive(UpperDirective.class);
 ```
 
 ### Wiring with directives
@@ -361,16 +439,19 @@ public class UpperWiring implements AnnotationsDirectiveWiring {
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
             boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
-            DataFetcher dataFetcher = DataFetcherFactories.wrapDataFetcher(field.getDataFetcher(), (((dataFetchingEnvironment, value) -> {
+            CodeRegistryUtil.wrapDataFetcher(field, environment, (((dataFetchingEnvironment, value) -> {
                 if (value instanceof String && isActive) {
                     return ((String) value).toUpperCase();
                 }
-                return value;
-            })));
-            return field.transform(builder -> builder.dataFetcher(dataFetcher));
+                return value; 
+            })));            
+            return field;
         }
     }
 ```
+
+You can also use the `field.transform` method in order to change some of the field's properties.
+
 This class turns your string field to upper case if the directive argument "isActive" is set to true.
 Now, you have to wire the field itself:
 ```java
@@ -410,7 +491,7 @@ NOTE: because `PropertyDataFetcher` and `FieldDataFetcher` can't handle connecti
 ### Customizing Relay schema
 
 By default, GraphQLAnnotations will use the `graphql.relay.Relay` class to create the Relay specific schema types (Mutations, Connections, Edges, PageInfo, ...).
-It is possible to set a custom implementation of the Relay class with `GraphQLAnnotations.setRelay` method. The class should inherit from `graphql.relay.Relay` and 
+It is possible to set a custom implementation of the Relay class with `graphqlAnnotations.setRelay` method. The class should inherit from `graphql.relay.Relay` and 
 can redefine methods that create Relay types.
 
 It is also possible to specify for every connection which relay do you want to use, by giving a value to the annotation: 

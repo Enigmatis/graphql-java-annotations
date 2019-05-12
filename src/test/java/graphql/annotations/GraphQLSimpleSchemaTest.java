@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,23 +18,12 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
-import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
-import graphql.schema.GraphQLObjectType;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.assertEquals;
 
 public class GraphQLSimpleSchemaTest {
-
-    @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-    }
-
-
     public static class User {
 
         private String name;
@@ -73,10 +62,7 @@ public class GraphQLSimpleSchemaTest {
 
     @Test
     public void detachedCall() {
-        GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectHandler graphQLObjectHandler = graphQLAnnotations.getObjectHandler();
-        GraphQLObjectType queryObject = graphQLObjectHandler.getObject(Query.class,graphQLAnnotations.getContainer());
-        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
+        GraphQL graphql = GraphQL.newGraphQL(newAnnotationsSchema().query(Query.class).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser{ name } }");
         String actual = result.getData().toString();
@@ -85,10 +71,7 @@ public class GraphQLSimpleSchemaTest {
 
     @Test
     public void staticCall() {
-        GraphQLAnnotations graphQLAnnotations = new GraphQLAnnotations();
-        GraphQLObjectHandler graphQLObjectHandler = graphQLAnnotations.getObjectHandler();
-        GraphQLObjectType queryObject = graphQLObjectHandler.getObject(Query.class,graphQLAnnotations.getContainer());
-        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
+        GraphQL graphql = GraphQL.newGraphQL(newAnnotationsSchema().query(Query.class).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser2{ name } }");
         String actual = result.getData().toString();

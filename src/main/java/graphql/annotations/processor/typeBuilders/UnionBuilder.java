@@ -58,7 +58,8 @@ public class UnionBuilder {
         Builder builder = newUnionType();
 
         GraphQLUnion unionAnnotation = iface.getAnnotation(GraphQLUnion.class);
-        builder.name(graphQLObjectInfoRetriever.getTypeName(iface));
+        String typeName = graphQLObjectInfoRetriever.getTypeName(iface);
+        builder.name(typeName);
         GraphQLDescription description = iface.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());
@@ -78,8 +79,7 @@ public class UnionBuilder {
                 .forEach(builder::possibleType);
 
         TypeResolver typeResolver = getTypeResolver(container, unionAnnotation);
-
-        builder.typeResolver(typeResolver);
+        container.getCodeRegistryBuilder().typeResolver(typeName, typeResolver);
         return builder;
     }
 
@@ -90,10 +90,9 @@ public class UnionBuilder {
 
         return typeResolverConstructorOptional
                 .map(constructor -> {
-                    if(constructor.getParameterCount() == 0) {
+                    if (constructor.getParameterCount() == 0) {
                         return (TypeResolver) constructNewInstance(constructor);
-                    }
-                    else {
+                    } else {
                         return (TypeResolver) constructNewInstance(constructor, unionAnnotation.possibleTypes(), container);
                     }
                 })

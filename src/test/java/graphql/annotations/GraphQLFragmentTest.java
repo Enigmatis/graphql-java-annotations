@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,6 @@ import graphql.TypeResolutionEnvironment;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
-import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.TypeResolver;
@@ -30,14 +28,17 @@ import org.testng.annotations.Test;
 
 import java.util.*;
 
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.AssertJUnit.assertEquals;
 
 
 public class GraphQLFragmentTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
     static Map<String, GraphQLObjectType> registry;
@@ -49,24 +50,17 @@ public class GraphQLFragmentTest {
     public void testInterfaceInlineFragment() throws Exception {
         // Given
         registry = new HashMap<>();
-        GraphQLInterfaceRetriever graphQLInterfaceRetriever=GraphQLAnnotations.getInstance().getObjectHandler().getTypeRetriever().getGraphQLInterfaceRetriever();
 
-
-        GraphQLObjectType rootType = GraphQLAnnotations.object(RootObject.class);
-
-        GraphQLObjectType objectType2 = GraphQLAnnotations.object(MyObject2.class);
+        GraphQLObjectType objectType2 = this.graphQLAnnotations.object(MyObject2.class);
 
         registry.put("MyObject2", objectType2);
 
-        GraphQLObjectType objectType = GraphQLAnnotations.object(MyObject.class);
+        GraphQLObjectType objectType = this.graphQLAnnotations.object(MyObject.class);
 
         registry.put("MyObject", objectType);
 
-        GraphQLInterfaceType iface = (GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(MyInterface.class,GraphQLAnnotations.getInstance().getContainer());
 
-        GraphQLSchema schema = GraphQLSchema.newSchema()
-                .query(rootType)
-                .build(new HashSet<>(Arrays.<graphql.schema.GraphQLType>asList(iface, objectType)));
+        GraphQLSchema schema = newAnnotationsSchema().query(RootObject.class).additionalType(MyObject.class).additionalType(MyInterface.class).build();
 
         GraphQL graphQL2 = GraphQL.newGraphQL(schema).build();
 
@@ -112,12 +106,12 @@ public class GraphQLFragmentTest {
     }
 
     @GraphQLTypeResolver(value = MyTypeResolver.class)
-    public static interface MyInterface {
+    public interface MyInterface {
         @GraphQLField
-        public String getA();
+        String getA();
 
         @GraphQLField
-        public String getB();
+        String getB();
     }
 
     public static class MyTypeResolver implements TypeResolver {

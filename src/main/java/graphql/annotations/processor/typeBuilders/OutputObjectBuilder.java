@@ -66,7 +66,8 @@ public class OutputObjectBuilder {
 
     public GraphQLObjectType.Builder getOutputObjectBuilder(Class<?> object, ProcessingElementsContainer container) throws GraphQLAnnotationsException {
         GraphQLObjectType.Builder builder = newObject();
-        builder.name(graphQLObjectInfoRetriever.getTypeName(object));
+        String typeName = graphQLObjectInfoRetriever.getTypeName(object);
+        builder.name(typeName);
         GraphQLDescription description = object.getAnnotation(GraphQLDescription.class);
         if (description != null) {
             builder.description(description.value());
@@ -77,7 +78,7 @@ public class OutputObjectBuilder {
                 continue;
             }
             if (methodSearchAlgorithm.isFound(method)) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(method, container);
+                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(typeName, method, container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
@@ -88,7 +89,7 @@ public class OutputObjectBuilder {
                 continue;
             }
             if (fieldSearchAlgorithm.isFound(field)) {
-                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(field, container);
+                GraphQLFieldDefinition gqlField = graphQLFieldRetriever.getField(typeName, field, container);
                 definedFields.add(gqlField.getName());
                 builder.field(gqlField);
             }
