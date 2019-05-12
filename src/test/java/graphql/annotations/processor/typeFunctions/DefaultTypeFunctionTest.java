@@ -21,8 +21,6 @@ import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.schema.*;
-import graphql.schema.GraphQLType;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.*;
@@ -33,12 +31,6 @@ import static graphql.Scalars.GraphQLString;
 import static org.testng.Assert.*;
 
 public class DefaultTypeFunctionTest {
-
-    @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-    }
-
     private enum A {
         @GraphQLName("someA") @GraphQLDescription("a") A, B
     }
@@ -67,10 +59,10 @@ public class DefaultTypeFunctionTest {
         List<GraphQLEnumValueDefinition> values = ((GraphQLEnumType) enumeration).getValues();
         assertEquals(values.stream().
                         map(GraphQLEnumValueDefinition::getName).collect(Collectors.toList()),
-                Arrays.asList("someA", "B"));
+                Arrays.asList("B", "someA"));
         assertEquals(values.stream().
                         map(GraphQLEnumValueDefinition::getDescription).collect(Collectors.toList()),
-                Arrays.asList("a", "B"));
+                Arrays.asList("B", "a"));
 
     }
 
@@ -199,7 +191,6 @@ public class DefaultTypeFunctionTest {
         assertNotNull(class1class2);
         assertTrue(((GraphQLObjectType) class1class2.getType()).getFieldDefinition("class1").getType() instanceof GraphQLTypeReference);
         assertTrue(((GraphQLObjectType) class1class2.getType()).getFieldDefinition("class2").getType() instanceof GraphQLTypeReference);
-        GraphQLAnnotations.instance = new GraphQLAnnotations();
     }
 
     private ProcessingElementsContainer testedProcessingElementsContainer() {

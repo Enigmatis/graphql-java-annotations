@@ -12,20 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  */
-package graphql.annotations; /**
- * Copyright 2016 Yurii Rashkovskii
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- */
+package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -38,9 +25,9 @@ import graphql.annotations.directives.Directive;
 import graphql.annotations.directives.creation.DirectiveLocations;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.util.CodeRegistryUtil;
 import graphql.introspection.Introspection;
 import graphql.schema.*;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -50,36 +37,30 @@ import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLDirective.newDirective;
 import static graphql.schema.GraphQLSchema.newSchema;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class GraphQLDirectivesTest {
 
-    @BeforeClass
-    public static void setUp() throws Exception {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-    }
+    private GraphQLAnnotations graphQLAnnotations;
 
     @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-        GraphQLAnnotations.getInstance().getContainer().getDirectiveRegistry().clear();
+    public void setUp() {
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
-
 
     public static class UpperWiring implements AnnotationsDirectiveWiring {
         @Override
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
             boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
-            DataFetcher dataFetcher = DataFetcherFactories.wrapDataFetcher(field.getDataFetcher(), (((dataFetchingEnvironment, value) -> {
+            CodeRegistryUtil.wrapDataFetcher(field, environment, (((dataFetchingEnvironment, value) -> {
                 if (value instanceof String && isActive) {
                     return ((String) value).toUpperCase();
                 }
                 return value;
             })));
-            return field.transform(builder -> builder.dataFetcher(dataFetcher));
+
+            return field;
         }
     }
 
@@ -88,20 +69,21 @@ public class GraphQLDirectivesTest {
         public GraphQLInputObjectField onInputObjectField(AnnotationsWiringEnvironment environment) {
             GraphQLInputObjectField field = (GraphQLInputObjectField) environment.getElement();
             String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
-            return field.transform(builder -> builder.name(field.getName()+suffix));
+            return field.transform(builder -> builder.name(field.getName() + suffix));
         }
 
         @Override
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
             String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
-            DataFetcher dataFetcher = DataFetcherFactories.wrapDataFetcher(field.getDataFetcher(), (((dataFetchingEnvironment, value) -> {
+            CodeRegistryUtil.wrapDataFetcher(field, environment, (dataFetchingEnvironment, value) -> {
                 if (value instanceof String) {
                     return value + suffix;
                 }
                 return value;
-            })));
-            return field.transform(builder -> builder.dataFetcher(dataFetcher));
+            });
+
+            return field;
         }
 
         @Override
@@ -167,7 +149,7 @@ public class GraphQLDirectivesTest {
         @GraphQLField
         private int b;
 
-        public InputObject(@GraphQLName("a") String a,@GraphQLName("b") int b) {
+        public InputObject(@GraphQLName("a") String a, @GraphQLName("b") int b) {
             this.a = a;
             this.b = b;
         }
@@ -184,8 +166,11 @@ public class GraphQLDirectivesTest {
     public void queryNameWithInputObject_directivesProvidedToRegistry_wiringOfInputObjectIsActivated() {
         GraphQLDirective suffixDirective = GraphQLDirective.newDirective().name("suffix").argument(builder -> builder.name("suffix").type(GraphQLString))
                 .validLocations(Introspection.DirectiveLocation.INPUT_FIELD_DEFINITION, Introspection.DirectiveLocation.FIELD_DEFINITION).build();
-        GraphQLObjectType object = GraphQLAnnotations.object(Query5.class, suffixDirective);
-        GraphQLSchema schema = newSchema().query(object).build();
+
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), suffixDirective);
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query5.class);
+        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
         GraphQLFieldDefinition nameWithInputObject = schema.getQueryType().getFieldDefinition("nameWithInputObject");
         GraphQLInputObjectField field = ((GraphQLInputObjectType) nameWithInputObject.getArgument("inputObject").getType()).getField("acoolSuffix");
         assertNotNull(field);
@@ -195,8 +180,10 @@ public class GraphQLDirectivesTest {
     public void queryNameWithArgument_directivesProvidedToRegistry_wiringOfArgumentIsActivated() {
         GraphQLDirective suffixDirective = GraphQLDirective.newDirective().name("suffix").argument(builder -> builder.name("suffix").type(GraphQLString))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.ARGUMENT_DEFINITION).build();
-        GraphQLObjectType object = GraphQLAnnotations.object(Query4.class, suffixDirective);
-        GraphQLSchema schema = newSchema().query(object).build();
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), suffixDirective);
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query4.class);
+        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { nameWithArgument(extensionArgcoolSuffixForArg: \"ext\") }");
         assertTrue(result.getErrors().isEmpty());
@@ -204,8 +191,9 @@ public class GraphQLDirectivesTest {
 
     @Test(expectedExceptions = GraphQLAnnotationsException.class)
     public void queryName_noDirectivesProvidedToRegistry_exceptionIsThrown() throws Exception {
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
+        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
 
         GraphQL.newGraphQL(schema).build().execute("query { name }");
     }
@@ -218,9 +206,11 @@ public class GraphQLDirectivesTest {
 
     @Test
     public void queryName_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
-        GraphQLDirective upperCase = GraphQLAnnotations.directive(UpperCase.class);
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class, upperCase);
-        GraphQLSchema schema = newSchema().query(object).build();
+        this.graphQLAnnotations.directive(UpperCase.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
+        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
+
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { name }");
         assertTrue(result.getErrors().isEmpty());
@@ -231,8 +221,10 @@ public class GraphQLDirectivesTest {
     public void queryNameWithFalse_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
-        GraphQLObjectType object = GraphQLAnnotations.object(Query.class, upperCase);
-        GraphQLSchema schema = newSchema().query(object).build();
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), upperCase);
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
+        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { nameWithFalse }");
         assertTrue(result.getErrors().isEmpty());
@@ -243,8 +235,10 @@ public class GraphQLDirectivesTest {
     public void queryNameWithNoArgs_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean).defaultValue(true))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
-        GraphQLObjectType object = GraphQLAnnotations.object(Query2.class, upperCase);
-        GraphQLSchema schema = newSchema().query(object).build();
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), upperCase);
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query2.class);
+        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { nameWithNoArgs }");
         assertTrue(result.getErrors().isEmpty());
@@ -255,8 +249,11 @@ public class GraphQLDirectivesTest {
     public void queryNameWithNoArgs_noDefaultValue_exceptionIsThrown() throws Exception {
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
-        GraphQLObjectType object = GraphQLAnnotations.object(Query2.class, upperCase);
-        GraphQLSchema schema = newSchema().query(object).build();
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), upperCase);
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query2.class);
+        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
+
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
 
         GraphQL.newGraphQL(schema).build().execute("query { nameWithNoArgs }");
     }
@@ -267,8 +264,12 @@ public class GraphQLDirectivesTest {
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLDirective suffixDirective = GraphQLDirective.newDirective().name("suffix").argument(builder -> builder.name("suffix").type(GraphQLString))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.ARGUMENT_DEFINITION).build();
-        GraphQLObjectType object = GraphQLAnnotations.object(Query3.class, upperCase, suffixDirective);
-        GraphQLSchema schema = newSchema().query(object).build();
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), upperCase);
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), suffixDirective);
+        GraphQLObjectType object = this.graphQLAnnotations.object(Query3.class);
+        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
+
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { name }");
         assertTrue(result.getErrors().isEmpty());

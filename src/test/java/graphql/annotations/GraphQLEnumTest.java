@@ -18,20 +18,12 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.processor.GraphQLAnnotations;
-import graphql.schema.GraphQLObjectType;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.assertEquals;
 
 public class GraphQLEnumTest {
-
-    @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-    }
 
     public enum Foo {
         ONE,
@@ -69,8 +61,7 @@ public class GraphQLEnumTest {
 
     @Test
     public void test() throws IllegalAccessException, NoSuchMethodException, InstantiationException {
-        GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
-        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
+        GraphQL graphql = GraphQL.newGraphQL(newAnnotationsSchema().query(Query.class).build()).build();
 
         ExecutionResult result = graphql.execute("{ defaultUser{ getName } }");
         assertEquals(result.getData().toString(), "{defaultUser={getName=ONE}}");
@@ -78,8 +69,7 @@ public class GraphQLEnumTest {
 
     @Test
     public void testAsInput() throws IllegalAccessException, NoSuchMethodException, InstantiationException {
-        GraphQLObjectType queryObject = GraphQLAnnotations.object(Query.class);
-        GraphQL graphql = GraphQL.newGraphQL(newSchema().query(queryObject).build()).build();
+        GraphQL graphql = GraphQL.newGraphQL(newAnnotationsSchema().query(Query.class).build()).build();
 
         ExecutionResult result = graphql.execute("{ user(param:TWO){ getName } }");
         assertEquals(result.getData().toString(), "{user={getName=TWO}}");

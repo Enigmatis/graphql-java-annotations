@@ -31,16 +31,18 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.Scalars.GraphQLString;
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 @SuppressWarnings("unchecked")
 public class GraphQLBatchedTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
     public static class SimpleBatchedField {
@@ -60,11 +62,10 @@ public class GraphQLBatchedTest {
 
     @Test
     public void batchedDataFetcher() throws Throwable {
-        GraphQLObjectType nestedObject = GraphQLAnnotations.object(SimpleBatchedField.class);
+        GraphQLObjectType nestedObject = this.graphQLAnnotations.object(SimpleBatchedField.class);
         assertEquals(nestedObject.getFieldDefinition("a").getType(), GraphQLString);
 
-        GraphQLObjectType object = GraphQLAnnotations.object(TestBatchedObject.class);
-        GraphQLSchema schema = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestBatchedObject.class).build();
         GraphQL graphql = GraphQL.newGraphQL(schema).queryExecutionStrategy(new BatchedExecutionStrategy()).build();
         ExecutionResult result = graphql.execute("{ fields { a } }", new TestBatchedObject());
         List errors = result.getErrors();
@@ -88,7 +89,7 @@ public class GraphQLBatchedTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void noStaticField() {
-        GraphQLObjectType object = GraphQLAnnotations.object(NoStaticBatchedField.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(NoStaticBatchedField.class);
     }
 
     public static class NoListBatchedField {
@@ -101,7 +102,7 @@ public class GraphQLBatchedTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void noListField() {
-        GraphQLObjectType object = GraphQLAnnotations.object(NoStaticBatchedField.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(NoStaticBatchedField.class);
     }
 
     public static class NoParameterizedBatchedField {
@@ -114,6 +115,6 @@ public class GraphQLBatchedTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void noParameterizedReturnField() {
-        GraphQLObjectType object = GraphQLAnnotations.object(NoStaticBatchedField.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(NoStaticBatchedField.class);
     }
 }

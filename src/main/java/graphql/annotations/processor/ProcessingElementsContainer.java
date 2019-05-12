@@ -20,6 +20,7 @@ import graphql.annotations.processor.graphQLProcessors.GraphQLOutputProcessor;
 import graphql.annotations.processor.typeFunctions.DefaultTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.relay.Relay;
+import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLDirective;
 
 import java.util.HashMap;
@@ -27,8 +28,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_SUFFIX;
 import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_PREFIX;
+import static graphql.annotations.processor.util.InputPropertiesUtil.DEFAULT_INPUT_SUFFIX;
+import static graphql.schema.GraphQLCodeRegistry.newCodeRegistry;
 
 public class ProcessingElementsContainer {
 
@@ -37,6 +39,7 @@ public class ProcessingElementsContainer {
     private Map<String, graphql.schema.GraphQLType> typeRegistry;
     private Map<String, graphql.schema.GraphQLDirective> directiveRegistry;
     private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry;
+    private GraphQLCodeRegistry.Builder codeRegistryBuilder;
     private Stack<String> processing;
     private String inputPrefix = DEFAULT_INPUT_PREFIX;
     private String inputSuffix = DEFAULT_INPUT_SUFFIX;
@@ -49,21 +52,25 @@ public class ProcessingElementsContainer {
         this.directiveRegistry = directiveRegistry;
     }
 
-    public ProcessingElementsContainer(TypeFunction defaultTypeFunction, Relay relay, Map<String, graphql.schema.GraphQLType> typeRegistry, Map<String, graphql.schema.GraphQLDirective> directiveRegistry, Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry, Stack<String> processing) {
+    public ProcessingElementsContainer(TypeFunction defaultTypeFunction, Relay relay, Map<String,
+            graphql.schema.GraphQLType> typeRegistry, Map<String, graphql.schema.GraphQLDirective> directiveRegistry,
+                                       Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry, Stack<String> processing,
+                                       GraphQLCodeRegistry.Builder codeRegistryBuilder) {
         this.defaultTypeFunction = defaultTypeFunction;
         this.relay = relay;
         this.typeRegistry = typeRegistry;
         this.directiveRegistry = directiveRegistry;
         this.extensionsTypeRegistry = extensionsTypeRegistry;
         this.processing = processing;
+        this.codeRegistryBuilder = codeRegistryBuilder;
     }
 
     public ProcessingElementsContainer(TypeFunction typeFunction) {
-        this(typeFunction, new Relay(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Stack<>());
+        this(typeFunction, new Relay(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Stack<>(), newCodeRegistry());
     }
 
     public ProcessingElementsContainer() {
-        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new Relay(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Stack<>());
+        this(new DefaultTypeFunction(new GraphQLInputProcessor(), new GraphQLOutputProcessor()), new Relay(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new Stack<>(), newCodeRegistry());
     }
 
     public Relay getRelay() {
@@ -120,5 +127,13 @@ public class ProcessingElementsContainer {
 
     public void setInputSuffix(String inputSuffix) {
         this.inputSuffix = inputSuffix;
+    }
+
+    public void setCodeRegistryBuilder(GraphQLCodeRegistry.Builder builder) {
+        this.codeRegistryBuilder = builder;
+    }
+
+    public GraphQLCodeRegistry.Builder getCodeRegistryBuilder() {
+        return this.codeRegistryBuilder;
     }
 }

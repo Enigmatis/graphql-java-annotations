@@ -14,21 +14,13 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.annotations.processor.GraphQLAnnotations;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static graphql.Scalars.GraphQLBoolean;
-import static org.testng.Assert.assertEquals;
 import static graphql.annotations.processor.typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
+import static org.testng.Assert.assertEquals;
 
 public class BooleanFunctionTests {
-
-    @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-    }
-
     @Test
     public void buildType_booleanType_returnsGraphQLBoolean() {
         DefaultTypeFunction instance = testedDefaultTypeFunction();

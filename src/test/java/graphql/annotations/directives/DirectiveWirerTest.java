@@ -29,10 +29,13 @@ import static org.mockito.Mockito.*;
 public class DirectiveWirerTest {
 
     private DirectiveWirer directiveWirer;
+    private String parentName = "parent";
+    private GraphQLCodeRegistry.Builder builder;
 
     @BeforeMethod
     public void setUp() throws Exception {
         directiveWirer = new DirectiveWirer();
+        builder = mock(GraphQLCodeRegistry.Builder.class);
     }
 
     // GraphQLFieldDefinition
@@ -46,8 +49,10 @@ public class DirectiveWirerTest {
         GraphQLFieldDefinition directiveContainer = GraphQLFieldDefinition.newFieldDefinition().name("bla")
                 .type(GraphQLString).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
-        AnnotationsWiringEnvironmentImpl lowerCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("lowerCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
+        AnnotationsWiringEnvironmentImpl lowerCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("lowerCase"), parentName, builder);
 
         when(upperWiring.onField(upperCaseEnv)).thenReturn(directiveContainer);
         when(lowerWiring.onField(lowerCaseEnv)).thenReturn(directiveContainer);
@@ -59,7 +64,7 @@ public class DirectiveWirerTest {
         map.put(lowerCase, lowerWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -75,7 +80,8 @@ public class DirectiveWirerTest {
         GraphQLFieldDefinition directiveContainer = GraphQLFieldDefinition.newFieldDefinition().name("bla")
                 .type(GraphQLString).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onField(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -84,7 +90,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLObjectType
@@ -96,7 +102,8 @@ public class DirectiveWirerTest {
 
         GraphQLObjectType directiveContainer = GraphQLObjectType.newObject().name("asdf").build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onObject(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -105,7 +112,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -119,7 +126,8 @@ public class DirectiveWirerTest {
 
         GraphQLObjectType directiveContainer = GraphQLObjectType.newObject().name("asdf00").build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onObject(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -128,7 +136,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLArgument
@@ -140,7 +148,8 @@ public class DirectiveWirerTest {
 
         GraphQLArgument directiveContainer = GraphQLArgument.newArgument().name("asdf").type(GraphQLString).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onArgument(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -149,7 +158,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -163,7 +172,8 @@ public class DirectiveWirerTest {
 
         GraphQLArgument directiveContainer = GraphQLArgument.newArgument().name("asdf0").type(GraphQLString).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onArgument(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -172,7 +182,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLInterfaceType
@@ -189,7 +199,8 @@ public class DirectiveWirerTest {
             }
         }).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onInterface(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -198,7 +209,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -217,7 +228,8 @@ public class DirectiveWirerTest {
             }
         }).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onInterface(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -226,7 +238,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLUnionType
@@ -239,7 +251,8 @@ public class DirectiveWirerTest {
         GraphQLUnionType directiveContainer = GraphQLUnionType.newUnionType().name("asdf")
                 .possibleType(GraphQLObjectType.newObject().name("Asdfaaaa").build()).typeResolver(env -> null).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onUnion(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -248,7 +261,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -264,7 +277,8 @@ public class DirectiveWirerTest {
                 .possibleType(GraphQLObjectType.newObject().name("Asdfaaaa").build()).typeResolver(env -> null).build();
 
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onUnion(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -273,7 +287,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLEnumType
@@ -285,7 +299,8 @@ public class DirectiveWirerTest {
 
         GraphQLEnumType directiveContainer = GraphQLEnumType.newEnum().name("asdf").value("asdfasdf").build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onEnum(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -294,7 +309,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -308,7 +323,8 @@ public class DirectiveWirerTest {
 
         GraphQLEnumType directiveContainer = GraphQLEnumType.newEnum().name("asdf").value("asdfasdf").build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onEnum(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -317,7 +333,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLEnumValueDefinition
@@ -329,7 +345,8 @@ public class DirectiveWirerTest {
 
         GraphQLEnumValueDefinition directiveContainer = GraphQLEnumValueDefinition.newEnumValueDefinition().name("asdf").build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onEnumValue(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -338,7 +355,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -352,7 +369,8 @@ public class DirectiveWirerTest {
 
         GraphQLEnumValueDefinition directiveContainer = GraphQLEnumValueDefinition.newEnumValueDefinition().name("asdf").build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onEnumValue(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -361,7 +379,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLScalarType
@@ -373,7 +391,8 @@ public class DirectiveWirerTest {
 
         GraphQLScalarType directiveContainer = GraphQLString;
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onScalar(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -382,7 +401,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -396,7 +415,8 @@ public class DirectiveWirerTest {
 
         GraphQLScalarType directiveContainer = GraphQLString;
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onScalar(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -405,7 +425,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLInputObjectType
@@ -418,7 +438,8 @@ public class DirectiveWirerTest {
         GraphQLInputObjectType directiveContainer = GraphQLInputObjectType.newInputObject().name("asdf")
                 .build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onInputObjectType(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -427,7 +448,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -442,7 +463,8 @@ public class DirectiveWirerTest {
         GraphQLInputObjectType directiveContainer = GraphQLInputObjectType.newInputObject().name("asdf")
                 .build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onInputObjectType(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -451,7 +473,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
     // GraphQLInputObjectField
@@ -464,7 +486,8 @@ public class DirectiveWirerTest {
         GraphQLInputObjectField directiveContainer = GraphQLInputObjectField.newInputObjectField().name("asdf")
                 .type(GraphQLInputObjectType.newInputObject().name("dfdf").build()).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
+                directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onInputObjectField(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -473,7 +496,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
 
         // Assert
 
@@ -488,7 +511,8 @@ public class DirectiveWirerTest {
         GraphQLInputObjectField directiveContainer = GraphQLInputObjectField.newInputObjectField().name("asdf")
                 .type(GraphQLInputObjectType.newInputObject().name("dfdf").build()).build();
 
-        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer, directiveContainer.getDirective("upperCase"));
+        AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
+                directiveContainer.getDirective("upperCase"), parentName, builder);
 
         when(upperWiring.onInputObjectField(upperCaseEnv)).thenReturn(directiveContainer);
 
@@ -497,7 +521,7 @@ public class DirectiveWirerTest {
         map.put(upperCase, upperWiring);
 
         // Act
-        directiveWirer.wire(directiveContainer, map);
+        directiveWirer.wire(directiveContainer, map, builder, parentName);
     }
 
 }

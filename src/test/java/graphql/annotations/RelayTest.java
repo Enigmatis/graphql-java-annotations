@@ -23,27 +23,37 @@ import graphql.annotations.strategies.EnhancedExecutionStrategy;
 import graphql.schema.*;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLType;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.*;
 
 @SuppressWarnings("unchecked")
 public class RelayTest {
 
+    private GraphQLAnnotations graphQLAnnotations;
+
+    private static GraphQLObjectType resultObject;
+
+    @BeforeClass
+    public void setUp() {
+        resultObject = new GraphQLAnnotations().object(Result.class);
+    }
+
     @BeforeMethod
     public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+        this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
     public static class ResultTypeResolver implements TypeResolver {
-
         @Override
         public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-            return GraphQLAnnotations.object(Result.class);
+            return resultObject;
         }
     }
 
@@ -53,7 +63,7 @@ public class RelayTest {
         int getI();
     }
 
-    public static class Result implements IResult{
+    public static class Result implements IResult {
         private final int i;
 
         public Result(int i) {
@@ -66,22 +76,28 @@ public class RelayTest {
     }
 
     public static class WrongReturnType {
-        @GraphQLField @GraphQLRelayMutation
+        @GraphQLField
+        @GraphQLRelayMutation
         public int doSomething() {
             return 0;
         }
     }
 
     public static class TestObject {
-        @GraphQLField @GraphQLRelayMutation
+        @GraphQLField
+        @GraphQLRelayMutation
         public Result doSomething() {
             return new Result(0);
         }
-        @GraphQLField @GraphQLRelayMutation
+
+        @GraphQLField
+        @GraphQLRelayMutation
         public Result doSomethingElse(@GraphQLName("a") @GraphQLDescription("A") int a, @GraphQLName("b") int b) {
             return new Result(a - b);
         }
-        @GraphQLField @GraphQLRelayMutation
+
+        @GraphQLField
+        @GraphQLRelayMutation
         public IResult doSomethingI() {
             return new Result(0);
         }
@@ -90,12 +106,12 @@ public class RelayTest {
 
     @Test(expectedExceptions = RuntimeException.class)
     public void notAnObjectType() {
-        GraphQLObjectType object = GraphQLAnnotations.object(WrongReturnType.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(WrongReturnType.class);
     }
 
     @Test
     public void noArgMutation() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(TestObject.class);
 
         GraphQLFieldDefinition doSomething = object.getFieldDefinition("doSomething");
 
@@ -113,7 +129,7 @@ public class RelayTest {
         assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
-        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).mutation(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
@@ -129,13 +145,13 @@ public class RelayTest {
 
     @Test
     public void interfaceReturningMutation() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(TestObject.class);
 
         GraphQLFieldDefinition doSomething = object.getFieldDefinition("doSomethingI");
 
         assertNotNull(doSomething);
 
-        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).mutation(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
@@ -152,7 +168,7 @@ public class RelayTest {
 
     @Test
     public void argMutation() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(TestObject.class);
 
         GraphQLFieldDefinition doSomethingElse = object.getFieldDefinition("doSomethingElse");
 
@@ -174,7 +190,7 @@ public class RelayTest {
         assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
-        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).mutation(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
@@ -190,7 +206,7 @@ public class RelayTest {
 
     @Test
     public void argVariableMutation() {
-        GraphQLObjectType object = GraphQLAnnotations.object(TestObject.class);
+        GraphQLObjectType object = this.graphQLAnnotations.object(TestObject.class);
 
         GraphQLFieldDefinition doSomethingElse = object.getFieldDefinition("doSomethingElse");
 
@@ -211,7 +227,7 @@ public class RelayTest {
         assertNotNull(returnType.getFieldDefinition("getI"));
         assertNotNull(returnType.getFieldDefinition("clientMutationId"));
 
-        GraphQLSchema schema = GraphQLSchema.newSchema().query(object).mutation(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).mutation(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 

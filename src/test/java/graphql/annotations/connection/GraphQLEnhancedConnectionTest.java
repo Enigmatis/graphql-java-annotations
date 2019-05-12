@@ -23,38 +23,27 @@ import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.assertEquals;
 
 @SuppressWarnings("ALL")
 public class GraphQLEnhancedConnectionTest {
 
-    private static GraphQL graphQL;
+    private GraphQL graphQL;
+    private GraphQLAnnotations graphQLAnnotations;
 
-
-    @BeforeClass
-    public static void setUp() throws Exception {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
-        GraphQLObjectType object = GraphQLAnnotations.object(TestListField.class);
-        GraphQLSchema schema = newSchema().query(object).build();
-
-        graphQL = GraphQL.newGraphQL(schema).build();
-    }
 
     @BeforeMethod
-    public void init() {
-        GraphQLAnnotations.getInstance().getTypeRegistry().clear();
+    public void setUp() throws Exception {
+        this.graphQLAnnotations = new GraphQLAnnotations();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestListField.class).build();
+        graphQL = GraphQL.newGraphQL(schema).build();
     }
 
     public static class Obj {
@@ -139,14 +128,14 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     @Test(expectedExceptions = GraphQLConnectionException.class)
     public void ConnectionFieldDoesntReturnPaginatedData_tryToBuildSchema_getException() throws Exception {
         //Act + Assert
-        GraphQLAnnotations.object(NotValidConnectionField.class);
+        this.graphQLAnnotations.object(NotValidConnectionField.class);
     }
 
     @Test
     public void validDatafetcher_queryForCursors_getValidCursors() throws Exception {
         //Arrange
         ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { edges { cursor } } }",
-                null, "CONTEXT", null, null);
+                null, "CONTEXT", null, new HashMap<>());
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
@@ -161,7 +150,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     public void fetchConnectionAsync() throws Exception {
         //Arrange
         ExecutionInput executionInput = new ExecutionInput("{ objsAsync(first:2) { edges { cursor } } }",
-                null, "CONTEXT", null, null);
+                null, "CONTEXT", null, new HashMap<>());
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
@@ -176,7 +165,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     public void validDatafetcher_queryForValues_returnsValidValues() throws Exception {
         //Arrange
         ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { edges { cursor node { id, val } } } }",
-                null, "CONTEXT", null, null);
+                null, "CONTEXT", null, new HashMap<>());
 
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
@@ -193,7 +182,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
 
         //Arrange
         ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { pageInfo { hasPreviousPage } } }",
-                null, "CONTEXT", null, null);
+                null, "CONTEXT", null, new HashMap<>());
 
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
@@ -208,7 +197,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
 
         //Arrange
         ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { pageInfo { hasNextPage } } }",
-                null, "CONTEXT", null, null);
+                null, "CONTEXT", null, new HashMap<>());
 
         //Act
         ExecutionResult result = graphQL.execute(executionInput);

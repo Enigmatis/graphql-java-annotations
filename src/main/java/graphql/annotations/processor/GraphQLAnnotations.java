@@ -30,6 +30,7 @@ import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.DataFetcherConstructor;
 import graphql.relay.Relay;
 import graphql.schema.GraphQLDirective;
+import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 
 import java.util.Arrays;
@@ -94,12 +95,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         this.container = new ProcessingElementsContainer(defaultTypeFunction);
     }
 
-    public static GraphQLAnnotations instance = new GraphQLAnnotations();
-
-    public static GraphQLAnnotations getInstance() {
-        return instance;
-    }
-
     public void setRelay(Relay relay) {
         this.container.setRelay(relay);
     }
@@ -109,38 +104,46 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         return toGraphqlName(name == null ? objectClass.getSimpleName() : name.value());
     }
 
-    public static GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
-        GraphQLAnnotations instance = getInstance();
+    public GraphQLInterfaceType generateInterface(Class<?> object) throws GraphQLAnnotationsException {
         try {
-            return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
+            return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
-            instance.getContainer().getProcessing().clear();
-            instance.getTypeRegistry().clear();
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
             throw e;
         }
     }
 
-    public static GraphQLObjectType object(Class<?> object, GraphQLDirective... directives) throws GraphQLAnnotationsException {
-        GraphQLAnnotations instance = getInstance();
-        Arrays.stream(directives).forEach(x -> instance.getContainer().getDirectiveRegistry().put(x.getName(), x));
-
+    public GraphQLObjectType object(Class<?> object) throws GraphQLAnnotationsException {
         try {
-            return instance.graphQLObjectHandler.getObject(object, instance.getContainer());
+            return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
-            instance.getContainer().getProcessing().clear();
-            instance.getTypeRegistry().clear();
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
             throw e;
         }
     }
 
-    public static GraphQLDirective directive(Class<?> object) throws GraphQLAnnotationsException {
-        GraphQLAnnotations instance = getInstance();
-
+    @Deprecated
+    public GraphQLObjectType object(Class<?> object, GraphQLDirective... directives) throws GraphQLAnnotationsException {
+        Arrays.stream(directives).forEach(directive -> this.getContainer().getDirectiveRegistry().put(directive.getName(), directive));
         try {
-            return instance.directiveCreator.getDirective(object);
+            return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
-            instance.getContainer().getProcessing().clear();
-            instance.getTypeRegistry().clear();
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
+            throw e;
+        }
+    }
+
+    public GraphQLDirective directive(Class<?> object) throws GraphQLAnnotationsException {
+        try {
+            GraphQLDirective directive = this.directiveCreator.getDirective(object);
+            this.getContainer().getDirectiveRegistry().put(directive.getName(), directive);
+            return directive;
+        } catch (GraphQLAnnotationsException e) {
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
             throw e;
         }
     }
@@ -149,12 +152,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         graphQLExtensionsHandler.registerTypeExtension(objectClass, container);
     }
 
-    public void registerType(TypeFunction typeFunction) {
+    public void registerTypeFunction(TypeFunction typeFunction) {
         ((DefaultTypeFunction) container.getDefaultTypeFunction()).register(typeFunction);
     }
 
-    public static void register(TypeFunction typeFunction) {
-        getInstance().registerType(typeFunction);
+    @Deprecated
+    public void register(TypeFunction typeFunction) {
+        this.registerTypeFunction(typeFunction);
     }
 
     public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {

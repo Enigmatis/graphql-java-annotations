@@ -14,16 +14,22 @@
  */
 package graphql.annotations.directives;
 
+import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLDirectiveContainer;
 
 public class AnnotationsWiringEnvironmentImpl implements AnnotationsWiringEnvironment {
     private final GraphQLDirectiveContainer element;
     private final GraphQLDirective directive;
+    private final String parentName;
+    private GraphQLCodeRegistry.Builder codeRegistryBuilder;
 
-    public AnnotationsWiringEnvironmentImpl(GraphQLDirectiveContainer element, GraphQLDirective directive) {
+    public AnnotationsWiringEnvironmentImpl(GraphQLDirectiveContainer element, GraphQLDirective directive,
+                                            String parentName, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
         this.element = element;
         this.directive = directive;
+        this.parentName = parentName;
+        this.codeRegistryBuilder = codeRegistryBuilder;
     }
 
     @Override
@@ -37,6 +43,16 @@ public class AnnotationsWiringEnvironmentImpl implements AnnotationsWiringEnviro
     }
 
     @Override
+    public String getParentName() {
+        return parentName;
+    }
+
+    @Override
+    public GraphQLCodeRegistry.Builder getCodeRegistryBuilder() {
+        return codeRegistryBuilder;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -44,6 +60,9 @@ public class AnnotationsWiringEnvironmentImpl implements AnnotationsWiringEnviro
         AnnotationsWiringEnvironmentImpl that = (AnnotationsWiringEnvironmentImpl) o;
 
         if (element != null ? !element.equals(that.element) : that.element != null) return false;
+        if (parentName != null ? !parentName.equals(that.parentName) : that.parentName != null) return false;
+        if (codeRegistryBuilder != null ? !codeRegistryBuilder.equals(that.codeRegistryBuilder) : that.codeRegistryBuilder != null)
+            return false;
         return directive != null ? directive.equals(that.directive) : that.directive == null;
     }
 

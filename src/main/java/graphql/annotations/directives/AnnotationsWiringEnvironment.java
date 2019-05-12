@@ -14,6 +14,7 @@
  */
 package graphql.annotations.directives;
 
+import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLDirectiveContainer;
 
@@ -27,4 +28,17 @@ public interface AnnotationsWiringEnvironment {
      * @return the directive that is being examined
      */
     GraphQLDirective getDirective();
+
+    /**
+     *
+     * @return the parent name of the element
+     */
+    String getParentName();
+
+
+    /**
+     *
+     * @return the code registry builder
+     */
+    GraphQLCodeRegistry.Builder getCodeRegistryBuilder();
 }

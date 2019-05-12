@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.Scalars.GraphQLString;
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.*;
 
 public class GraphQLExtensionsTest {
@@ -98,7 +98,7 @@ public class GraphQLExtensionsTest {
         GraphQLAnnotations instance = new GraphQLAnnotations();
         instance.registerTypeExtension(TestObjectExtension.class);
         GraphQLObjectHandler graphQLObjectHandler = instance.getObjectHandler();
-        GraphQLObjectType object = graphQLObjectHandler.getObject(GraphQLExtensionsTest.TestObject.class, instance.getContainer());
+        GraphQLObjectType object = graphQLObjectHandler.getGraphQLType(GraphQLExtensionsTest.TestObject.class, instance.getContainer());
 
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 5);
@@ -114,13 +114,7 @@ public class GraphQLExtensionsTest {
 
     @Test
     public void values() {
-        GraphQLAnnotations instance = new GraphQLAnnotations();
-        instance.registerTypeExtension(TestObjectExtension.class);
-        GraphQLObjectHandler graphQLObjectHandler = instance.getObjectHandler();
-        GraphQLObjectType object = graphQLObjectHandler.getObject(GraphQLExtensionsTest.TestObject.class, instance.getContainer());
-
-        GraphQLSchema schema = newSchema().query(object).build();
-        GraphQLSchema schemaInherited = newSchema().query(object).build();
+        GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).typeExtension(TestObjectExtension.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field field2 field3 field4 field5}", new GraphQLExtensionsTest.TestObject());
         Map<String, Object> data = result.getData();
@@ -136,7 +130,7 @@ public class GraphQLExtensionsTest {
         GraphQLAnnotations instance = new GraphQLAnnotations();
         GraphQLObjectHandler graphQLObjectHandler = instance.getObjectHandler();
         instance.registerTypeExtension(TestObjectExtensionInvalid.class);
-        GraphQLAnnotationsException e = expectThrows(GraphQLAnnotationsException.class, () -> graphQLObjectHandler.getObject(TestObject.class,instance.getContainer()));
+        GraphQLAnnotationsException e = expectThrows(GraphQLAnnotationsException.class, () -> graphQLObjectHandler.getGraphQLType(TestObject.class, instance.getContainer()));
         assertTrue(e.getMessage().startsWith("Duplicate field"));
     }
 }
