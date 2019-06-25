@@ -42,7 +42,7 @@ public class GraphQLObjectInfoRetriever {
                 .collect(Collectors.toList());
     }
 
-    public static Boolean isGraphQLField(AnnotatedElement element) {
+    public Boolean isGraphQLField(AnnotatedElement element) {
         GraphQLField annotation = element.getAnnotation(GraphQLField.class);
         if (annotation == null) {
             return null;
