@@ -18,7 +18,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.TreeMap;
 
-public  class ObjectUtil {
+public class ObjectUtil {
 
     public static Map<String, Field> getAllFields(Class c) {
         Map<String, Field> fields;
@@ -30,7 +30,9 @@ public  class ObjectUtil {
         }
 
         for (Field f : c.getDeclaredFields()) {
-            fields.put(f.getName(), f);
+            if (!f.isSynthetic()) {
+                fields.put(f.getName(), f);
+            }
         }
 
         return fields;
