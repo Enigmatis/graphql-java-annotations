@@ -49,11 +49,9 @@ public class DirectiveCreator {
     }
 
     private void buildArguments(GraphQLDirective.Builder builder, Class<?> annotatedClass) {
-        Arrays.stream(annotatedClass.getDeclaredFields()).forEach(x -> {
-            if (!x.isSynthetic()) {
-                builder.argument(directiveArgumentCreator.getArgument(x, annotatedClass));
-            }
-        });
+        Arrays.stream(annotatedClass.getDeclaredFields())
+                .filter(x -> !x.isSynthetic())
+                .forEach(x -> builder.argument(directiveArgumentCreator.getArgument(x, annotatedClass)));
     }
 
     private Introspection.DirectiveLocation[] getValidLocations(Class<?> annotatedClass) {
