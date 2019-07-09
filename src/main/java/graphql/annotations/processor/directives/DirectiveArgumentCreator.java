@@ -35,7 +35,6 @@ public class DirectiveArgumentCreator {
         this.container = container;
     }
 
-
     public GraphQLArgument getArgument(Field field, Class<?> containingClass) {
         GraphQLArgument.Builder builder = newArgument()
                 .name(commonPropertiesCreator.getName(field))
@@ -60,6 +59,4 @@ public class DirectiveArgumentCreator {
         return (GraphQLInputType) typeFunction.buildType(true, field.getType(),
                 field.getAnnotatedType(), container);
     }
-
-
 }

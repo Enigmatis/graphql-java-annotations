@@ -36,8 +36,8 @@ public class DirectiveCreator {
 
     public GraphQLDirective getDirective(Class<?> annotatedClass) {
         GraphQLDirective.Builder builder = newDirective()
-        .name(commonPropertiesCreator.getName(annotatedClass))
-        .description(commonPropertiesCreator.getDescription(annotatedClass));
+                .name(commonPropertiesCreator.getName(annotatedClass))
+                .description(commonPropertiesCreator.getDescription(annotatedClass));
         Introspection.DirectiveLocation[] validLocations = getValidLocations(annotatedClass);
         if (validLocations == null || validLocations.length == 0) {
             throw new GraphQLAnnotationsException("No valid locations defined on directive", null);
@@ -49,10 +49,10 @@ public class DirectiveCreator {
     }
 
     private void buildArguments(GraphQLDirective.Builder builder, Class<?> annotatedClass) {
-        Arrays.stream(annotatedClass.getDeclaredFields()).forEach(x ->
-                builder.argument(directiveArgumentCreator.getArgument(x, annotatedClass)));
+        Arrays.stream(annotatedClass.getDeclaredFields())
+                .filter(field -> !field.isSynthetic())
+                .forEach(field -> builder.argument(directiveArgumentCreator.getArgument(field, annotatedClass)));
     }
-
 
     private Introspection.DirectiveLocation[] getValidLocations(Class<?> annotatedClass) {
         DirectiveLocations directiveLocationsAnnotation = annotatedClass.getAnnotation(DirectiveLocations.class);
@@ -61,5 +61,4 @@ public class DirectiveCreator {
         }
         return null;
     }
-
 }
