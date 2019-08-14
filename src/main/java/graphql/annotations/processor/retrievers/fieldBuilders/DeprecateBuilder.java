@@ -30,7 +30,7 @@ public class DeprecateBuilder implements Builder<String> {
     public String build() {
         GraphQLDeprecate deprecate = object.getAnnotation(GraphQLDeprecate.class);
         if (deprecate != null) {
-            return deprecate.value();
+            return deprecate.value().isEmpty() ? DEFAULT_DEPRECATION_DESCRIPTION : deprecate.value();
         }
         if (object.getAnnotation(Deprecated.class) != null) {
             return DEFAULT_DEPRECATION_DESCRIPTION;
