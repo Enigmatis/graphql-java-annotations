@@ -188,16 +188,11 @@ public class DirectiveWirerTest {
     // GraphQLInterfaceType
 
     @Test
-    public void wireGraphQLInterfaceType_validLocations_correctMethodIsCalled() throws Exception {
+    public void wireGraphQLInterfaceType_validLocations_correctMethodIsCalled() {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLInterfaceType directiveContainer = GraphQLInterfaceType.newInterface().name("asdf").typeResolver(new TypeResolver() {
-            @Override
-            public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-                return null;
-            }
-        }).build();
+        GraphQLInterfaceType directiveContainer = GraphQLInterfaceType.newInterface().name("asdf").build();
 
         AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
                 directiveContainer.getDirective("upperCase"), parentName, builder);
@@ -221,12 +216,7 @@ public class DirectiveWirerTest {
         // Arrange
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
-        GraphQLInterfaceType directiveContainer = GraphQLInterfaceType.newInterface().name("asdf").typeResolver(new TypeResolver() {
-            @Override
-            public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-                return null;
-            }
-        }).build();
+        GraphQLInterfaceType directiveContainer = GraphQLInterfaceType.newInterface().name("asdf").build();
 
         AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(directiveContainer,
                 directiveContainer.getDirective("upperCase"), parentName, builder);
@@ -249,7 +239,7 @@ public class DirectiveWirerTest {
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
         GraphQLUnionType directiveContainer = GraphQLUnionType.newUnionType().name("asdf")
-                .possibleType(GraphQLObjectType.newObject().name("Asdfaaaa").build()).typeResolver(env -> null).build();
+                .possibleType(GraphQLObjectType.newObject().name("Asdfaaaa").build()).build();
 
         AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
                 directiveContainer, directiveContainer.getDirective("upperCase"), parentName, builder);
@@ -274,7 +264,7 @@ public class DirectiveWirerTest {
         AnnotationsDirectiveWiring upperWiring = mock(AnnotationsDirectiveWiring.class);
 
         GraphQLUnionType directiveContainer = GraphQLUnionType.newUnionType().name("asdf")
-                .possibleType(GraphQLObjectType.newObject().name("Asdfaaaa").build()).typeResolver(env -> null).build();
+                .possibleType(GraphQLObjectType.newObject().name("Asdfaaaa").build()).build();
 
 
         AnnotationsWiringEnvironmentImpl upperCaseEnv = new AnnotationsWiringEnvironmentImpl(
