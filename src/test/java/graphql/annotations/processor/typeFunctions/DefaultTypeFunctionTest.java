@@ -59,10 +59,10 @@ public class DefaultTypeFunctionTest {
         List<GraphQLEnumValueDefinition> values = ((GraphQLEnumType) enumeration).getValues();
         assertEquals(values.stream().
                         map(GraphQLEnumValueDefinition::getName).collect(Collectors.toList()),
-                Arrays.asList("B", "someA"));
+                Arrays.asList("someA", "B"));
         assertEquals(values.stream().
                         map(GraphQLEnumValueDefinition::getDescription).collect(Collectors.toList()),
-                Arrays.asList("B", "a"));
+                Arrays.asList("a", "B"));
 
     }
 

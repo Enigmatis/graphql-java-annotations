@@ -67,7 +67,7 @@ public class DeprecateBuilderTest {
         String deprecate = deprecateBuilder.build();
 
         // assert
-        assertEquals(deprecate, "");
+        assertEquals(deprecate, "Deprecated");
     }
 
     @Test

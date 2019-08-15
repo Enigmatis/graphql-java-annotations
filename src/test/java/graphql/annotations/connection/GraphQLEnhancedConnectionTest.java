@@ -134,8 +134,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     @Test
     public void validDatafetcher_queryForCursors_getValidCursors() throws Exception {
         //Arrange
-        ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { edges { cursor } } }",
-                null, "CONTEXT", null, new HashMap<>());
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput().query("{ objs(first:2) { edges { cursor } } }").build();
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
@@ -149,8 +148,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     @Test
     public void fetchConnectionAsync() throws Exception {
         //Arrange
-        ExecutionInput executionInput = new ExecutionInput("{ objsAsync(first:2) { edges { cursor } } }",
-                null, "CONTEXT", null, new HashMap<>());
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput().query("{ objsAsync(first:2) { edges { cursor } } }").build();
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
         Map<String, Map<String, List<Map<String, Map<String, Object>>>>> data = result.getData();
@@ -164,8 +162,9 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     @Test
     public void validDatafetcher_queryForValues_returnsValidValues() throws Exception {
         //Arrange
-        ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { edges { cursor node { id, val } } } }",
-                null, "CONTEXT", null, new HashMap<>());
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput().query("{ objs(first:2) { edges { cursor node { id, val } } } }")
+                .context("CONTEXT").root(null).operationName(null).variables(new HashMap<>())
+                .build();
 
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
@@ -181,8 +180,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     public void validDatafetcher_queryForHasPreviousPage_returnsFalse() throws Exception {
 
         //Arrange
-        ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { pageInfo { hasPreviousPage } } }",
-                null, "CONTEXT", null, new HashMap<>());
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput().query("{ objs(first:2) { pageInfo { hasPreviousPage } } }").build();
 
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
@@ -196,8 +194,7 @@ public static class NotGoodDataFetcher implements DataFetcher<List<Obj>> {
     public void validDatafetcher_queryForHasNextPage_returnsTrue() throws Exception {
 
         //Arrange
-        ExecutionInput executionInput = new ExecutionInput("{ objs(first:2) { pageInfo { hasNextPage } } }",
-                null, "CONTEXT", null, new HashMap<>());
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput().query("{ objs(first:2) { pageInfo { hasNextPage } } }").build();
 
         //Act
         ExecutionResult result = graphQL.execute(executionInput);
