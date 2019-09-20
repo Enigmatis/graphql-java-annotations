@@ -34,6 +34,7 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
+// todo: add tests for other directives types
 public class DirectiveCreatorTest {
     private DirectiveCreator directiveCreator;
     private DirectiveArgumentCreator directiveArgumentCreator;
@@ -52,6 +53,7 @@ public class DirectiveCreatorTest {
     public static class UpperDirectiveNoValidLocations {
         private boolean isActive = true;
     }
+
     @BeforeMethod
     public void setUp() throws NoSuchFieldException {
         directiveArgumentCreator = Mockito.mock(DirectiveArgumentCreator.class);
