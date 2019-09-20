@@ -19,6 +19,8 @@ import graphql.annotations.annotationTypes.GraphQLName;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class CommonPropertiesCreator {
     public String getDescription(AnnotatedElement annotatedElement) {
@@ -37,6 +39,10 @@ public class CommonPropertiesCreator {
             return ((Class<?>) annotatedElement).getSimpleName();
         } else if (annotatedElement instanceof Field) {
             return ((Field) annotatedElement).getName();
+        } else if (annotatedElement instanceof Method){
+            return ((Method) annotatedElement).getName();
+        } else if(annotatedElement instanceof Parameter){
+            return ((Parameter)annotatedElement).getName();
         }
         return null;
     }
