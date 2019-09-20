@@ -24,7 +24,5 @@ import java.lang.annotation.Target;
 public @interface Directive {
     String name();
 
-    Class<? extends AnnotationsDirectiveWiring> wiringClass();
-
     String[] argumentsValues() default {};
 }
