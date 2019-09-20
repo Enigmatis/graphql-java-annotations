@@ -16,7 +16,9 @@ package graphql.annotations;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.creation.DirectiveLocations;
+import graphql.annotations.directives.creation.DirectiveWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLArgument;
@@ -38,9 +40,14 @@ public class GraphQLDirectiveCreationTest {
         this.graphQLAnnotations = new GraphQLAnnotations();
     }
 
+    public static class GeneralWiring implements AnnotationsDirectiveWiring{
+
+    }
+
     @GraphQLName("upper")
     @GraphQLDescription("makes string upper case")
     @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
+    @DirectiveWiring(GeneralWiring.class)
     public static class UpperDirective {
         private boolean isActive = true;
         @GraphQLName("suffixToAdd")

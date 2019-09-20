@@ -15,6 +15,7 @@
 package graphql.annotations.directives;
 
 import graphql.annotations.annotationTypes.GraphQLDirectives;
+import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.schema.GraphQLDirective;
@@ -40,10 +41,10 @@ public class DirectiveWiringMapRetrieverTest {
 
     }
 
-    @GraphQLDirectives({@Directive(name = "upperCase", wiringClass = WiringClass.class), @Directive(name = "lowerCase", wiringClass = SecondWiringClass.class)})
+    @GraphQLDirectives({@Directive(name = "upperCase"), @Directive(name = "lowerCase")})
     public static String field;
 
-    @GraphQLDirectives({@Directive(name = "upperCase", wiringClass = ThirdWiringClass.class)})
+    @GraphQLDirectives({@Directive(name = "upperCase")})
     public static String fieldWithPrivateWiringClassThatShouldFail;
 
     @Test
@@ -68,8 +69,8 @@ public class DirectiveWiringMapRetrieverTest {
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
         ProcessingElementsContainer container = new ProcessingElementsContainer();
-        container.getDirectiveRegistry().put("upperCase", upperCase);
-        container.getDirectiveRegistry().put("lowerCase", lowerCase);
+        container.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, ThirdWiringClass.class));
+        container.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, SecondWiringClass.class));
 
         // Act
         try {
@@ -88,8 +89,8 @@ public class DirectiveWiringMapRetrieverTest {
         GraphQLDirective upperCase = newDirective().name("upperCase").build();
         GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
         ProcessingElementsContainer container = new ProcessingElementsContainer();
-        container.getDirectiveRegistry().put("upperCase", upperCase);
-        container.getDirectiveRegistry().put("lowerCase", lowerCase);
+        container.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
+        container.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, SecondWiringClass.class));
 
         // Act
         Map<GraphQLDirective, AnnotationsDirectiveWiring> map = directiveWiringMapRetriever.getDirectiveWiringMap(this.getClass().getField("field"), container);
