@@ -16,6 +16,7 @@ package graphql.annotations.processor;
 
 import graphql.annotations.annotationTypes.GraphQLDirectiveDefinition;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.directives.creation.DirectiveAnnotation;
 import graphql.annotations.directives.creation.DirectiveWiring;
 import graphql.annotations.processor.directives.CommonPropertiesCreator;
 import graphql.annotations.processor.directives.DirectiveArgumentCreator;
@@ -161,7 +162,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     public GraphQLDirective directiveViaAnnotation(Class<?> annotationClass) {
         try {
             GraphQLDirective directive = this.directiveCreator.getDirective(annotationClass);
-            DirectiveWiring annotation = annotationClass.getAnnotation(DirectiveWiring.class);
+            DirectiveAnnotation annotation = annotationClass.getAnnotation(DirectiveAnnotation.class);
             if (annotation==null){
                 throw new GraphQLAnnotationsException(String.format("No wiring is provided to directive class %s", annotationClass.getSimpleName()), null);
             }

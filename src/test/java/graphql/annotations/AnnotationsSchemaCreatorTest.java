@@ -14,7 +14,6 @@
  */
 package graphql.annotations;
 
-import graphql.annotations.AnnotationsSchemaCreator;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;

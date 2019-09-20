@@ -189,8 +189,7 @@ public class GraphQLDirectivesTest {
 
     @Target({ElementType.TYPE, ElementType.METHOD})
     @Retention(RetentionPolicy.RUNTIME)
-    @DirectiveAnnotation
-    @DirectiveWiring(UpperWiring.class)
+    @DirectiveAnnotation(UpperWiring.class)
     @DirectiveLocations(Introspection.DirectiveLocation.FIELD_DEFINITION)
     @GraphQLName("upper")
     public @interface ToUpperCase{
@@ -352,4 +351,6 @@ public class GraphQLDirectivesTest {
     }
 
 
+    public static class Wiring implements AnnotationsDirectiveWiring {
+    }
 }

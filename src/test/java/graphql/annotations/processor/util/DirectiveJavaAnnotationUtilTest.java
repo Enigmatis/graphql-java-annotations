@@ -2,6 +2,7 @@ package graphql.annotations.processor.util;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.creation.DirectiveAnnotation;
 import org.testng.annotations.Test;
 
@@ -20,7 +21,11 @@ public class DirectiveJavaAnnotationUtilTest {
         DirectiveJavaAnnotationUtil.getDirectiveAnnotations(null);
     }
 
-    @DirectiveAnnotation
+    static class Wiring implements AnnotationsDirectiveWiring {
+
+    }
+
+    @DirectiveAnnotation(Wiring.class)
     @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     @GraphQLName("sample")
@@ -28,7 +33,7 @@ public class DirectiveJavaAnnotationUtilTest {
 
     }
 
-    @DirectiveAnnotation
+    @DirectiveAnnotation(Wiring.class)
     @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     @interface DirectiveAnnotationSample2{
