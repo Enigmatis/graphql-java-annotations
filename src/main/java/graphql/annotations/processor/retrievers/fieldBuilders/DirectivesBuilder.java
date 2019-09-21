@@ -14,6 +14,7 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders;
 
+import com.sun.deploy.util.ReflectionUtil;
 import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -21,6 +22,7 @@ import graphql.annotations.processor.util.DirectiveJavaAnnotationUtil;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLScalarType;
+import javafx.scene.effect.Reflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -92,6 +94,7 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
         directiveBuilder.argument(graphQLArgument.transform(builder -> {
             if (graphQLArgument.getType() instanceof GraphQLScalarType) {
                 try {
+                    methods[finalI].setAccessible(true);
                     Object argumentValue = methods[finalI].invoke(annotation);
                     Object value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
                     builder.value(value);

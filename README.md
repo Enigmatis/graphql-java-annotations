@@ -572,6 +572,8 @@ public String name() {
 We now wired the field "name" - so it will turn upper case when calling the field.
 The ``Directive`` annotations requires the name of the directive, the wiring class (the ``UpperWiring`` class defined earlier), and the values of the arguments. If an argument has a default value, you don't have to supply a value in the arguments values.
 
+Notice that in any way, the directives are sequential, so the first annotated directive will happen before the second one.
+
 ## Relay support
 
 ### Mutations

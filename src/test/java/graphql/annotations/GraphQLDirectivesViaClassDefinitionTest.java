@@ -45,7 +45,7 @@ import static graphql.schema.GraphQLDirective.newDirective;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.*;
 
-public class GraphQLDirectivesTest {
+public class GraphQLDirectivesViaClassDefinitionTest {
 
     private GraphQLAnnotations graphQLAnnotations;
 
@@ -183,40 +183,6 @@ public class GraphQLDirectivesTest {
             return "yarin";
         }
     }
-
-
-    @Target({ElementType.TYPE, ElementType.METHOD})
-    @Retention(RetentionPolicy.RUNTIME)
-    @GraphQLDirectiveDefinition(wiring = UpperWiring.class)
-    @DirectiveLocations(Introspection.DirectiveLocation.FIELD_DEFINITION)
-    @GraphQLName("upper")
-    public @interface ToUpperCase{
-        boolean isActive() default true;
-    }
-
-
-    public static class QueryAnnotation {
-        @GraphQLField
-        @ToUpperCase
-        public static String name() {
-            return "yarin";
-        }
-    }
-
-
-    @Test
-    public void queryName_javaAnnotationDirective_wiringIsActivated() throws Exception {
-        this.graphQLAnnotations.directiveViaAnnotation(ToUpperCase.class);
-        GraphQLObjectType object = this.graphQLAnnotations.object(QueryAnnotation.class);
-        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
-
-        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
-
-        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { name }");
-        assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, String>) result.getData()).get("name").toString(), "YARIN");
-    }
-
 
 
     @Test
