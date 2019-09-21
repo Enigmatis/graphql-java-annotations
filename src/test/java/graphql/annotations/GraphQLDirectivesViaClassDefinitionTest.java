@@ -168,35 +168,8 @@ public class GraphQLDirectivesViaClassDefinitionTest {
     }
 
 
-    public static class QueryAlternative {
-        @GraphQLName("suffix")
-        @GraphQLDirectiveDefinition(wiring = SuffixWiring.class)
-        @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.ARGUMENT_DEFINITION})
-        public static void suffixDirective(@GraphQLName("suffix") String suffix) {
-
-        }
-
-        @GraphQLField
-        @GraphQLDirectives({
-                @Directive(name = "suffix", argumentsValues = {"coolSuffix"})})
-        public static String name() {
-            return "yarin";
-        }
-    }
 
 
-    @Test
-    public void queryName_directivesInAlternativeWayCreation_wiringIsActivated() throws Exception {
-        this.graphQLAnnotations.directives(QueryAlternative.class);
-        GraphQLObjectType object = this.graphQLAnnotations.object(QueryAlternative.class);
-        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
-
-        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
-
-        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { name }");
-        assertTrue(result.getErrors().isEmpty());
-        assertEquals(((Map<String, String>) result.getData()).get("name").toString(), "yarincoolSuffix");
-    }
 
 
     @Test

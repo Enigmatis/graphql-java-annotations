@@ -158,7 +158,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
     }
 
-    //todo: add tests
     public GraphQLDirective directiveViaAnnotation(Class<?> annotationClass) {
         if (!annotationClass.isAnnotationPresent(GraphQLDirectiveDefinition.class) || !annotationClass.isAnnotationPresent(Retention.class)){
             throw new GraphQLAnnotationsException(String.format("The supplied class %s is not annotated with a GraphQLDirectiveDefinition and/or Retention annotation", annotationClass.getSimpleName()), null);
@@ -176,7 +175,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
     }
 
-    //todo: add tests
     public Set<GraphQLDirective> directives(Class<?> directivesDeclarationClass) {
         Method[] methods = directivesDeclarationClass.getMethods();
         Set<GraphQLDirective> directiveSet = new HashSet<>();

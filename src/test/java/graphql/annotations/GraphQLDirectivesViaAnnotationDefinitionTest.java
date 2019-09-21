@@ -41,8 +41,6 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
         this.schema = newSchema().query(object).codeRegistry(codeRegistry).build();
-
-
     }
 
     /**
