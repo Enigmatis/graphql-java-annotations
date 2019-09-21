@@ -141,6 +141,7 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         @GraphQLName("suffix")
         String suffixToAdd();
         boolean isActive();
+        String[] extraSuffixes() default {};
     }
 
     public static class Query{
