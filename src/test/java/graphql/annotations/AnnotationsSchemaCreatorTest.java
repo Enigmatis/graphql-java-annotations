@@ -17,10 +17,10 @@ package graphql.annotations;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.AnnotationsWiringEnvironment;
 import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
-import graphql.annotations.annotationTypes.directives.definition.DirectiveWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLDirective;
@@ -119,9 +119,9 @@ public class AnnotationsSchemaCreatorTest {
 
     @GraphQLName("testDirective")
     @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION})
-    @DirectiveWiring(GeneralWiring.class)
+    @GraphQLDirectiveDefinition(wiring = GeneralWiring.class)
     public static class DirectiveDefinitionTest {
-        private boolean isActive = true;
+        public boolean isActive = true;
     }
 
     @Test
@@ -138,7 +138,7 @@ public class AnnotationsSchemaCreatorTest {
 
     @GraphQLName("secondDirective")
     @DirectiveLocations(Introspection.DirectiveLocation.FIELD)
-    @DirectiveWiring(GeneralWiring.class)
+    @GraphQLDirectiveDefinition(wiring = GeneralWiring.class)
     public static class SecondDirective {
 
     }

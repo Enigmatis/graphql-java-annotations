@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 /**
  * You should put this annotation on top of a directive method you created, or a directive java annotation you created
  */
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GraphQLDirectiveDefinition {
     Class<? extends AnnotationsDirectiveWiring> wiring();

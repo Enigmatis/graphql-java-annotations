@@ -19,14 +19,16 @@ import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiv
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
-import graphql.annotations.annotationTypes.directives.definition.DirectiveWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
 
 import static graphql.Scalars.GraphQLBoolean;
@@ -54,7 +56,7 @@ public class GraphQLDirectiveCreationTest {
     @GraphQLName("upper")
     @GraphQLDescription("makes string upper case")
     @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
-    @DirectiveWiring(GeneralWiring.class)
+    @GraphQLDirectiveDefinition(wiring = GeneralWiring.class)
     public static class UpperDirective {
         private boolean isActive = true;
         @GraphQLName("suffixToAdd")
@@ -121,8 +123,8 @@ public class GraphQLDirectiveCreationTest {
         // Act
         Set<GraphQLDirective> directive = this.graphQLAnnotations.directives(DirectivesMethodsContainer.class);
 
-        GraphQLDirective upper = (GraphQLDirective) directive.toArray()[1];
-        GraphQLDirective suffix = (GraphQLDirective) directive.toArray()[0];
+        GraphQLDirective upper = (GraphQLDirective) directive.toArray()[0];
+        GraphQLDirective suffix = (GraphQLDirective) directive.toArray()[1];
 
         // Assert
         assertEquals(upper.getName(), "upper");
@@ -151,6 +153,7 @@ public class GraphQLDirectiveCreationTest {
     @GraphQLDescription("the upper")
     @GraphQLDirectiveDefinition(wiring = Wiring.class)
     @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
+    @Retention(RetentionPolicy.RUNTIME)
     @interface UpperAnnotation {
         @GraphQLName("isActive")
         @GraphQLDescription("is active")
@@ -158,6 +161,7 @@ public class GraphQLDirectiveCreationTest {
     }
 
     @GraphQLName("bla")
+    @Retention(RetentionPolicy.RUNTIME)
     @interface NoDirectiveAnnotation {
         boolean isActive() default true;
     }
@@ -179,21 +183,10 @@ public class GraphQLDirectiveCreationTest {
         assertEquals(true,isActive.getDefaultValue());
     }
 
-    @Test
-    public void directive_suppliedNoDirectiveAnnotation_returnNull() {
+    @Test(expectedExceptions = GraphQLAnnotationsException.class)
+    public void directive_suppliedNoDirectiveAnnotation_throwException() {
         // Act
         GraphQLDirective upper = this.graphQLAnnotations.directiveViaAnnotation(NoDirectiveAnnotation.class);
-
-        // Assert
-        assertEquals(upper.getName(), "upper");
-        assertEquals(upper.getDescription(), "the upper");
-        assertArrayEquals(upper.validLocations().toArray(), new Introspection.DirectiveLocation[]{Introspection.DirectiveLocation.FIELD_DEFINITION,
-                Introspection.DirectiveLocation.INTERFACE});
-        GraphQLArgument isActive = upper.getArgument("isActive");
-        assertNotNull(isActive);
-        assertEquals(isActive.getName(), "isActive");
-        assertEquals(isActive.getType(), GraphQLBoolean);
-        assertEquals(true,isActive.getDefaultValue());
     }
 
 

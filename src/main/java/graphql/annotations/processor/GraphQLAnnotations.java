@@ -16,7 +16,6 @@ package graphql.annotations.processor;
 
 import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.annotationTypes.directives.definition.DirectiveWiring;
 import graphql.annotations.processor.directives.CommonPropertiesCreator;
 import graphql.annotations.processor.directives.DirectiveArgumentCreator;
 import graphql.annotations.processor.directives.DirectiveCreator;
@@ -35,6 +34,7 @@ import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 
+import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -142,13 +142,14 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     public GraphQLDirective directive(Class<?> object) throws GraphQLAnnotationsException {
+        if (!object.isAnnotationPresent(GraphQLDirectiveDefinition.class)){
+            throw new GraphQLAnnotationsException(String.format("The supplied class %s is not annotated with a GraphQLDirectiveDefinition annotation", object.getSimpleName()), null);
+        }
+
         try {
             GraphQLDirective directive = this.directiveCreator.getDirective(object);
-            DirectiveWiring annotation = object.getAnnotation(DirectiveWiring.class);
-            if (annotation==null){
-                throw new GraphQLAnnotationsException(String.format("No wiring is provided to directive class %s", object.getSimpleName()), null);
-            }
-            this.getContainer().getDirectiveRegistry().put(directive.getName(), new DirectiveAndWiring(directive, annotation.value()));
+            GraphQLDirectiveDefinition annotation = object.getAnnotation(GraphQLDirectiveDefinition.class);
+            this.getContainer().getDirectiveRegistry().put(directive.getName(), new DirectiveAndWiring(directive, annotation.wiring()));
             return directive;
         } catch (GraphQLAnnotationsException e) {
             this.getContainer().getProcessing().clear();
@@ -159,12 +160,13 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
     //todo: add tests
     public GraphQLDirective directiveViaAnnotation(Class<?> annotationClass) {
+        if (!annotationClass.isAnnotationPresent(GraphQLDirectiveDefinition.class) || !annotationClass.isAnnotationPresent(Retention.class)){
+            throw new GraphQLAnnotationsException(String.format("The supplied class %s is not annotated with a GraphQLDirectiveDefinition and/or Retention annotation", annotationClass.getSimpleName()), null);
+        }
+
         try {
             GraphQLDirective directive = this.directiveCreator.getDirective(annotationClass);
             GraphQLDirectiveDefinition annotation = annotationClass.getAnnotation(GraphQLDirectiveDefinition.class);
-            if (annotation==null){
-                throw new GraphQLAnnotationsException(String.format("No wiring is provided to directive class %s", annotationClass.getSimpleName()), null);
-            }
             this.getContainer().getDirectiveRegistry().put(directive.getName(), new DirectiveAndWiring(directive, annotation.wiring()));
             return directive;
         } catch (GraphQLAnnotationsException e) {
@@ -178,7 +180,7 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     public Set<GraphQLDirective> directives(Class<?> directivesDeclarationClass) {
         Method[] methods = directivesDeclarationClass.getMethods();
         Set<GraphQLDirective> directiveSet = new HashSet<>();
-        Arrays.stream(methods).filter(method -> method.isAnnotationPresent(GraphQLDirectiveDefinition.class))
+        Arrays.stream(methods).sequential().filter(method -> method.isAnnotationPresent(GraphQLDirectiveDefinition.class))
                 .forEach(method -> {
                     try {
                         DirectiveAndWiring directive = this.directiveCreator.getDirective(method);

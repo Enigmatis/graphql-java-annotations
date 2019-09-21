@@ -24,7 +24,6 @@ import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.AnnotationsWiringEnvironment;
 import graphql.annotations.annotationTypes.directives.activation.Directive;
 import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
-import graphql.annotations.annotationTypes.directives.definition.DirectiveWiring;
 import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -272,7 +271,7 @@ public class GraphQLDirectivesTest {
 
     @GraphQLName("upperCase")
     @DirectiveLocations(Introspection.DirectiveLocation.FIELD_DEFINITION)
-    @DirectiveWiring(UpperWiring.class)
+    @GraphQLDirectiveDefinition(wiring = UpperWiring.class)
     public static class UpperCase {
         boolean isActive;
     }

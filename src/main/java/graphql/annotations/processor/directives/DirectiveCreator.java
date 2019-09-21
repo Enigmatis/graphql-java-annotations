@@ -22,6 +22,8 @@ import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLDirective;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -73,7 +75,7 @@ public class DirectiveCreator {
     }
 
     private void buildArguments(GraphQLDirective.Builder builder, Class<?> annotatedClass) {
-        if (annotatedClass.isAnnotationPresent(GraphQLDirectiveDefinition.class)){
+        if (annotatedClass.isAnnotationPresent(Retention.class)){
             Arrays.stream(annotatedClass.getDeclaredMethods())
                     .filter(method -> !method.isSynthetic())
                     .forEach(method -> builder.argument(directiveArgumentCreator.getArgument(method)));
