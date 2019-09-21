@@ -14,9 +14,9 @@
 // */
 //package graphql.annotations.processor.retrievers.fieldBuilders;
 //
-//import graphql.annotations.annotationTypes.GraphQLDirectives;
+//import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 //import graphql.annotations.directives.AnnotationsDirectiveWiring;
-//import graphql.annotations.directives.Directive;
+//import graphql.annotations.annotationTypes.directives.activation.Directive;
 //import graphql.annotations.processor.ProcessingElementsContainer;
 //import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 //import graphql.schema.GraphQLDirective;

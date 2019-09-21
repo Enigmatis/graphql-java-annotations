@@ -16,16 +16,15 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.annotationTypes.GraphQLDirectiveDefinition;
-import graphql.annotations.annotationTypes.GraphQLDirectives;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
+import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.AnnotationsWiringEnvironment;
-import graphql.annotations.directives.Directive;
-import graphql.annotations.directives.creation.DirectiveAnnotation;
-import graphql.annotations.directives.creation.DirectiveLocations;
-import graphql.annotations.directives.creation.DirectiveWiring;
+import graphql.annotations.annotationTypes.directives.activation.Directive;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveWiring;
 import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -189,7 +188,7 @@ public class GraphQLDirectivesTest {
 
     @Target({ElementType.TYPE, ElementType.METHOD})
     @Retention(RetentionPolicy.RUNTIME)
-    @DirectiveAnnotation(UpperWiring.class)
+    @GraphQLDirectiveDefinition(wiring = UpperWiring.class)
     @DirectiveLocations(Introspection.DirectiveLocation.FIELD_DEFINITION)
     @GraphQLName("upper")
     public @interface ToUpperCase{

@@ -14,12 +14,9 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders;
 
-import graphql.annotations.annotationTypes.GraphQLDirectives;
-import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.directives.creation.DirectiveAnnotation;
+import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.annotations.processor.retrievers.fieldBuilders.field.FieldNameBuilder;
 import graphql.annotations.processor.util.DirectiveJavaAnnotationUtil;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
@@ -27,7 +24,6 @@ import graphql.schema.GraphQLScalarType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;

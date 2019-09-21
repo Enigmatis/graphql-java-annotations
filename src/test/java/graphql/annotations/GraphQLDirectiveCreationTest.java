@@ -15,12 +15,11 @@
 package graphql.annotations;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
-import graphql.annotations.annotationTypes.GraphQLDirectiveDefinition;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
-import graphql.annotations.directives.creation.DirectiveAnnotation;
-import graphql.annotations.directives.creation.DirectiveLocations;
-import graphql.annotations.directives.creation.DirectiveWiring;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLArgument;
@@ -150,7 +149,7 @@ public class GraphQLDirectiveCreationTest {
 
     @GraphQLName("upper")
     @GraphQLDescription("the upper")
-    @DirectiveAnnotation(Wiring.class)
+    @GraphQLDirectiveDefinition(wiring = Wiring.class)
     @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
     @interface UpperAnnotation {
         @GraphQLName("isActive")
@@ -179,5 +178,23 @@ public class GraphQLDirectiveCreationTest {
         assertEquals(isActive.getType(), GraphQLBoolean);
         assertEquals(true,isActive.getDefaultValue());
     }
+
+    @Test
+    public void directive_suppliedNoDirectiveAnnotation_returnNull() {
+        // Act
+        GraphQLDirective upper = this.graphQLAnnotations.directiveViaAnnotation(NoDirectiveAnnotation.class);
+
+        // Assert
+        assertEquals(upper.getName(), "upper");
+        assertEquals(upper.getDescription(), "the upper");
+        assertArrayEquals(upper.validLocations().toArray(), new Introspection.DirectiveLocation[]{Introspection.DirectiveLocation.FIELD_DEFINITION,
+                Introspection.DirectiveLocation.INTERFACE});
+        GraphQLArgument isActive = upper.getArgument("isActive");
+        assertNotNull(isActive);
+        assertEquals(isActive.getName(), "isActive");
+        assertEquals(isActive.getType(), GraphQLBoolean);
+        assertEquals(true,isActive.getDefaultValue());
+    }
+
 
 }

@@ -16,6 +16,7 @@ package graphql.annotations.directives.creation;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
 import graphql.annotations.processor.directives.CommonPropertiesCreator;
 import graphql.annotations.processor.directives.DirectiveArgumentCreator;
 import graphql.annotations.processor.directives.DirectiveCreator;

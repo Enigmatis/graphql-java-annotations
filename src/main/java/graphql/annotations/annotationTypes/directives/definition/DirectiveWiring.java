@@ -1,4 +1,4 @@
-package graphql.annotations.directives.creation;
+package graphql.annotations.annotationTypes.directives.definition;
 
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.introspection.Introspection;

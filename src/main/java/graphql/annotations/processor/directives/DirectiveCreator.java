@@ -14,10 +14,9 @@
  */
 package graphql.annotations.processor.directives;
 
-import graphql.annotations.annotationTypes.GraphQLDirectiveDefinition;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
-import graphql.annotations.directives.creation.DirectiveAnnotation;
-import graphql.annotations.directives.creation.DirectiveLocations;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
 import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.introspection.Introspection;
@@ -74,7 +73,7 @@ public class DirectiveCreator {
     }
 
     private void buildArguments(GraphQLDirective.Builder builder, Class<?> annotatedClass) {
-        if (annotatedClass.isAnnotationPresent(DirectiveAnnotation.class)){
+        if (annotatedClass.isAnnotationPresent(GraphQLDirectiveDefinition.class)){
             Arrays.stream(annotatedClass.getDeclaredMethods())
                     .filter(method -> !method.isSynthetic())
                     .forEach(method -> builder.argument(directiveArgumentCreator.getArgument(method)));

@@ -1,7 +1,7 @@
 package graphql.annotations.processor.util;
 
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.directives.creation.DirectiveAnnotation;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -14,7 +14,7 @@ public class DirectiveJavaAnnotationUtil {
         if (annotatedElement==null){
             throw new NullPointerException("supplied element is null");
         }
-        return Arrays.stream(annotatedElement.getDeclaredAnnotations()).filter(annotation -> annotation.annotationType().isAnnotationPresent(DirectiveAnnotation.class));
+        return Arrays.stream(annotatedElement.getDeclaredAnnotations()).filter(annotation -> annotation.annotationType().isAnnotationPresent(GraphQLDirectiveDefinition.class));
     }
 
     public static String getName(Annotation annotation){

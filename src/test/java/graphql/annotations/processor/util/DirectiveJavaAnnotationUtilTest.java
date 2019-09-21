@@ -2,8 +2,8 @@ package graphql.annotations.processor.util;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
-import graphql.annotations.directives.creation.DirectiveAnnotation;
 import org.testng.annotations.Test;
 
 import java.lang.annotation.*;
@@ -25,34 +25,37 @@ public class DirectiveJavaAnnotationUtilTest {
 
     }
 
-    @DirectiveAnnotation(Wiring.class)
+    @GraphQLDirectiveDefinition(wiring = Wiring.class)
     @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     @GraphQLName("sample")
-    @interface DirectiveAnnotationSample{
+    @interface DirectiveAnnotationSample {
 
     }
 
-    @DirectiveAnnotation(Wiring.class)
+    @GraphQLDirectiveDefinition(wiring = Wiring.class)
     @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
-    @interface DirectiveAnnotationSample2{
+    @interface DirectiveAnnotationSample2 {
 
     }
 
 
-    static class Container{
+    static class Container {
 
         @DirectiveAnnotationSample
         @DirectiveAnnotationSample2
         @GraphQLName("blabla")
-        public void fieldAnnotatedWithMultipleAnnotationsIncludingDirective(){}
+        public void fieldAnnotatedWithMultipleAnnotationsIncludingDirective() {
+        }
 
         @GraphQLName("bbb")
         @GraphQLDescription("asdfasdf")
-        public void fieldAnnotatedWithMultipleAnnotationsWithoutDirective(){}
+        public void fieldAnnotatedWithMultipleAnnotationsWithoutDirective() {
+        }
 
-        public void fieldNotAnnotated(){}
+        public void fieldNotAnnotated() {
+        }
 
     }
 
@@ -95,7 +98,7 @@ public class DirectiveJavaAnnotationUtilTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void getName_nullElement_throwNullPointerException(){
+    public void getName_nullElement_throwNullPointerException() {
         String name = DirectiveJavaAnnotationUtil.getName(null);
     }
 
