@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 import static graphql.schema.GraphQLDirective.newDirective;
 
 
-//todo: add tests for other directive types
 public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
     private AnnotatedElement object;
     private ProcessingElementsContainer container;
@@ -44,6 +43,40 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
         this.object = object;
         this.container = container;
     }
+
+    @Override
+    public GraphQLDirective[] build() {
+        // building directives from directives java annotations
+        List<GraphQLDirective> graphQLDirectives = new ArrayList<>();
+        DirectiveJavaAnnotationUtil.getDirectiveAnnotations(object)
+                .forEach(annotation -> {
+                    String name = DirectiveJavaAnnotationUtil.getName(annotation);
+                    if (container.getDirectiveRegistry().containsKey(name)) {
+                        GraphQLDirective graphQLDirective = transformArgs(container.getDirectiveRegistry().get(name).getDirective(), annotation);
+                        graphQLDirectives.add(graphQLDirective);
+                    } else {
+                        throw new GraphQLAnnotationsException(String.format("No directive named %s is found in the directive registry", name), null);
+                    }
+                });
+
+        // building directives from graphql-java-annotations directive annotation
+        GraphQLDirectives directives = object.getAnnotation(GraphQLDirectives.class);
+        if (directives != null) {
+            List<GraphQLDirective> oldGraphQLDirectives = Arrays.stream(directives.value())
+                    .map(x -> {
+                                if (container.getDirectiveRegistry().containsKey(x.name())) {
+                                    return transformArgs(container.getDirectiveRegistry().get(x.name()).getDirective(), x.argumentsValues());
+                                } else {
+                                    throw new GraphQLAnnotationsException(String.format("No directive named %s is found in the directive registry", x.name()), null);
+                                }
+                            }
+                    ).collect(Collectors.toList());
+            graphQLDirectives.addAll(oldGraphQLDirectives);
+        }
+
+        return graphQLDirectives.toArray(new GraphQLDirective[graphQLDirectives.size()]);
+    }
+
 
     private GraphQLDirective transformArgs(GraphQLDirective graphQLDirective, Annotation annotation) {
         GraphQLDirective.Builder directiveBuilder = newDirective(graphQLDirective);
@@ -126,38 +159,5 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
                 throw new GraphQLAnnotationsException("Directive argument type must be a scalar!", null);
             }
         }));
-    }
-
-    @Override
-    public GraphQLDirective[] build() {
-        // building directives from directives java annotations
-        List<GraphQLDirective> graphQLDirectives = new ArrayList<>();
-        DirectiveJavaAnnotationUtil.getDirectiveAnnotations(object)
-                .forEach(annotation -> {
-                    String name = DirectiveJavaAnnotationUtil.getName(annotation);
-                    if (container.getDirectiveRegistry().containsKey(name)) {
-                        GraphQLDirective graphQLDirective = transformArgs(container.getDirectiveRegistry().get(name).getDirective(), annotation);
-                        graphQLDirectives.add(graphQLDirective);
-                    } else {
-                        throw new GraphQLAnnotationsException(String.format("No directive named %s is found in the directive registry", name), null);
-                    }
-                });
-
-        // building directives from graphql-java-annotations directive annotation
-        GraphQLDirectives directives = object.getAnnotation(GraphQLDirectives.class);
-        if (directives != null) {
-            List<GraphQLDirective> oldGraphQLDirectives = Arrays.stream(directives.value())
-                    .map(x -> {
-                                if (container.getDirectiveRegistry().containsKey(x.name())) {
-                                    return transformArgs(container.getDirectiveRegistry().get(x.name()).getDirective(), x.argumentsValues());
-                                } else {
-                                    throw new GraphQLAnnotationsException(String.format("No directive named %s is found in the directive registry", x.name()), null);
-                                }
-                            }
-                    ).collect(Collectors.toList());
-            graphQLDirectives.addAll(oldGraphQLDirectives);
-        }
-
-        return graphQLDirectives.toArray(new GraphQLDirective[graphQLDirectives.size()]);
     }
 }
