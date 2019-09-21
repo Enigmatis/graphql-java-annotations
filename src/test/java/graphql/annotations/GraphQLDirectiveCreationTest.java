@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.Set;
 
 import static graphql.Scalars.GraphQLBoolean;
@@ -122,9 +123,10 @@ public class GraphQLDirectiveCreationTest {
     public void directive_suppliedDirectiveMethodContainer_returnCorrectDirective() {
         // Act
         Set<GraphQLDirective> directive = this.graphQLAnnotations.directives(DirectivesMethodsContainer.class);
+        GraphQLDirective[] directives = directive.toArray(new GraphQLDirective[]{});
 
-        GraphQLDirective upper = (GraphQLDirective) directive.toArray()[0];
-        GraphQLDirective suffix = (GraphQLDirective) directive.toArray()[1];
+        GraphQLDirective upper = (GraphQLDirective) Arrays.stream(directives).filter(x->x.getName().equals("upper")).toArray()[0];
+        GraphQLDirective suffix = (GraphQLDirective) Arrays.stream(directives).filter(x->x.getName().equals("suffix")).toArray()[0];
 
         // Assert
         assertEquals(upper.getName(), "upper");
