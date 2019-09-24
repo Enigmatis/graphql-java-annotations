@@ -14,7 +14,6 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders;
 
-import com.sun.deploy.util.ReflectionUtil;
 import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -22,7 +21,7 @@ import graphql.annotations.processor.util.DirectiveJavaAnnotationUtil;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLScalarType;
-import javafx.scene.effect.Reflection;
+import graphql.schema.GraphQLType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -126,11 +125,17 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
         Method[] methods = annotation.annotationType().getDeclaredMethods();
         directiveBuilder.argument(graphQLArgument.transform(builder -> {
             // todo: add support for list
-            if (graphQLArgument.getType() instanceof GraphQLScalarType) {
+            if (graphQLArgument.getType() instanceof GraphQLType) {
                 try {
                     methods[finalI].setAccessible(true);
                     Object argumentValue = methods[finalI].invoke(annotation);
-                    Object value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
+                    Object value;
+                    if (graphQLArgument.getType() instanceof GraphQLScalarType) {
+                        value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
+                    }
+                    else{
+                        value = argumentValue;
+                    }
                     builder.value(value);
                 } catch (Exception e) {
                     throw new GraphQLAnnotationsException("Could not parse argument value to argument type", e);

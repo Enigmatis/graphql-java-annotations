@@ -19,8 +19,6 @@ import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.annotationTypes.directives.activation.Directive;
-import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
 import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
@@ -39,9 +37,7 @@ import java.lang.annotation.Target;
 import java.util.Map;
 
 import static graphql.schema.GraphQLSchema.newSchema;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class GraphQLDirectivesViaAnnotationDefinitionTest {
     private GraphQLAnnotations graphQLAnnotations;
@@ -52,6 +48,7 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         this.graphQLAnnotations = new GraphQLAnnotations();
         this.graphQLAnnotations.directiveViaAnnotation(Upper.class);
         this.graphQLAnnotations.directiveViaAnnotation(Suffix.class);
+        this.graphQLAnnotations.directiveViaAnnotation(DirectiveWithList.class);
         GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
         this.schema = newSchema().query(object).codeRegistry(codeRegistry).build();
@@ -122,6 +119,16 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         }
     }
 
+    public static class DirectiveWithListWiring implements AnnotationsDirectiveWiring{
+        @Override
+        public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
+            GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
+            String[] list= (String[]) environment.getDirective().getArgument("list").getValue();
+            CodeRegistryUtil.wrapDataFetcher(field, environment, (dataFetchingEnvironment, value) -> value + list[0]);
+            return field;
+        }
+    }
+
 
     @GraphQLDirectiveDefinition(wiring = UpperWiring.class)
     @GraphQLName("upper")
@@ -141,7 +148,15 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         @GraphQLName("suffix")
         String suffixToAdd();
         boolean isActive();
-        String[] extraSuffixes() default {};
+    }
+
+    @GraphQLDirectiveDefinition(wiring = DirectiveWithListWiring.class)
+    @GraphQLName("list")
+    @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE, ElementType.METHOD})
+    @Retention(RetentionPolicy.RUNTIME)
+    @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.ARGUMENT_DEFINITION, Introspection.DirectiveLocation.INPUT_FIELD_DEFINITION})
+    @interface DirectiveWithList{
+        String[] list();
     }
 
     public static class Query{
@@ -179,6 +194,9 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
             return "yarin";
         }
 
+        @GraphQLField
+        @DirectiveWithList(list = {"v", "x", "y"})
+        public static String nameWithDirectiveWithList() {return "yarin";}
 
         public static class NameWithArgument implements DataFetcher {
             @Override
@@ -265,5 +283,16 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         assertTrue(result1.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result1.getData()).get("nameWithMultipleDirectives").toString(), "YARIN is cool");
     }
+
+    @Test
+    public void usingAnnotationDirective_listArgument_wiringHappens(){
+        // Act
+        ExecutionResult result1 = GraphQL.newGraphQL(schema).build().execute("query { nameWithDirectiveWithList }");
+
+        // Assert
+        assertTrue(result1.getErrors().isEmpty());
+        assertEquals(((Map<String, String>) result1.getData()).get("nameWithDirectiveWithList").toString(), "yarinv");
+    }
+
 
 }
