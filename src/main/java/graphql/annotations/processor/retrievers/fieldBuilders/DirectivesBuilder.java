@@ -128,7 +128,6 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
         GraphQLArgument graphQLArgument = arguments.get(i);
         Method[] methods = annotation.annotationType().getDeclaredMethods();
         directiveBuilder.argument(graphQLArgument.transform(builder -> {
-            // todo: add support for list
             if (graphQLArgument.getType() instanceof GraphQLType) {
                 try {
                     methods[finalI].setAccessible(true);
