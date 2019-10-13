@@ -14,16 +14,15 @@
  */
 package graphql.annotations.processor.directives;
 
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
 import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
-import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
 import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLDirective;
 
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -56,7 +55,7 @@ public class DirectiveCreator {
         return builder.build();
     }
 
-    public DirectiveAndWiring getDirective(Method directiveMethod){
+    public DirectiveAndWiring getDirectiveAndWiring(Method directiveMethod){
         GraphQLDirective.Builder builder = newDirective()
                 .name(commonPropertiesCreator.getName(directiveMethod))
                 .description(commonPropertiesCreator.getDescription(directiveMethod));

@@ -427,7 +427,7 @@ For example, we wish to create a directive that adds suffix to graphql fields.
 ```
 
 - must be annotated with `@GraphQLDirectiveDefinition` and to supply a wiring class to it (will be explained later)
-- the name of the directive will be taken from the class name `(Suffix)` or if annotated with `@GraphQLName` - from its value
+- the name of the directive will be taken from the class name (`Suffix`) or if annotated with `@GraphQLName` - from its value
 - the description is taken from the `@GraphQLDescription` annotation
 - must be annotated with `@Retention` with a `RUNTIME` policy
 - must be annotated with `@DirectiveLocations` in order to specify where we can put this directive on (for example - field definition, interface)
