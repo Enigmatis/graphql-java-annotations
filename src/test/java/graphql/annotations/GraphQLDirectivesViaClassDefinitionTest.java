@@ -16,13 +16,15 @@ package graphql.annotations;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.annotations.annotationTypes.GraphQLDirectives;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
+import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.AnnotationsWiringEnvironment;
-import graphql.annotations.directives.Directive;
-import graphql.annotations.directives.creation.DirectiveLocations;
+import graphql.annotations.annotationTypes.directives.activation.Directive;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
+import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.util.CodeRegistryUtil;
@@ -31,6 +33,10 @@ import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Map;
 
 import static graphql.Scalars.GraphQLBoolean;
@@ -39,7 +45,7 @@ import static graphql.schema.GraphQLDirective.newDirective;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static org.testng.Assert.*;
 
-public class GraphQLDirectivesTest {
+public class GraphQLDirectivesViaClassDefinitionTest {
 
     private GraphQLAnnotations graphQLAnnotations;
 
@@ -103,13 +109,13 @@ public class GraphQLDirectivesTest {
 
     public static class Query {
         @GraphQLField
-        @GraphQLDirectives(@Directive(name = "upperCase", wiringClass = UpperWiring.class, argumentsValues = {"true"}))
+        @GraphQLDirectives(@Directive(name = "upperCase", argumentsValues = {"true"}))
         public static String name() {
             return "yarin";
         }
 
         @GraphQLField
-        @GraphQLDirectives(@Directive(name = "upperCase", wiringClass = UpperWiring.class, argumentsValues = {"false"}))
+        @GraphQLDirectives(@Directive(name = "upperCase", argumentsValues = {"false"}))
         public static String nameWithFalse() {
             return "yarin";
         }
@@ -117,7 +123,7 @@ public class GraphQLDirectivesTest {
 
     public static class Query2 {
         @GraphQLField
-        @GraphQLDirectives(@Directive(name = "upperCase", wiringClass = UpperWiring.class))
+        @GraphQLDirectives(@Directive(name = "upperCase"))
         public static String nameWithNoArgs() {
             return "yarin";
         }
@@ -125,8 +131,8 @@ public class GraphQLDirectivesTest {
 
     public static class Query3 {
         @GraphQLField
-        @GraphQLDirectives({@Directive(name = "upperCase", wiringClass = UpperWiring.class, argumentsValues = {"true"}),
-                @Directive(name = "suffix", wiringClass = SuffixWiring.class, argumentsValues = {"coolSuffix"})})
+        @GraphQLDirectives({@Directive(name = "upperCase", argumentsValues = {"true"}),
+                @Directive(name = "suffix", argumentsValues = {"coolSuffix"})})
         public static String name() {
             return "yarin";
         }
@@ -134,8 +140,7 @@ public class GraphQLDirectivesTest {
 
     public static class Query4 {
         @GraphQLField
-        public static String nameWithArgument(@GraphQLDirectives({@Directive(name = "suffix",
-                wiringClass = SuffixWiring.class, argumentsValues = {"coolSuffixForArg"})})
+        public static String nameWithArgument(@GraphQLDirectives({@Directive(name = "suffix", argumentsValues = {"coolSuffixForArg"})})
                                               @GraphQLName("extensionArg") String extensionArg) {
             return "yarin" + extensionArg;
         }
@@ -143,7 +148,7 @@ public class GraphQLDirectivesTest {
 
     public static class InputObject {
         @GraphQLField
-        @GraphQLDirectives({@Directive(name = "suffix", wiringClass = SuffixWiring.class, argumentsValues = {"coolSuffix"})})
+        @GraphQLDirectives({@Directive(name = "suffix", argumentsValues = {"coolSuffix"})})
         private String a;
 
         @GraphQLField
@@ -162,12 +167,17 @@ public class GraphQLDirectivesTest {
         }
     }
 
+
+
+
+
+
     @Test
     public void queryNameWithInputObject_directivesProvidedToRegistry_wiringOfInputObjectIsActivated() {
         GraphQLDirective suffixDirective = GraphQLDirective.newDirective().name("suffix").argument(builder -> builder.name("suffix").type(GraphQLString))
                 .validLocations(Introspection.DirectiveLocation.INPUT_FIELD_DEFINITION, Introspection.DirectiveLocation.FIELD_DEFINITION).build();
 
-        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), suffixDirective);
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), new DirectiveAndWiring(suffixDirective, SuffixWiring.class));
         GraphQLObjectType object = this.graphQLAnnotations.object(Query5.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
         GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
@@ -180,7 +190,7 @@ public class GraphQLDirectivesTest {
     public void queryNameWithArgument_directivesProvidedToRegistry_wiringOfArgumentIsActivated() {
         GraphQLDirective suffixDirective = GraphQLDirective.newDirective().name("suffix").argument(builder -> builder.name("suffix").type(GraphQLString))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.ARGUMENT_DEFINITION).build();
-        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), suffixDirective);
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), new DirectiveAndWiring(suffixDirective, SuffixWiring.class));
         GraphQLObjectType object = this.graphQLAnnotations.object(Query4.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
         GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
@@ -200,6 +210,7 @@ public class GraphQLDirectivesTest {
 
     @GraphQLName("upperCase")
     @DirectiveLocations(Introspection.DirectiveLocation.FIELD_DEFINITION)
+    @GraphQLDirectiveDefinition(wiring = UpperWiring.class)
     public static class UpperCase {
         boolean isActive;
     }
@@ -221,7 +232,7 @@ public class GraphQLDirectivesTest {
     public void queryNameWithFalse_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
-        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), upperCase);
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), new DirectiveAndWiring(upperCase, UpperWiring.class));
         GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
         GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
@@ -235,7 +246,7 @@ public class GraphQLDirectivesTest {
     public void queryNameWithNoArgs_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean).defaultValue(true))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
-        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), upperCase);
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), new DirectiveAndWiring(upperCase, UpperWiring.class));
         GraphQLObjectType object = this.graphQLAnnotations.object(Query2.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
         GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
@@ -249,7 +260,7 @@ public class GraphQLDirectivesTest {
     public void queryNameWithNoArgs_noDefaultValue_exceptionIsThrown() throws Exception {
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
-        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), upperCase);
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), new DirectiveAndWiring(upperCase, UpperWiring.class));
         GraphQLObjectType object = this.graphQLAnnotations.object(Query2.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
 
@@ -264,8 +275,8 @@ public class GraphQLDirectivesTest {
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         GraphQLDirective suffixDirective = GraphQLDirective.newDirective().name("suffix").argument(builder -> builder.name("suffix").type(GraphQLString))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.ARGUMENT_DEFINITION).build();
-        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), upperCase);
-        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), suffixDirective);
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), new DirectiveAndWiring(upperCase, UpperWiring.class));
+        this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(suffixDirective.getName(), new DirectiveAndWiring(suffixDirective, SuffixWiring.class));
         GraphQLObjectType object = this.graphQLAnnotations.object(Query3.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
 
@@ -277,4 +288,6 @@ public class GraphQLDirectivesTest {
     }
 
 
+    public static class Wiring implements AnnotationsDirectiveWiring {
+    }
 }

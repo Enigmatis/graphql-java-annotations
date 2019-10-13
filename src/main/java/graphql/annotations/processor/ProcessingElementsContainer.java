@@ -37,23 +37,23 @@ public class ProcessingElementsContainer {
     private TypeFunction defaultTypeFunction;
     private graphql.relay.Relay relay;
     private Map<String, graphql.schema.GraphQLType> typeRegistry;
-    private Map<String, graphql.schema.GraphQLDirective> directiveRegistry;
+    private Map<String, DirectiveAndWiring> directiveRegistry;
     private Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry;
     private GraphQLCodeRegistry.Builder codeRegistryBuilder;
     private Stack<String> processing;
     private String inputPrefix = DEFAULT_INPUT_PREFIX;
     private String inputSuffix = DEFAULT_INPUT_SUFFIX;
 
-    public Map<String, GraphQLDirective> getDirectiveRegistry() {
+    public Map<String, DirectiveAndWiring> getDirectiveRegistry() {
         return directiveRegistry;
     }
 
-    public void setDirectiveRegistry(Map<String, GraphQLDirective> directiveRegistry) {
+    public void setDirectiveRegistry(Map<String, DirectiveAndWiring> directiveRegistry) {
         this.directiveRegistry = directiveRegistry;
     }
 
     public ProcessingElementsContainer(TypeFunction defaultTypeFunction, Relay relay, Map<String,
-            graphql.schema.GraphQLType> typeRegistry, Map<String, graphql.schema.GraphQLDirective> directiveRegistry,
+            graphql.schema.GraphQLType> typeRegistry, Map<String, DirectiveAndWiring> directiveRegistry,
                                        Map<Class<?>, Set<Class<?>>> extensionsTypeRegistry, Stack<String> processing,
                                        GraphQLCodeRegistry.Builder codeRegistryBuilder) {
         this.defaultTypeFunction = defaultTypeFunction;

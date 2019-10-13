@@ -14,17 +14,24 @@
  */
 package graphql.annotations.processor.directives;
 
-import graphql.annotations.directives.creation.DirectiveLocations;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
+import graphql.annotations.directives.AnnotationsDirectiveWiring;
+import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLDirective;
 
+import java.lang.annotation.Retention;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import static graphql.schema.GraphQLDirective.newDirective;
 
 public class DirectiveCreator {
 
+    public static final String NO_VALID_LOCATIONS_DEFINED_ON_DIRECTIVE = "No valid locations defined on directive";
     private DirectiveArgumentCreator directiveArgumentCreator;
     private CommonPropertiesCreator commonPropertiesCreator;
 
@@ -40,7 +47,7 @@ public class DirectiveCreator {
                 .description(commonPropertiesCreator.getDescription(annotatedClass));
         Introspection.DirectiveLocation[] validLocations = getValidLocations(annotatedClass);
         if (validLocations == null || validLocations.length == 0) {
-            throw new GraphQLAnnotationsException("No valid locations defined on directive", null);
+            throw new GraphQLAnnotationsException(NO_VALID_LOCATIONS_DEFINED_ON_DIRECTIVE, null);
         }
         builder.validLocations(validLocations);
         buildArguments(builder, annotatedClass);
@@ -48,14 +55,46 @@ public class DirectiveCreator {
         return builder.build();
     }
 
-    private void buildArguments(GraphQLDirective.Builder builder, Class<?> annotatedClass) {
-        Arrays.stream(annotatedClass.getDeclaredFields())
-                .filter(field -> !field.isSynthetic())
-                .forEach(field -> builder.argument(directiveArgumentCreator.getArgument(field, annotatedClass)));
+    public DirectiveAndWiring getDirectiveAndWiring(Method directiveMethod){
+        GraphQLDirective.Builder builder = newDirective()
+                .name(commonPropertiesCreator.getName(directiveMethod))
+                .description(commonPropertiesCreator.getDescription(directiveMethod));
+        Introspection.DirectiveLocation[] validLocations = getValidLocations(directiveMethod);
+        if (validLocations == null || validLocations.length == 0) {
+            throw new GraphQLAnnotationsException(NO_VALID_LOCATIONS_DEFINED_ON_DIRECTIVE, null);
+        }
+
+        builder.validLocations(validLocations);
+        buildArguments(builder, directiveMethod);
+
+        GraphQLDirective builtDirective = builder.build();
+        Class<? extends AnnotationsDirectiveWiring> wiringClass = directiveMethod.getAnnotation(GraphQLDirectiveDefinition.class).wiring();
+
+        return new DirectiveAndWiring(builtDirective, wiringClass);
     }
 
-    private Introspection.DirectiveLocation[] getValidLocations(Class<?> annotatedClass) {
-        DirectiveLocations directiveLocationsAnnotation = annotatedClass.getAnnotation(DirectiveLocations.class);
+    private void buildArguments(GraphQLDirective.Builder builder, Class<?> annotatedClass) {
+        if (annotatedClass.isAnnotationPresent(Retention.class)){
+            Arrays.stream(annotatedClass.getDeclaredMethods())
+                    .filter(method -> !method.isSynthetic())
+                    .forEach(method -> builder.argument(directiveArgumentCreator.getArgument(method)));
+
+        }
+        else {
+            Arrays.stream(annotatedClass.getDeclaredFields())
+                    .filter(field -> !field.isSynthetic())
+                    .forEach(field -> builder.argument(directiveArgumentCreator.getArgument(field, annotatedClass)));
+        }
+    }
+
+    private void buildArguments(GraphQLDirective.Builder builder, Method directiveMethod) {
+        Arrays.stream(directiveMethod.getParameters())
+                .filter(parameter -> !parameter.isSynthetic())
+                .forEach(parameter -> builder.argument(directiveArgumentCreator.getArgument(parameter)));
+    }
+
+    private Introspection.DirectiveLocation[] getValidLocations(AnnotatedElement annotatedElement) {
+        DirectiveLocations directiveLocationsAnnotation = annotatedElement.getAnnotation(DirectiveLocations.class);
         if (directiveLocationsAnnotation != null) {
             return directiveLocationsAnnotation.value();
         }
