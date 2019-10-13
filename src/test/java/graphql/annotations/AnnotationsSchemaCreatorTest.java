@@ -14,14 +14,17 @@
  */
 package graphql.annotations;
 
-import graphql.annotations.AnnotationsSchemaCreator;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.directives.creation.DirectiveLocations;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
+import graphql.annotations.directives.AnnotationsDirectiveWiring;
+import graphql.annotations.directives.AnnotationsWiringEnvironment;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLDirective;
+import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
@@ -107,10 +110,18 @@ public class AnnotationsSchemaCreatorTest {
         assertThat(subscriptionType.getFieldDefinitions().size(), is(1));
     }
 
+    public static class GeneralWiring implements AnnotationsDirectiveWiring{
+        @Override
+        public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
+            return null;
+        }
+    }
+
     @GraphQLName("testDirective")
     @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION})
+    @GraphQLDirectiveDefinition(wiring = GeneralWiring.class)
     public static class DirectiveDefinitionTest {
-        private boolean isActive = true;
+        public boolean isActive = true;
     }
 
     @Test
@@ -127,6 +138,7 @@ public class AnnotationsSchemaCreatorTest {
 
     @GraphQLName("secondDirective")
     @DirectiveLocations(Introspection.DirectiveLocation.FIELD)
+    @GraphQLDirectiveDefinition(wiring = GeneralWiring.class)
     public static class SecondDirective {
 
     }

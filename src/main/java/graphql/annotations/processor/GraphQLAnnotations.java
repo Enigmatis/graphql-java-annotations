@@ -15,6 +15,7 @@
 package graphql.annotations.processor;
 
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.processor.directives.CommonPropertiesCreator;
 import graphql.annotations.processor.directives.DirectiveArgumentCreator;
 import graphql.annotations.processor.directives.DirectiveCreator;
@@ -33,8 +34,12 @@ import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 
+import java.lang.annotation.Retention;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 
@@ -44,6 +49,7 @@ import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
  */
 public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
 
+    public static final String NOT_PROPERLY_ANNOTATION_ERROR = "The supplied class %s is not annotated with a GraphQLDirectiveDefinition annotation";
     private GraphQLObjectHandler graphQLObjectHandler;
     private GraphQLExtensionsHandler graphQLExtensionsHandler;
     private DirectiveCreator directiveCreator;
@@ -125,8 +131,8 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     @Deprecated
-    public GraphQLObjectType object(Class<?> object, GraphQLDirective... directives) throws GraphQLAnnotationsException {
-        Arrays.stream(directives).forEach(directive -> this.getContainer().getDirectiveRegistry().put(directive.getName(), directive));
+    public GraphQLObjectType object(Class<?> object, DirectiveAndWiring... directives) throws GraphQLAnnotationsException {
+        Arrays.stream(directives).forEach(directiveAndWiring -> this.getContainer().getDirectiveRegistry().put(directiveAndWiring.getDirective().getName(), directiveAndWiring));
         try {
             return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
         } catch (GraphQLAnnotationsException e) {
@@ -137,15 +143,55 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
     }
 
     public GraphQLDirective directive(Class<?> object) throws GraphQLAnnotationsException {
+        if (!object.isAnnotationPresent(GraphQLDirectiveDefinition.class)){
+            throw new GraphQLAnnotationsException(String.format(NOT_PROPERLY_ANNOTATION_ERROR, object.getSimpleName()), null);
+        }
+
         try {
             GraphQLDirective directive = this.directiveCreator.getDirective(object);
-            this.getContainer().getDirectiveRegistry().put(directive.getName(), directive);
+            GraphQLDirectiveDefinition annotation = object.getAnnotation(GraphQLDirectiveDefinition.class);
+            this.getContainer().getDirectiveRegistry().put(directive.getName(), new DirectiveAndWiring(directive, annotation.wiring()));
             return directive;
         } catch (GraphQLAnnotationsException e) {
             this.getContainer().getProcessing().clear();
             this.getTypeRegistry().clear();
             throw e;
         }
+    }
+
+    public GraphQLDirective directiveViaAnnotation(Class<?> annotationClass) {
+        if (!annotationClass.isAnnotationPresent(GraphQLDirectiveDefinition.class) || !annotationClass.isAnnotationPresent(Retention.class)){
+            throw new GraphQLAnnotationsException(String.format("The supplied class %s is not annotated with a GraphQLDirectiveDefinition and/or Retention annotation", annotationClass.getSimpleName()), null);
+        }
+
+        try {
+            GraphQLDirective directive = this.directiveCreator.getDirective(annotationClass);
+            GraphQLDirectiveDefinition annotation = annotationClass.getAnnotation(GraphQLDirectiveDefinition.class);
+            this.getContainer().getDirectiveRegistry().put(directive.getName(), new DirectiveAndWiring(directive, annotation.wiring()));
+            return directive;
+        } catch (GraphQLAnnotationsException e) {
+            this.getContainer().getProcessing().clear();
+            this.getTypeRegistry().clear();
+            throw e;
+        }
+    }
+
+    public Set<GraphQLDirective> directives(Class<?> directivesDeclarationClass) {
+        Method[] methods = directivesDeclarationClass.getMethods();
+        Set<GraphQLDirective> directiveSet = new HashSet<>();
+        Arrays.stream(methods).sequential().filter(method -> method.isAnnotationPresent(GraphQLDirectiveDefinition.class))
+                .forEach(method -> {
+                    try {
+                        DirectiveAndWiring directiveAndWiring = this.directiveCreator.getDirectiveAndWiring(method);
+                        this.getContainer().getDirectiveRegistry().put(directiveAndWiring.getDirective().getName(), directiveAndWiring);
+                        directiveSet.add(directiveAndWiring.getDirective());
+                    } catch (GraphQLAnnotationsException e) {
+                        this.getContainer().getProcessing().clear();
+                        this.getTypeRegistry().clear();
+                        throw e;
+                    }
+                });
+        return directiveSet;
     }
 
     public void registerTypeExtension(Class<?> objectClass) {

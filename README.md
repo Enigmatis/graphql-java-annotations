@@ -35,7 +35,7 @@ syntax for GraphQL schema definition.
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:7.1"
+  compile "io.github.graphql-java:graphql-java-annotations:7.2"
 }
 ```
 
@@ -45,7 +45,7 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>7.1</version>
+    <version>7.2</version>
 </dependency>
 ```
 
@@ -401,20 +401,94 @@ graphqlAnnotations.registerType(new UUIDTypeFunction())
 You can also specify custom type function for any field with `@GraphQLType` annotation.
 
 ## Directives
-You can wire your fields using directives with annotations.
-We allow both defining directives using annotations, and wiring fields.
+In GraphQL, you can add directives to your schema. Directive is a way of adding some logic to your schema or changing your schema.
+For example, we can create a `@upper` directive, that if we add it to string fields in our schema, they will be transformed to upper cases (its an example, you need to implement it).   
 
-### Creating/Defining a ``GraphQLDirective``
-In order to create a directive, you first have to create a class that the directive will be created from.
+### Declaring a ``GraphQLDirective``
+There are multiple ways to declare a directive in your schema using graphql-java-annotations.
+
+#### Using a Java Annotation (recommended)
+This is the most recommended way of creating a directive, because it is very easy to use later in your schema.
+In order to declare a directive using a java annotation, you first have to create the java annotation, and annotate it with special annotations.
+
+For example, we wish to create a directive that adds suffix to graphql fields.
+
+```java
+@GraphQLName("suffix")
+@GraphQLDescription("this directive adds suffix to a string type")
+@GraphQLDirectiveDefinition(wiring = SuffixWiring.class)
+@DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
+@Retention(RetentionPolicy.RUNTIME)
+@interface Suffix {
+    @GraphQLName("suffixToAdd")
+    @GraphQLDescription("the suffix to add to your type")
+    boolean suffixToAdd() default true;
+}
+```
+
+- must be annotated with `@GraphQLDirectiveDefinition` and to supply a wiring class to it (will be explained later)
+- the name of the directive will be taken from the class name (`Suffix`) or if annotated with `@GraphQLName` - from its value
+- the description is taken from the `@GraphQLDescription` annotation
+- must be annotated with `@Retention` with a `RUNTIME` policy
+- must be annotated with `@DirectiveLocations` in order to specify where we can put this directive on (for example - field definition, interface)
+
+You can see that we also defined a ``sufixToAdd`` argument for the directive. We can also use `@GraphQLName` and `@GraphQLDescription` annotations in there.
+
+In order to define a default value for the argument, use the `default` keyword like in the example.
+
+After you created the class, you will be able to create the ``GraphQLDirective`` object using the following code:
+```java
+GraphQLDirective directive = graphqlAnnotations.directiveViaAnnotation(Suffix.class);
+```
+
+#### Using a method declaration
+You can also declare an annotation via a method declaration inside some class.
+For example, we will create a class of directive declarations:
+
+```java
+class DirectiveDeclarations{
+    @GraphQLName("upper")
+    @GraphQLDescription("upper directive")
+    @GraphQLDirectiveDefinition(wiring = UpperWiring.class)
+    @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
+    public void upperDirective(@GraphQLName("isActive") @GraphQLDescription("is active") boolean isActive) {
+    }
+    
+    @GraphQLName("suffix")
+    @GraphQLDescription("suffix directive")
+    @GraphQLDirectiveDefinition(wiring = SuffixWiring.class)
+    @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
+    public void suffixDirective(@GraphQLName("suffix") @GraphQLDescription("the suffix") String suffix) {
+    }
+}
+```
+
+- The methods has to be annotated with the `@GraphQLDirectiveDefinition` annotation, and to be supplied with a wiring class
+- The methods has to be annotated with the `@DirectiveLocations` annotation 
+- Can be used: `@GraphQLName` and `@GraphQLDescription` - also inside method parameters (that will be transformed into arguments of the directive)
+
+Notice that method params cannot have default values - so the directive arguments will not have default values.
+
+In order to create the directives, you need to write:
+```java
+Set<GraphQLDirective> set = graphqlAnnotations.directives(DirectiveDeclarations.class);
+```
+
+#### Using a class declaration
+
+Another way is to declare the directive using a class.
+
 For example:
 
 ```java
-    @GraphQLName("upper")
-    @GraphQLDescription("upper")
-    @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
-    public static class UpperDirective {
-        private boolean isActive = true;
-    }
+@GraphQLName("upper")
+@GraphQLDescription("upper")
+@DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.INTERFACE})
+@GraphQLDirectiveDefinition(wiring = UpperWiring.class)
+public static class UpperDirective {
+    @GraphQLName("isActive")
+    private boolean isActive = true;
+}
 ```
 
 The name of the directive will be taken from the ``@GraphQLName`` annotation (if not specified, the name will be the class's name).
@@ -426,13 +500,14 @@ You can also use ``@GraphQLName`` and ``@GraphQLDescription`` annotations on the
 
 After you created the class, you will be able to create the ``GraphQLDirective`` object using the following code:
 ```java
-graphqlAnnotations.directive(UpperDirective.class);
+GraphQLDirective directive = graphqlAnnotations.directive(UpperDirective.class);
 ```
 
-### Wiring with directives
-Using directives you will be able to wire fields and more, for example, changing the data fetchers of the fields.
+### Wiring with the directives
+In order to define the wiring logic (what will be executed on top of the graphql type annotated with the directive) we have to create wiring class.
 
-In order to define a wiring functionality, you have to create a Wiring class matching one of you directives. For example:
+In order to define a wiring functionality, you have to create a Wiring class matching one of your directives. For example:
+
 ```java
 public class UpperWiring implements AnnotationsDirectiveWiring {
         @Override
@@ -450,19 +525,55 @@ public class UpperWiring implements AnnotationsDirectiveWiring {
     }
 ```
 
+In this example we wrap the data fetcher of the field in order to make the resolved value upper case.
+
 You can also use the `field.transform` method in order to change some of the field's properties.
 
 This class turns your string field to upper case if the directive argument "isActive" is set to true.
-Now, you have to wire the field itself:
+
+Put this class inside the `@GraphQLDirectiveDefinition(wiring = UpperWiring.class)` annotation where you declare your directive (see directive declaration section above).
+
+### Using the directives
+
+There are 2 ways of using the directives in your graphql types.
+
+#### Using the directive java annotation (RECOMMENDED)
+This way only works if you declared your directive as a java annotation.
+In the example above, we created the `@Suffix` annotation as a directive.
+So now we can put it on top of our graphql field.
+
+For example:
+
 ```java
 @GraphQLField
-@GraphQLDirectives(@Directive(name = "upperCase", wiringClass = UpperWiring.class, argumentsValues = {"true"}))
-public static String name() {
+@Suffix(suffixToAdd = " is cool")
+public String name(){
     return "yarin";
 }
 ```
+
+Now every time the field will be executed, the suffix " is cool" will be added to it.
+You can also use directive on field arguments, interfaces, etc.
+
+#### Using `@GraphQLDirectives` annotation
+This way works in the 3 methods of declaring directives, but is less recommended because its more complicated and not so nice.
+You can annotate your graphql field with the `@GraphQLDirectives` annotation and supply it with the directives to use and the arguments values you want to supply.
+
+For example:
+
+```java
+@GraphQLField
+@GraphQLDirectives(@Directive(name = "upperCase", argumentsValues = {"true"}))
+public String name() {
+    return "yarin";
+}
+```
+
 We now wired the field "name" - so it will turn upper case when calling the field.
 The ``Directive`` annotations requires the name of the directive, the wiring class (the ``UpperWiring`` class defined earlier), and the values of the arguments. If an argument has a default value, you don't have to supply a value in the arguments values.
+
+Notice that in any way, the directives are sequential, so the first annotated directive will happen before the second one.
+If put both java annotation directive and `@GraphQLDirectives` annotation directives, the java annotation directive will be applied first.
 
 ## Relay support
 
