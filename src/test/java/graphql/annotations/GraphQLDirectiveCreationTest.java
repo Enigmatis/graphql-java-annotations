@@ -15,10 +15,10 @@
 package graphql.annotations;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
-import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
+import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
+import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.introspection.Introspection;
@@ -171,7 +171,7 @@ public class GraphQLDirectiveCreationTest {
     @Test
     public void directive_suppliedDirectiveAnnotation_returnCorrectDirective() {
         // Act
-        GraphQLDirective upper = this.graphQLAnnotations.directiveViaAnnotation(UpperAnnotation.class);
+        GraphQLDirective upper = this.graphQLAnnotations.directive(UpperAnnotation.class);
 
         // Assert
         assertEquals(upper.getName(), "upper");
@@ -188,7 +188,7 @@ public class GraphQLDirectiveCreationTest {
     @Test(expectedExceptions = GraphQLAnnotationsException.class)
     public void directive_suppliedNoDirectiveAnnotation_throwException() {
         // Act
-        GraphQLDirective upper = this.graphQLAnnotations.directiveViaAnnotation(NoDirectiveAnnotation.class);
+        GraphQLDirective upper = this.graphQLAnnotations.directive(NoDirectiveAnnotation.class);
     }
 
 

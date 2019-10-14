@@ -36,6 +36,7 @@ public class AnnotationsSchemaCreator {
         private Class<?> mutationObject;
         private Class<?> subscriptionObject;
         private Set<Class<?>> directivesObjectList = new HashSet<>();
+        private Set<Class<?>> directiveContainerClasses = new HashSet<>();
         private Set<Class<?>> additionalTypesList = new HashSet<>();
         private Set<Class<?>> typeExtensions = new HashSet<>();
         private Set<TypeFunction> typeFunctions = new HashSet<>();
@@ -110,6 +111,16 @@ public class AnnotationsSchemaCreator {
          */
         public Builder directives(Set<Class<?>> directiveClasses) {
             this.directivesObjectList.addAll(directiveClasses);
+            return this;
+        }
+
+        /**
+         * Add directive declaration class to create directives for the graphql schema
+         * @param directiveContainerClass a directive container class (directives are defined as methods inside the class)
+         * @return the builder after adding the directive container class to the list of directive container classes
+         */
+        public Builder directives(Class<?> directiveContainerClass){
+            this.directiveContainerClasses.add(directiveContainerClass);
             return this;
         }
 
@@ -223,6 +234,8 @@ public class AnnotationsSchemaCreator {
             }
 
             Set<GraphQLDirective> directives = directivesObjectList.stream().map(dir -> graphQLAnnotations.directive(dir)).collect(Collectors.toSet());
+            directiveContainerClasses.forEach(dir->directives.addAll(graphQLAnnotations.directives(dir)));
+
             Set<GraphQLType> additionalTypes = additionalTypesList.stream().map(additionalType ->
                     additionalType.isInterface() ?
                             graphQLAnnotations.generateInterface(additionalType) : graphQLAnnotations.object(additionalType)).collect(Collectors.toSet());
@@ -234,7 +247,7 @@ public class AnnotationsSchemaCreator {
             if (this.subscriptionObject != null) {
                 this.graphqlSchemaBuilder.subscription(graphQLAnnotations.object(subscriptionObject));
             }
-            if (!this.directivesObjectList.isEmpty()) {
+            if (!directives.isEmpty()) {
                 graphqlSchemaBuilder.additionalDirectives(directives);
             }
             this.graphqlSchemaBuilder.additionalTypes(additionalTypes).additionalType(Relay.pageInfoType)

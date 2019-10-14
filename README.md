@@ -438,7 +438,7 @@ In order to define a default value for the argument, use the `default` keyword l
 
 After you created the class, you will be able to create the ``GraphQLDirective`` object using the following code:
 ```java
-GraphQLDirective directive = graphqlAnnotations.directiveViaAnnotation(Suffix.class);
+GraphQLDirective directive = graphqlAnnotations.directive(Suffix.class);
 ```
 
 #### Using a method declaration
