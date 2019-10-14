@@ -17,10 +17,10 @@ package graphql.annotations;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
 import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.AnnotationsWiringEnvironment;
-import graphql.annotations.annotationTypes.directives.definition.DirectiveLocations;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.introspection.Introspection;
 import graphql.schema.GraphQLDirective;
@@ -30,6 +30,10 @@ import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -110,7 +114,7 @@ public class AnnotationsSchemaCreatorTest {
         assertThat(subscriptionType.getFieldDefinitions().size(), is(1));
     }
 
-    public static class GeneralWiring implements AnnotationsDirectiveWiring{
+    public static class GeneralWiring implements AnnotationsDirectiveWiring {
         @Override
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             return null;
@@ -156,6 +160,62 @@ public class AnnotationsSchemaCreatorTest {
         // assert
         assertThat(schema.getDirective("secondDirective"), notNullValue());
         assertThat(schema.getDirective("testDirective"), notNullValue());
+    }
+
+
+    @GraphQLDirectiveDefinition(wiring = GeneralWiring.class)
+    @GraphQLName("upper")
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @DirectiveLocations(Introspection.DirectiveLocation.FIELD_DEFINITION)
+    @interface UpperAnnotation {
+        boolean isActive() default true;
+    }
+
+
+    @Test
+    public void build_directiveUsingAnnotation_schemaIsCreatedWithDirective() {
+        // arrange + act
+        GraphQLSchema schema = builder.query(QueryTest.class).directive(UpperAnnotation.class).build();
+
+        // assert
+        GraphQLDirective testDirective = schema.getDirective("upper");
+        assertThat(testDirective, notNullValue());
+        assertThat(testDirective.getArguments().size(), is(1));
+        assertThat(testDirective.getArgument("isActive"), notNullValue());
+    }
+
+
+    public static class DirectivesContainer {
+        @GraphQLName("suffix")
+        @GraphQLDirectiveDefinition(wiring = GeneralWiring.class)
+        @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.ARGUMENT_DEFINITION})
+        public static void suffixDirective(@GraphQLName("suffix") String suffix) {
+
+        }
+
+        @GraphQLName("upper")
+        @GraphQLDirectiveDefinition(wiring = GeneralWiring.class)
+        @DirectiveLocations({Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.ARGUMENT_DEFINITION})
+        public static void upper() {
+
+        }
+    }
+
+
+    @Test
+    public void build_directive_UsingDirectivesContainer_schemaIsCreatedWithDirective() {
+        // arrange + act
+        GraphQLSchema schema = builder.query(QueryTest.class).directives(DirectivesContainer.class).build();
+
+        // assert
+        GraphQLDirective testDirective = schema.getDirective("suffix");
+        assertThat(testDirective, notNullValue());
+        assertThat(testDirective.getArguments().size(), is(1));
+        assertThat(testDirective.getArgument("suffix"), notNullValue());
+
+        GraphQLDirective upper = schema.getDirective("upper");
+        assertThat(upper, notNullValue());
     }
 
     @GraphQLName("additional")

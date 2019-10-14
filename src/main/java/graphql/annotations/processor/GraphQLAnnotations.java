@@ -34,7 +34,6 @@ import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 
-import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -159,21 +158,9 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
     }
 
+    @Deprecated
     public GraphQLDirective directiveViaAnnotation(Class<?> annotationClass) {
-        if (!annotationClass.isAnnotationPresent(GraphQLDirectiveDefinition.class) || !annotationClass.isAnnotationPresent(Retention.class)){
-            throw new GraphQLAnnotationsException(String.format("The supplied class %s is not annotated with a GraphQLDirectiveDefinition and/or Retention annotation", annotationClass.getSimpleName()), null);
-        }
-
-        try {
-            GraphQLDirective directive = this.directiveCreator.getDirective(annotationClass);
-            GraphQLDirectiveDefinition annotation = annotationClass.getAnnotation(GraphQLDirectiveDefinition.class);
-            this.getContainer().getDirectiveRegistry().put(directive.getName(), new DirectiveAndWiring(directive, annotation.wiring()));
-            return directive;
-        } catch (GraphQLAnnotationsException e) {
-            this.getContainer().getProcessing().clear();
-            this.getTypeRegistry().clear();
-            throw e;
-        }
+        return this.directive(annotationClass);
     }
 
     public Set<GraphQLDirective> directives(Class<?> directivesDeclarationClass) {

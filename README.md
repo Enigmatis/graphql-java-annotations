@@ -35,7 +35,7 @@ syntax for GraphQL schema definition.
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:7.2"
+  compile "io.github.graphql-java:graphql-java-annotations:7.2.1"
 }
 ```
 
@@ -45,7 +45,7 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>7.2</version>
+    <version>7.2.1</version>
 </dependency>
 ```
 
@@ -438,7 +438,7 @@ In order to define a default value for the argument, use the `default` keyword l
 
 After you created the class, you will be able to create the ``GraphQLDirective`` object using the following code:
 ```java
-GraphQLDirective directive = graphqlAnnotations.directiveViaAnnotation(Suffix.class);
+GraphQLDirective directive = graphqlAnnotations.directive(Suffix.class);
 ```
 
 #### Using a method declaration
