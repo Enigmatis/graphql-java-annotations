@@ -6,6 +6,8 @@
 [GraphQL-Java](https://github.com/andimarek/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
 syntax for GraphQL schema definition.
 
+If you would like to use a tool that creates a graphql spring boot server using graphql-java-annotations, you can view the [graphql-spring-annotations](https://github.com/yarinvak/graphql-spring-annotations) library.
+
 
 ## Table Of Contents
 - [Getting Started](#getting-started)
