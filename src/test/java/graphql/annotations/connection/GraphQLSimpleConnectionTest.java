@@ -23,6 +23,7 @@ import graphql.annotations.connection.simple.*;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -50,7 +51,7 @@ public class GraphQLSimpleConnectionTest {
     public void simpleConnection_buildSchema_TypeOfSimpleConnectionIsGraphQLList() throws Exception {
         GraphQLSchema schema = newAnnotationsSchema().query(MainConnection.class).build();
 
-        String objsTypeName = schema.getQueryType().getFieldDefinition("objs").getType().getName();
+        String objsTypeName = ((GraphQLNamedType)schema.getQueryType().getFieldDefinition("objs").getType()).getName();
 
         assertThat(objsTypeName, is("ObjChunk"));
     }

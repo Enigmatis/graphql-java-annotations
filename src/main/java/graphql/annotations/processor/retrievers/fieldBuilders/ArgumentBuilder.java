@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,16 +17,19 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 import graphql.annotations.annotationTypes.GraphQLDefaultValue;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.DirectiveWirer;
 import graphql.annotations.directives.DirectiveWiringMapRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
+import graphql.annotations.processor.util.GraphQLTypeNameResolver;
 import graphql.schema.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,9 +84,11 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
             argumentBuilder.name(toGraphqlName(parameter.getName()));
         }
         argumentBuilder.withDirectives(new DirectivesBuilder(parameter, container).build());
-        return (GraphQLArgument) new DirectiveWirer().wire(argumentBuilder.build(),
-                new DirectiveWiringMapRetriever().getDirectiveWiringMap(parameter, container), container.getCodeRegistryBuilder(),
-                inputType.getName());
+        GraphQLArgument builtArgument = argumentBuilder.build();
+        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> directiveWiringMap = new DirectiveWiringMapRetriever().getDirectiveWiringMap(parameter, container);
+        return (GraphQLArgument) new DirectiveWirer().wire(builtArgument,
+                directiveWiringMap, container.getCodeRegistryBuilder(),
+                GraphQLTypeNameResolver.getName(inputType));
     }
 
 }

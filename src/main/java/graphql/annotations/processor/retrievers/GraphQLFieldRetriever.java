@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Yurii Rashkovskii
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static graphql.annotations.processor.util.GraphQLTypeNameResolver.getName;
 import static graphql.annotations.processor.util.ReflectionKit.newInstance;
 import static graphql.schema.FieldCoordinates.coordinates;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
@@ -154,10 +155,10 @@ public class GraphQLFieldRetriever {
             relayFieldDefinition = buildRelayMutation(method, container, builder, outputType, args);
 
             // Getting the data fetcher from the old field type and putting it as the new type
-            String newParentType = relayFieldDefinition.getType().getName();
+            String newParentType = (getName(relayFieldDefinition.getType()));
             relayFieldDefinition.getType().getChildren().forEach(field -> {
-                DataFetcher dataFetcher = CodeRegistryUtil.getDataFetcher(container.getCodeRegistryBuilder(), outputType.getName(), (GraphQLFieldDefinition) field);
-                container.getCodeRegistryBuilder().dataFetcher(coordinates(newParentType, field.getName()), dataFetcher);
+                DataFetcher dataFetcher = CodeRegistryUtil.getDataFetcher(container.getCodeRegistryBuilder(), getName(outputType), (GraphQLFieldDefinition) field);
+                container.getCodeRegistryBuilder().dataFetcher(coordinates(newParentType, getName(field)), dataFetcher);
             });
 
         } else {
@@ -217,10 +218,10 @@ public class GraphQLFieldRetriever {
     }
 
     private GraphQLOutputType internalGetGraphQLConnection(AccessibleObject field, GraphQLList listType, Relay relay, Map<String, graphql.schema.GraphQLType> typeRegistry) {
-        GraphQLOutputType wrappedType = (GraphQLOutputType) listType.getWrappedType();
+        GraphQLType wrappedType = listType.getWrappedType();
         String connectionName = field.getAnnotation(GraphQLConnection.class).name();
-        connectionName = connectionName.isEmpty() ? wrappedType.getName() : connectionName;
-        GraphQLObjectType edgeType = getActualType(relay.edgeType(connectionName, wrappedType, null, Collections.emptyList()), typeRegistry);
+        connectionName = connectionName.isEmpty() ? getName(wrappedType) : connectionName;
+        GraphQLObjectType edgeType = getActualType(relay.edgeType(connectionName, (GraphQLOutputType) wrappedType, null, Collections.emptyList()), typeRegistry);
         return getActualType(relay.connectionType(connectionName, edgeType, Collections.emptyList()), typeRegistry);
     }
 
