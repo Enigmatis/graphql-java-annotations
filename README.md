@@ -379,7 +379,7 @@ public class HumanExtension {
 
 ## Type Inference
 
-By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum, List) will be inferred from Java types. Also, it will respect `@javax.validation.constraints.NotNull` annotation with respect to value's nullability, as well as `@GraphQLNonNull`
+By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum, List) will be inferred from Java types. Also, it will respect `@GraphQLNonNull` with respect to value's nullability
 
 Stream type is also supported and treated as a list.
 
