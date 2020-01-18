@@ -16,8 +16,6 @@ package graphql.annotations.processor.retrievers;
 
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.annotationTypes.GraphQLUnion;
-import graphql.annotations.directives.DirectiveWirer;
-import graphql.annotations.directives.DirectiveWiringMapRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -87,13 +85,6 @@ public class GraphQLTypeRetriever {
                         graphQLFieldRetriever, graphQLInterfaceRetriever, extensionsHandler).getOutputObjectBuilder(object, container).build();
             }
         }
-
-        DirectiveWirer directiveWirer = new DirectiveWirer();
-
-        // wire the type with the directives and change the original type
-        type = (GraphQLType) directiveWirer.wire((GraphQLDirectiveContainer) type,
-                new DirectiveWiringMapRetriever().getDirectiveWiringMap(object, container),
-                container.getCodeRegistryBuilder(), null);
 
         container.getTypeRegistry().put(GraphQLTypeNameResolver.getName(type), type);
         container.getProcessing().pop();

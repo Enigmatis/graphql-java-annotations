@@ -129,18 +129,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         }
     }
 
-    @Deprecated
-    public GraphQLObjectType object(Class<?> object, DirectiveAndWiring... directives) throws GraphQLAnnotationsException {
-        Arrays.stream(directives).forEach(directiveAndWiring -> this.getContainer().getDirectiveRegistry().put(directiveAndWiring.getDirective().getName(), directiveAndWiring));
-        try {
-            return this.graphQLObjectHandler.getGraphQLType(object, this.getContainer());
-        } catch (GraphQLAnnotationsException e) {
-            this.getContainer().getProcessing().clear();
-            this.getTypeRegistry().clear();
-            throw e;
-        }
-    }
-
     public GraphQLDirective directive(Class<?> object) throws GraphQLAnnotationsException {
         if (!object.isAnnotationPresent(GraphQLDirectiveDefinition.class)){
             throw new GraphQLAnnotationsException(String.format(NOT_PROPERLY_ANNOTATION_ERROR, object.getSimpleName()), null);
@@ -156,11 +144,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
             this.getTypeRegistry().clear();
             throw e;
         }
-    }
-
-    @Deprecated
-    public GraphQLDirective directiveViaAnnotation(Class<?> annotationClass) {
-        return this.directive(annotationClass);
     }
 
     public Set<GraphQLDirective> directives(Class<?> directivesDeclarationClass) {
@@ -189,10 +172,6 @@ public class GraphQLAnnotations implements GraphQLAnnotationsProcessor {
         ((DefaultTypeFunction) container.getDefaultTypeFunction()).register(typeFunction);
     }
 
-    @Deprecated
-    public void register(TypeFunction typeFunction) {
-        this.registerTypeFunction(typeFunction);
-    }
 
     public Map<String, graphql.schema.GraphQLType> getTypeRegistry() {
         return container.getTypeRegistry();

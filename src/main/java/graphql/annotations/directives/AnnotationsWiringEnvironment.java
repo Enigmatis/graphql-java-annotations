@@ -17,6 +17,7 @@ package graphql.annotations.directives;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLDirectiveContainer;
+import graphql.schema.GraphQLSchemaElement;
 
 public interface AnnotationsWiringEnvironment {
     /**
@@ -33,7 +34,7 @@ public interface AnnotationsWiringEnvironment {
      *
      * @return the parent name of the element
      */
-    String getParentName();
+    GraphQLSchemaElement getParentElement();
 
 
     /**

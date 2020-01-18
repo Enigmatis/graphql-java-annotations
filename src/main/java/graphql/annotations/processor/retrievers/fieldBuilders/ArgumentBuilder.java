@@ -17,19 +17,14 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 import graphql.annotations.annotationTypes.GraphQLDefaultValue;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.directives.AnnotationsDirectiveWiring;
-import graphql.annotations.directives.DirectiveWirer;
-import graphql.annotations.directives.DirectiveWiringMapRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
-import graphql.annotations.processor.util.GraphQLTypeNameResolver;
 import graphql.schema.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,11 +79,7 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
             argumentBuilder.name(toGraphqlName(parameter.getName()));
         }
         argumentBuilder.withDirectives(new DirectivesBuilder(parameter, container).build());
-        GraphQLArgument builtArgument = argumentBuilder.build();
-        HashMap<GraphQLDirective, AnnotationsDirectiveWiring> directiveWiringMap = new DirectiveWiringMapRetriever().getDirectiveWiringMap(parameter, container);
-        return (GraphQLArgument) new DirectiveWirer().wire(builtArgument,
-                directiveWiringMap, container.getCodeRegistryBuilder(),
-                GraphQLTypeNameResolver.getName(inputType));
+        return argumentBuilder.build();
     }
 
 }
