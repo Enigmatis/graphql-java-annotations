@@ -11,11 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static graphql.util.TreeTransformerUtil.changeNode;
-
 public class DirectiveSchemaVisitor implements GraphQLTypeVisitor {
     private HashMap<String, AnnotationsDirectiveWiring> directiveWiringMap;
     private GraphQLCodeRegistry.Builder codeRegistryBuilder;
+    private TreeTransformerUtilWrapper transformerUtilWrapper;
 
     @FunctionalInterface
     interface WiringFunction {
@@ -27,17 +26,18 @@ public class DirectiveSchemaVisitor implements GraphQLTypeVisitor {
     private Map<Class, WiringFunction> functionMap;
 
 
-    public DirectiveSchemaVisitor(HashMap<String, AnnotationsDirectiveWiring> directiveWiringMap, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+    public DirectiveSchemaVisitor(HashMap<String, AnnotationsDirectiveWiring> directiveWiringMap, GraphQLCodeRegistry.Builder codeRegistryBuilder,
+                                  TreeTransformerUtilWrapper treeTransformerUtilWrapper) {
         this.directiveWiringMap = directiveWiringMap;
         this.functionMap = createFunctionsMap();
         this.codeRegistryBuilder = codeRegistryBuilder;
+        this.transformerUtilWrapper = treeTransformerUtilWrapper;
     }
 
     @Override
     public TraversalControl visitGraphQLArgument(GraphQLArgument node, TraverserContext<GraphQLSchemaElement> context) {
         return this.visitGraphQLType(GraphQLArgument.class, node, context);
     }
-
 
     @Override
     public TraversalControl visitGraphQLInterfaceType(GraphQLInterfaceType node, TraverserContext<GraphQLSchemaElement> context) {
@@ -124,7 +124,7 @@ public class DirectiveSchemaVisitor implements GraphQLTypeVisitor {
                 }
             }
         }
-        return changeNode(context, newNode);
+        return transformerUtilWrapper.changeNode(context, newNode);
     }
 
     private void putInMap(Map<Class, WiringFunction> map, Class clazz, String functionName,

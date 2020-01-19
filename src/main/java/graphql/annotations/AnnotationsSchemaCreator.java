@@ -16,6 +16,7 @@ package graphql.annotations;
 
 import graphql.annotations.directives.AnnotationsDirectiveWiring;
 import graphql.annotations.directives.DirectiveSchemaVisitor;
+import graphql.annotations.directives.TreeTransformerUtilWrapper;
 import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
@@ -267,9 +268,10 @@ public class AnnotationsSchemaCreator {
             GraphQLSchema schema = this.graphqlSchemaBuilder.build();
             // wire with directives
             HashMap<String, AnnotationsDirectiveWiring> directiveWiringHashMap = transformDirectiveRegistry(this.graphQLAnnotations.getContainer().getDirectiveRegistry());
-            DirectiveSchemaVisitor directiveSchemaVisitor = new DirectiveSchemaVisitor(directiveWiringHashMap, graphQLAnnotations.getContainer().getCodeRegistryBuilder());
-            GraphQLSchema trasnformedSchema = this.schemaTransformer.transform(schema, directiveSchemaVisitor);
-            return newSchema(trasnformedSchema).codeRegistry(graphQLAnnotations.getContainer().getCodeRegistryBuilder().build()).build();
+            DirectiveSchemaVisitor directiveSchemaVisitor = new DirectiveSchemaVisitor(directiveWiringHashMap,
+                    graphQLAnnotations.getContainer().getCodeRegistryBuilder(), new TreeTransformerUtilWrapper());
+            GraphQLSchema transformedSchema = this.schemaTransformer.transform(schema, directiveSchemaVisitor);
+            return newSchema(transformedSchema).codeRegistry(graphQLAnnotations.getContainer().getCodeRegistryBuilder().build()).build();
         }
 
         private HashMap<String, AnnotationsDirectiveWiring> transformDirectiveRegistry(Map<String, DirectiveAndWiring> directiveRegistry) {
