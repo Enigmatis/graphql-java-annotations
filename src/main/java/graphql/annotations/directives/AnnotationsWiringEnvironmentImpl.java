@@ -26,10 +26,10 @@ public class AnnotationsWiringEnvironmentImpl implements AnnotationsWiringEnviro
     private GraphQLCodeRegistry.Builder codeRegistryBuilder;
 
     public AnnotationsWiringEnvironmentImpl(GraphQLDirectiveContainer element, GraphQLDirective directive,
-                                            GraphQLSchemaElement parentELement, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+                                            GraphQLSchemaElement parentElement, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
         this.element = element;
         this.directive = directive;
-        this.parentElement = parentELement;
+        this.parentElement = parentElement;
         this.codeRegistryBuilder = codeRegistryBuilder;
     }
 
