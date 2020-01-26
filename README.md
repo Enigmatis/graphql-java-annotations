@@ -1,4 +1,4 @@
-![logo](polaris-iconsmalredl.png?raw=true) 
+![logo](graphql-annotations.png?raw=true)
 # GraphQL-Java Annotations
 [![Build Status](https://travis-ci.org/graphql-java/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/graphql-java/graphql-java-annotations)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.graphql-java/graphql-java-annotations.svg?maxAge=3000)]()
@@ -37,7 +37,7 @@ If you would like to use a tool that creates a graphql spring boot server using 
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:7.2.1"
+  compile "io.github.graphql-java:graphql-java-annotations:8.0"
 }
 ```
 
@@ -47,7 +47,7 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>7.2.1</version>
+    <version>8.0</version>
 </dependency>
 ```
 
