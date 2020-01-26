@@ -1,6 +1,4 @@
 /**
- * Copyright 2016 Yurii Rashkovskii
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,7 +127,7 @@ public class GraphQLInterfaceTest {
     @Test
     public void testInterfaces() {
         GraphQLObjectType object = this.graphQLAnnotations.object(TestObject.class);
-        List<GraphQLOutputType> ifaces = object.getInterfaces();
+        List<GraphQLNamedOutputType> ifaces = object.getInterfaces();
         assertEquals(ifaces.size(), 1);
         assertEquals(ifaces.get(0).getName(), "TestIface");
     }

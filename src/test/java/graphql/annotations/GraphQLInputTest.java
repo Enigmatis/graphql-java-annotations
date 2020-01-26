@@ -1,6 +1,4 @@
 /**
- * Copyright 2016 Yurii Rashkovskii
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,10 +20,7 @@ import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.TypeResolver;
+import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -297,10 +292,10 @@ public class GraphQLInputTest {
         // arrange + act
         GraphQLSchema schema = newSchema().query(this.graphQLAnnotations.object(QueryInputAndOutput.class)).build();
         // assert
-        assertEquals(schema.getQueryType().getFieldDefinition("getHero").getType().getName(), "hero");
-        assertEquals(schema.getQueryType().getFieldDefinition("getString").getArgument("input").getType().getName(), "Inputhero");
-        assertEquals(((GraphQLInputObjectType) schema.getQueryType().getFieldDefinition("getString")
-                .getArgument("input").getType()).getField("skill").getType().getName(), "InputSkill");
+        assertEquals(((GraphQLNamedType) (schema.getQueryType().getFieldDefinition("getHero").getType())).getName(), "hero");
+        assertEquals(((GraphQLNamedType) schema.getQueryType().getFieldDefinition("getString").getArgument("input").getType()).getName(), "Inputhero");
+        assertEquals(((GraphQLNamedType) ((GraphQLInputObjectType) schema.getQueryType().getFieldDefinition("getString")
+                .getArgument("input").getType()).getField("skill").getType()).getName(), "InputSkill");
     }
 
     @Test
@@ -308,8 +303,8 @@ public class GraphQLInputTest {
         // arrange + act
         GraphQLSchema schema = newSchema().query(this.graphQLAnnotations.object(QueryInputAndOutput2.class)).build();
         // assert
-        assertEquals(schema.getQueryType().getFieldDefinition("getSkill").getType().getName(), "Skill");
-        assertEquals(schema.getQueryType().getFieldDefinition("getA").getArgument("skill").getType().getName(), "InputSkill");
+        assertEquals(((GraphQLNamedType) schema.getQueryType().getFieldDefinition("getSkill").getType()).getName(), "Skill");
+        assertEquals(((GraphQLNamedType) schema.getQueryType().getFieldDefinition("getA").getArgument("skill").getType()).getName(), "InputSkill");
     }
 
     @GraphQLName("A")
@@ -366,11 +361,11 @@ public class GraphQLInputTest {
         // arrange + act
         GraphQLSchema schema = newSchema().query(this.graphQLAnnotations.object(QuerySameNameWithChildren.class)).build();
         // assert
-        assertEquals(schema.getQueryType().getFieldDefinition("getAout").getType().getName(), "A");
-        assertEquals(schema.getQueryType().getFieldDefinition("getAout").getType().getClass(), GraphQLObjectType.class);
-        assertEquals(schema.getQueryType().getFieldDefinition("getBout").getType().getName(), "B");
+        assertEquals(((GraphQLNamedType) schema.getQueryType().getFieldDefinition("getAout").getType()).getName(), "A");
+        assertEquals(((GraphQLNamedType) schema.getQueryType().getFieldDefinition("getAout").getType()).getClass(), GraphQLObjectType.class);
+        assertEquals(((GraphQLNamedType) schema.getQueryType().getFieldDefinition("getBout").getType()).getName(), "B");
         assertEquals(schema.getQueryType().getFieldDefinition("getBout").getType().getClass(), GraphQLObjectType.class);
-        assertEquals(schema.getQueryType().getFieldDefinition("getA").getArgument("input").getType().getName(), "InputA");
+        assertEquals(((GraphQLNamedType) schema.getQueryType().getFieldDefinition("getA").getArgument("input").getType()).getName(), "InputA");
         assertEquals(schema.getQueryType().getFieldDefinition("getA").getArgument("input").getType().getClass(), GraphQLInputObjectType.class);
         assertEquals(schema.getQueryType().getFieldDefinition("getB").getArgument("input").getType().getClass(), GraphQLInputObjectType.class);
 

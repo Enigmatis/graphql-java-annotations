@@ -17,18 +17,19 @@ package graphql.annotations.directives;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLDirectiveContainer;
+import graphql.schema.GraphQLSchemaElement;
 
 public class AnnotationsWiringEnvironmentImpl implements AnnotationsWiringEnvironment {
     private final GraphQLDirectiveContainer element;
     private final GraphQLDirective directive;
-    private final String parentName;
+    private final GraphQLSchemaElement parentElement;
     private GraphQLCodeRegistry.Builder codeRegistryBuilder;
 
     public AnnotationsWiringEnvironmentImpl(GraphQLDirectiveContainer element, GraphQLDirective directive,
-                                            String parentName, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
+                                            GraphQLSchemaElement parentElement, GraphQLCodeRegistry.Builder codeRegistryBuilder) {
         this.element = element;
         this.directive = directive;
-        this.parentName = parentName;
+        this.parentElement = parentElement;
         this.codeRegistryBuilder = codeRegistryBuilder;
     }
 
@@ -43,8 +44,8 @@ public class AnnotationsWiringEnvironmentImpl implements AnnotationsWiringEnviro
     }
 
     @Override
-    public String getParentName() {
-        return parentName;
+    public GraphQLSchemaElement getParentElement() {
+        return parentElement;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class AnnotationsWiringEnvironmentImpl implements AnnotationsWiringEnviro
         AnnotationsWiringEnvironmentImpl that = (AnnotationsWiringEnvironmentImpl) o;
 
         if (element != null ? !element.equals(that.element) : that.element != null) return false;
-        if (parentName != null ? !parentName.equals(that.parentName) : that.parentName != null) return false;
+        if (parentElement != null ? !parentElement.equals(that.parentElement) : that.parentElement != null) return false;
         if (codeRegistryBuilder != null ? !codeRegistryBuilder.equals(that.codeRegistryBuilder) : that.codeRegistryBuilder != null)
             return false;
         return directive != null ? directive.equals(that.directive) : that.directive == null;

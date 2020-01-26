@@ -1,6 +1,4 @@
 /**
- * Copyright 2016 Yurii Rashkovskii
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +14,12 @@ package graphql.annotations.processor.retrievers;
 
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.annotationTypes.GraphQLUnion;
-import graphql.annotations.directives.DirectiveWirer;
-import graphql.annotations.directives.DirectiveWiringMapRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
 import graphql.annotations.processor.typeBuilders.*;
+import graphql.annotations.processor.util.GraphQLTypeNameResolver;
 import graphql.schema.*;
 import org.osgi.service.component.annotations.*;
 
@@ -87,14 +84,7 @@ public class GraphQLTypeRetriever {
             }
         }
 
-        DirectiveWirer directiveWirer = new DirectiveWirer();
-
-        // wire the type with the directives and change the original type
-        type = directiveWirer.wire((GraphQLDirectiveContainer) type,
-                new DirectiveWiringMapRetriever().getDirectiveWiringMap(object, container),
-                container.getCodeRegistryBuilder(), null);
-
-        container.getTypeRegistry().put(type.getName(), type);
+        container.getTypeRegistry().put(GraphQLTypeNameResolver.getName(type), type);
         container.getProcessing().pop();
 
         return type;

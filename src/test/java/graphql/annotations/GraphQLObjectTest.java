@@ -306,8 +306,8 @@ public class GraphQLObjectTest {
         assertEquals(fields.get(5).getName(), "privateTest");
         assertEquals(fields.get(6).getName(), "publicTest");
 
-        DataFetcher dataFetcher1 = CodeRegistryUtil.getDataFetcher(this.graphQLAnnotations.getContainer().getCodeRegistryBuilder(), "TestObject", fields.get(5));
-        DataFetcher dataFetcher2 = CodeRegistryUtil.getDataFetcher(this.graphQLAnnotations.getContainer().getCodeRegistryBuilder(), "TestObject", fields.get(6));
+        DataFetcher dataFetcher1 = CodeRegistryUtil.getDataFetcher(this.graphQLAnnotations.getContainer().getCodeRegistryBuilder(), object, fields.get(5));
+        DataFetcher dataFetcher2 = CodeRegistryUtil.getDataFetcher(this.graphQLAnnotations.getContainer().getCodeRegistryBuilder(), object, fields.get(6));
         assertEquals(dataFetcher1.getClass(), PropertyDataFetcher.class);
         assertEquals(dataFetcher2.getClass(), PropertyDataFetcher.class);
 
