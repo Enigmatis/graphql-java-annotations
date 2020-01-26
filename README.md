@@ -1,10 +1,12 @@
-![logo](polaris-iconsmalredl.png?raw=true) 
+![logo](graphql-annotations.png?raw=true)
 # GraphQL-Java Annotations
 [![Build Status](https://travis-ci.org/graphql-java/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/graphql-java/graphql-java-annotations)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.graphql-java/graphql-java-annotations.svg?maxAge=3000)]()
 
 [GraphQL-Java](https://github.com/andimarek/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
 syntax for GraphQL schema definition.
+
+If you would like to use a tool that creates a graphql spring boot server using graphql-java-annotations, you can view the [graphql-spring-annotations](https://github.com/yarinvak/graphql-spring-annotations) library.
 
 
 ## Table Of Contents
@@ -35,7 +37,7 @@ syntax for GraphQL schema definition.
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:7.2.1"
+  compile "io.github.graphql-java:graphql-java-annotations:8.0"
 }
 ```
 
@@ -45,7 +47,7 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>7.2.1</version>
+    <version>8.0</version>
 </dependency>
 ```
 
@@ -377,7 +379,7 @@ public class HumanExtension {
 
 ## Type Inference
 
-By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum, List) will be inferred from Java types. Also, it will respect `@javax.validation.constraints.NotNull` annotation with respect to value's nullability, as well as `@GraphQLNonNull`
+By default, standard GraphQL types (String, Integer, Long, Float, Boolean, Enum, List) will be inferred from Java types. Also, it will respect `@GraphQLNonNull` with respect to value's nullability
 
 Stream type is also supported and treated as a list.
 

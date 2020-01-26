@@ -1,6 +1,4 @@
 /**
- * Copyright 2016 Yurii Rashkovskii
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +15,6 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 import graphql.annotations.annotationTypes.GraphQLDefaultValue;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.directives.DirectiveWirer;
-import graphql.annotations.directives.DirectiveWiringMapRetriever;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
@@ -81,9 +77,7 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
             argumentBuilder.name(toGraphqlName(parameter.getName()));
         }
         argumentBuilder.withDirectives(new DirectivesBuilder(parameter, container).build());
-        return (GraphQLArgument) new DirectiveWirer().wire(argumentBuilder.build(),
-                new DirectiveWiringMapRetriever().getDirectiveWiringMap(parameter, container), container.getCodeRegistryBuilder(),
-                inputType.getName());
+        return argumentBuilder.build();
     }
 
 }

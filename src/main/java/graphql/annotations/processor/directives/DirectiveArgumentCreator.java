@@ -15,7 +15,6 @@
 package graphql.annotations.processor.directives;
 
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLInputType;
@@ -45,7 +44,7 @@ public class DirectiveArgumentCreator {
         try {
             builder.defaultValue(getDefaultValue(field, containingClass));
         } catch (IllegalAccessException | InstantiationException e) {
-            throw new GraphQLAnnotationsException(e);
+            builder.defaultValue(null);
         }
 
         return builder.build();

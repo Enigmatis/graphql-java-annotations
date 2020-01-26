@@ -1,6 +1,4 @@
 /**
- * Copyright 2016 Yurii Rashkovskii
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +22,7 @@ import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.util.CustomRelay;
 import graphql.relay.Relay;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
+import graphql.schema.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -162,7 +157,7 @@ public class GraphQLConnectionTest {
             graphql.schema.GraphQLObjectType f = (GraphQLObjectType) schema.getType("ObjConnection");
             assertTrue(f.getFieldDefinitions().size() == 4);
             assertTrue(f.getFieldDefinition("nodes").getType() instanceof GraphQLList);
-            assertEquals(((GraphQLList) f.getFieldDefinition("nodes").getType()).getWrappedType().getName(), "Obj");
+            assertEquals(((GraphQLNamedType) ((GraphQLList) f.getFieldDefinition("nodes").getType()).getWrappedType()).getName(), "Obj");
 
             GraphQLObjectType pageInfo = (GraphQLObjectType) schema.getType("PageInfo");
             assertTrue(pageInfo.getFieldDefinition("additionalInfo") != null);

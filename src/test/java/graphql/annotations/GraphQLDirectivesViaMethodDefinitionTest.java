@@ -24,15 +24,13 @@ import graphql.annotations.annotationTypes.directives.definition.DirectiveLocati
 import graphql.annotations.annotationTypes.directives.definition.GraphQLDirectiveDefinition;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.introspection.Introspection;
-import graphql.schema.GraphQLCodeRegistry;
-import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Map;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -60,10 +58,7 @@ public class GraphQLDirectivesViaMethodDefinitionTest {
     @BeforeMethod
     public void setUp() {
         this.graphQLAnnotations = new GraphQLAnnotations();
-        this.graphQLAnnotations.directives(DirectivesContainer.class);
-        GraphQLObjectType object = this.graphQLAnnotations.object(DirectivesContainer.class);
-        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
-        this.schema = newSchema().query(object).codeRegistry(codeRegistry).build();
+        this.schema = newAnnotationsSchema().query(DirectivesContainer.class).directives(DirectivesContainer.class).build();
 
     }
 

@@ -1,6 +1,4 @@
 /**
- * Copyright 2016 Yurii Rashkovskii
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +12,22 @@
  */
 package graphql.annotations;
 
+import graphql.annotations.directives.AnnotationsDirectiveWiring;
+import graphql.annotations.directives.DirectiveSchemaVisitor;
+import graphql.annotations.directives.TreeTransformerUtilWrapper;
+import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.relay.Relay;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
+import graphql.schema.SchemaTransformer;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static graphql.schema.GraphQLSchema.newSchema;
 
 public class AnnotationsSchemaCreator {
 
@@ -43,6 +47,7 @@ public class AnnotationsSchemaCreator {
         private Boolean shouldAlwaysPrettify = null;
         private GraphQLAnnotations graphQLAnnotations;
         private GraphQLSchema.Builder graphqlSchemaBuilder;
+        private SchemaTransformer schemaTransformer = new SchemaTransformer();
 
         /**
          * You can set your own schema builder, but its optional
@@ -114,12 +119,18 @@ public class AnnotationsSchemaCreator {
             return this;
         }
 
+        public Builder directives(Class<?>... directiveClasses) {
+            this.directivesObjectList.addAll(Arrays.asList(directiveClasses));
+            return this;
+        }
+
         /**
          * Add directive declaration class to create directives for the graphql schema
+         *
          * @param directiveContainerClass a directive container class (directives are defined as methods inside the class)
          * @return the builder after adding the directive container class to the list of directive container classes
          */
-        public Builder directives(Class<?> directiveContainerClass){
+        public Builder directives(Class<?> directiveContainerClass) {
             this.directiveContainerClasses.add(directiveContainerClass);
             return this;
         }
@@ -234,7 +245,7 @@ public class AnnotationsSchemaCreator {
             }
 
             Set<GraphQLDirective> directives = directivesObjectList.stream().map(dir -> graphQLAnnotations.directive(dir)).collect(Collectors.toSet());
-            directiveContainerClasses.forEach(dir->directives.addAll(graphQLAnnotations.directives(dir)));
+            directiveContainerClasses.forEach(dir -> directives.addAll(graphQLAnnotations.directives(dir)));
 
             Set<GraphQLType> additionalTypes = additionalTypesList.stream().map(additionalType ->
                     additionalType.isInterface() ?
@@ -252,7 +263,26 @@ public class AnnotationsSchemaCreator {
             }
             this.graphqlSchemaBuilder.additionalTypes(additionalTypes).additionalType(Relay.pageInfoType)
                     .codeRegistry(graphQLAnnotations.getContainer().getCodeRegistryBuilder().build());
-            return this.graphqlSchemaBuilder.build();
+            GraphQLSchema schema = this.graphqlSchemaBuilder.build();
+            // wire with directives
+            HashMap<String, AnnotationsDirectiveWiring> directiveWiringHashMap = transformDirectiveRegistry(this.graphQLAnnotations.getContainer().getDirectiveRegistry());
+            DirectiveSchemaVisitor directiveSchemaVisitor = new DirectiveSchemaVisitor(directiveWiringHashMap,
+                    graphQLAnnotations.getContainer().getCodeRegistryBuilder(), new TreeTransformerUtilWrapper());
+            GraphQLSchema transformedSchema = this.schemaTransformer.transform(schema, directiveSchemaVisitor);
+            return newSchema(transformedSchema).codeRegistry(graphQLAnnotations.getContainer().getCodeRegistryBuilder().build()).build();
+        }
+
+        private HashMap<String, AnnotationsDirectiveWiring> transformDirectiveRegistry(Map<String, DirectiveAndWiring> directiveRegistry) {
+            HashMap<String, AnnotationsDirectiveWiring> map = new HashMap<>();
+            directiveRegistry.forEach((directiveName, directiveAndWiring) -> {
+                try {
+                    map.put(directiveName, directiveAndWiring.getWiringClass().newInstance());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            return map;
         }
     }
 }

@@ -36,7 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Map;
 
-import static graphql.schema.GraphQLSchema.newSchema;
+import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.*;
 
 public class GraphQLDirectivesViaAnnotationDefinitionTest {
@@ -46,12 +46,7 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
     @BeforeMethod
     public void setUp() {
         this.graphQLAnnotations = new GraphQLAnnotations();
-        this.graphQLAnnotations.directive(Upper.class);
-        this.graphQLAnnotations.directive(Suffix.class);
-        this.graphQLAnnotations.directive(DirectiveWithList.class);
-        GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
-        GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
-        this.schema = newSchema().query(object).codeRegistry(codeRegistry).build();
+        this.schema = newAnnotationsSchema().query(Query.class).directives(Upper.class, Suffix.class, DirectiveWithList.class).build();
     }
 
     /**
