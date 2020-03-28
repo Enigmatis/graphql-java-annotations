@@ -19,10 +19,15 @@ import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.connection.exceptions.GraphQLConnectionException;
 import graphql.annotations.processor.GraphQLAnnotations;
+import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.CustomRelay;
 import graphql.relay.Relay;
 import graphql.schema.*;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.ParameterizedType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,6 +40,7 @@ import java.util.stream.Stream;
 
 import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static graphql.annotations.processor.util.RelayKit.EMPTY_CONNECTION;
+import static graphql.schema.GraphQLNonNull.nonNull;
 import static graphql.schema.GraphQLSchema.newSchema;
 import static java.util.Collections.emptyList;
 import static org.testng.Assert.*;
@@ -199,6 +205,19 @@ public class GraphQLConnectionTest {
         assertTrue(result.getErrors().isEmpty());
 
         testResult("getNonNullObjs", result);
+    }
+
+    @Test
+    public void methodDoubleNonNull() {
+        GraphQLSchema schema = newAnnotationsSchema().query(TestConnections.class).build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        ExecutionResult result = graphQL.execute("{ getDoubleNonNullObjs(first: 1) { edges { cursor node { id, val } } } }",
+            new TestConnections(Arrays.asList(new Obj("1", "test"), new Obj("2", "hello"), new Obj("3", "world"))));
+
+        assertTrue(result.getErrors().isEmpty());
+
+        testResult("getDoubleNonNullObjs", result);
     }
 
     @Test
@@ -388,6 +407,13 @@ public class GraphQLConnectionTest {
         }
 
         @GraphQLField
+        @GraphQLConnection(name = "doubleNonNullObjs")
+        @graphql.annotations.annotationTypes.GraphQLType(DoubleNonNullIterableTypeFunction.class)
+        public PaginatedData<Obj> getDoubleNonNullObjs(DataFetchingEnvironment environment) {
+          return getNonNullObjs(environment);
+        }
+
+        @GraphQLField
         @GraphQLConnection(name = "nullObj")
         public PaginatedData<Obj> getNullObj() {
             return null;
@@ -395,5 +421,43 @@ public class GraphQLConnectionTest {
 
 
     }
+
+    /*
+     * double @GraphQLNonNull on @GraphQLList like [ObjectType!]!
+     */
+    public static class DoubleNonNullIterableTypeFunction implements TypeFunction {
+
+        @Override
+        public boolean canBuildType(Class<?> theClass, AnnotatedType annotatedType) {
+            return Iterable.class.isAssignableFrom(theClass);
+        }
+
+        @Override
+        public GraphQLType buildType(
+            boolean input,
+            Class<?> theClass,
+            AnnotatedType annotatedType,
+            ProcessingElementsContainer container) {
+
+            if (!(annotatedType instanceof AnnotatedParameterizedType)) {
+                throw new IllegalArgumentException("List type parameter should be specified");
+            }
+            AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) annotatedType;
+            AnnotatedType arg = parameterizedType.getAnnotatedActualTypeArguments()[0];
+            Class<?> klass;
+            if (arg.getType() instanceof ParameterizedType) {
+                klass = (Class<?>) ((ParameterizedType) (arg.getType())).getRawType();
+            } else {
+                klass = (Class<?>) arg.getType();
+            }
+
+            TypeFunction typeFunction = container.getDefaultTypeFunction();
+            GraphQLType type = typeFunction.buildType(input, klass, arg, container);
+
+            // double @GraphQLNonNull on @GraphQLList like [ObjectType!]!
+            return nonNull(new GraphQLList(nonNull(type)));
+        }
+    }
+
 
 }
