@@ -19,12 +19,10 @@ import graphql.GraphQL;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
-import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.PropertyDataFetcher;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -33,14 +31,6 @@ import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.*;
 
 public class GraphQLDataFetcherTest {
-
-    private GraphQLAnnotations graphQLAnnotations;
-
-    @BeforeMethod
-    public void init() {
-        this.graphQLAnnotations = new GraphQLAnnotations();
-    }
-
     @Test
     public void shouldUsePreferredConstructor() {
         // Given
