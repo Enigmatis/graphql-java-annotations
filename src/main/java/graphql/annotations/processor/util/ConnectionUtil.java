@@ -33,13 +33,24 @@ public class ConnectionUtil {
     private static final List<Class> TYPES_FOR_CONNECTION = Arrays.asList(GraphQLObjectType.class, GraphQLInterfaceType.class, GraphQLUnionType.class, GraphQLTypeReference.class);
 
     public static boolean isConnection(AccessibleObject obj, GraphQLType type) {
+        if (!obj.isAnnotationPresent(GraphQLConnection.class)) {
+          return false;
+        }
+
         if (type instanceof graphql.schema.GraphQLNonNull) {
             type =  ((GraphQLNonNull) type).getWrappedType();
         }
-        final GraphQLType actualType = type;
-        boolean isValidGraphQLTypeForConnection = obj.isAnnotationPresent(GraphQLConnection.class) &&
-                actualType instanceof GraphQLList && TYPES_FOR_CONNECTION.stream().anyMatch(aClass ->
-                aClass.isInstance(((GraphQLList) actualType).getWrappedType()));
+        if (!(type instanceof GraphQLList)) {
+          return false;
+        }
+
+        type = ((GraphQLList) type).getWrappedType();
+        if (type instanceof graphql.schema.GraphQLNonNull) {
+            type =  ((GraphQLNonNull) type).getWrappedType();
+        }
+
+        final GraphQLType elementType = type;
+        boolean isValidGraphQLTypeForConnection = TYPES_FOR_CONNECTION.stream().anyMatch(aClass -> aClass.isInstance(elementType));
 
         if (isValidGraphQLTypeForConnection) {
             ConnectionValidator validator = newInstance(obj.getAnnotation(GraphQLConnection.class).validator());
