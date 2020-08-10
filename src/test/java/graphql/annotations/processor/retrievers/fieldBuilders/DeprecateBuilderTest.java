@@ -17,6 +17,7 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 import graphql.annotations.annotationTypes.GraphQLDeprecate;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -43,6 +44,14 @@ public class DeprecateBuilderTest {
         return 1;
     }
 
+    @GraphQLDeprecate("test field deprecated")
+    public String testField;
+
+    @GraphQLDeprecate
+    public String testField1;
+
+    public String testField2;
+
     @Test
     public void build_graphQLDeprecateAnnotationExistsWithValue_returnAnnotationValue() throws NoSuchMethodException {
         // arrange
@@ -55,7 +64,6 @@ public class DeprecateBuilderTest {
         // assert
         assertEquals(deprecate, "test deprecated");
     }
-
 
     @Test
     public void build_graphQLDeprecateAnnotationExistsWithNoValue_returnEmptyString() throws NoSuchMethodException {
@@ -94,5 +102,44 @@ public class DeprecateBuilderTest {
 
         // assert
         assertNull(deprecate);
+    }
+
+    @Test
+    public void build_deprecatedAnnotationExistsOnField_returnNull() throws NoSuchFieldException {
+        // arrange
+        Field field = getClass().getField("testField2");
+        DeprecateBuilder deprecateBuilder = new DeprecateBuilder(field);
+
+        // act
+        String deprecate = deprecateBuilder.build();
+
+        // assert
+        assertNull(deprecate);
+    }
+
+    @Test
+    public void build_graphQLDeprecateAnnotationExistsOnFieldWithNoValue_returnEmptyString() throws NoSuchFieldException {
+        // arrange
+        Field field = getClass().getField("testField1");
+        DeprecateBuilder deprecateBuilder = new DeprecateBuilder(field);
+
+        // act
+        String deprecate = deprecateBuilder.build();
+
+        // assert
+        assertEquals(deprecate, "Deprecated");
+    }
+
+    @Test
+    public void build_graphQLDeprecateAnnotationExistsOnFieldWithValue_returnAnnotationValue() throws NoSuchFieldException {
+        // arrange
+        Field field = getClass().getField("testField");
+        DeprecateBuilder deprecateBuilder = new DeprecateBuilder(field);
+
+        // act
+        String deprecate = deprecateBuilder.build();
+
+        // assert
+        assertEquals(deprecate, "test field deprecated");
     }
 }
