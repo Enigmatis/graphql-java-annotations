@@ -25,6 +25,14 @@ import static org.testng.AssertJUnit.assertNull;
 
 public class DeprecateBuilderTest {
 
+    @GraphQLDeprecate("test field deprecated")
+    public String testField;
+
+    @GraphQLDeprecate
+    public String testField1;
+
+    public String testField2;
+
     @GraphQLDeprecate("test deprecated")
     public int testMethod() {
         return 1;
@@ -43,14 +51,6 @@ public class DeprecateBuilderTest {
     public int testMethod4() {
         return 1;
     }
-
-    @GraphQLDeprecate("test field deprecated")
-    public String testField;
-
-    @GraphQLDeprecate
-    public String testField1;
-
-    public String testField2;
 
     @Test
     public void build_graphQLDeprecateAnnotationExistsWithValue_returnAnnotationValue() throws NoSuchMethodException {

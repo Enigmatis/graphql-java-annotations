@@ -18,7 +18,6 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'idea'
 
-//apply plugin: 'osgi'
 apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
