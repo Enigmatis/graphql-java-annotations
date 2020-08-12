@@ -105,7 +105,7 @@ public class DeprecateBuilderTest {
     }
 
     @Test
-    public void build_deprecatedAnnotationExistsOnField_returnNull() throws NoSuchFieldException {
+    public void build_deprecatedAnnotationDoesNotExistsOnField_returnNull() throws NoSuchFieldException {
         // arrange
         Field field = getClass().getField("testField2");
         DeprecateBuilder deprecateBuilder = new DeprecateBuilder(field);
