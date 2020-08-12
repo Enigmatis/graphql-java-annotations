@@ -250,7 +250,7 @@ public String field(@GraphQLDefaultValue(DefaultValue.class) String value) {
 The `DefaultValue` class can define a `getInstance` method that will be called instead of the default constructor.
 
 `@GraphQLDeprecate` and Java's `@Deprecated` can be used to specify a deprecated
-field.
+field or method.
 
 ### Custom data fetcher
 
