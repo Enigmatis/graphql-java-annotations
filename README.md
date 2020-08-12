@@ -37,7 +37,7 @@ If you would like to use a tool that creates a graphql spring boot server using 
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:8.0.1"
+  compile "io.github.graphql-java:graphql-java-annotations:8.1"
 }
 ```
 
@@ -47,7 +47,7 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>8.0.1</version>
+    <version>8.1</version>
 </dependency>
 ```
 
@@ -250,7 +250,7 @@ public String field(@GraphQLDefaultValue(DefaultValue.class) String value) {
 The `DefaultValue` class can define a `getInstance` method that will be called instead of the default constructor.
 
 `@GraphQLDeprecate` and Java's `@Deprecated` can be used to specify a deprecated
-field.
+field or method.
 
 ### Custom data fetcher
 
