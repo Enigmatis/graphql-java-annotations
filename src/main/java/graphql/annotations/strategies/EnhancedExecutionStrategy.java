@@ -73,7 +73,7 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
         graphql.schema.GraphQLType fieldType = parameters.getExecutionStepInfo().getType();
         Object result = parameters.getSource();
         if (result instanceof Enum && fieldType instanceof GraphQLEnumType) {
-            Object value = ((GraphQLEnumType) fieldType).getCoercing().parseValue(((Enum) result).name());
+            Object value = ((GraphQLEnumType) fieldType).parseValue(((Enum) result).name());
             return super.completeValue(executionContext, withSource(parameters, value));
         }
         if (result instanceof Optional) {
