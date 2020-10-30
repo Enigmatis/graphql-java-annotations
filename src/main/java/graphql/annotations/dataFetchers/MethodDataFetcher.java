@@ -1,6 +1,4 @@
 /**
- * Copyright 2016 Yurii Rashkovskii
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +13,7 @@
 package graphql.annotations.dataFetchers;
 
 import graphql.annotations.annotationTypes.GraphQLBatched;
+import graphql.annotations.annotationTypes.GraphQLConstructor;
 import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.ProcessingElementsContainer;
@@ -68,10 +67,9 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
     public T get(DataFetchingEnvironment environment) {
         try {
             T obj;
-            if (Modifier.isStatic(method.getModifiers())){
+            if (Modifier.isStatic(method.getModifiers())) {
                 return (T) method.invoke(null, invocationArgs(environment, container));
-            }
-            else if (method.isAnnotationPresent(GraphQLBatched.class) || method.isAnnotationPresent(GraphQLInvokeDetached.class)) {
+            } else if (method.isAnnotationPresent(GraphQLBatched.class) || method.isAnnotationPresent(GraphQLInvokeDetached.class)) {
                 obj = newInstance((Class<T>) method.getDeclaringClass());
             } else if (!method.getDeclaringClass().isInstance(environment.getSource())) {
                 obj = newInstance((Class<T>) method.getDeclaringClass(), environment.getSource());
@@ -130,21 +128,19 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
         }
         if (p instanceof Class<?> && graphQLType instanceof GraphQLInputObjectType) {
             Constructor<?> constructors[] = ((Class) p).getConstructors();
-            for (Constructor<?> constructor : constructors) {
-                Parameter[] parameters = constructor.getParameters();
-                if (parameters.length == 1 && parameters[0].getType().isAssignableFrom(arg.getClass())) {
-                    return constructNewInstance(constructor, arg);
-                } else {
-                    List<Object> objects = new ArrayList<>();
-                    Map map = (Map) arg;
-                    for (Parameter parameter : parameters) {
-                        String name = toGraphqlName(parameter.getAnnotation(GraphQLName.class) != null ? parameter.getAnnotation(GraphQLName.class).value() : parameter.getName());
-                        objects.add(buildArg(parameter.getParameterizedType(), ((GraphQLInputObjectType) graphQLType).getField(name).getType(), map.get(name)));
-                    }
-                    return constructNewInstance(constructor, objects.toArray(new Object[objects.size()]));
+            Constructor<?> constructor = getBuildArgConstructor(constructors);
+            Parameter[] parameters = constructor.getParameters();
+            if (parameters.length == 1 && parameters[0].getType().isAssignableFrom(arg.getClass())) {
+                return constructNewInstance(constructor, arg);
+            } else {
+                List<Object> objects = new ArrayList<>();
+                Map map = (Map) arg;
+                for (Parameter parameter : parameters) {
+                    String name = toGraphqlName(parameter.getAnnotation(GraphQLName.class) != null ? parameter.getAnnotation(GraphQLName.class).value() : parameter.getName());
+                    objects.add(buildArg(parameter.getParameterizedType(), ((GraphQLInputObjectType) graphQLType).getField(name).getType(), map.get(name)));
                 }
+                return constructNewInstance(constructor, objects.toArray(new Object[objects.size()]));
             }
-            return null;
         } else if (p instanceof ParameterizedType && graphQLType instanceof GraphQLList) {
             List<Object> list = new ArrayList<>();
             Type subType = ((ParameterizedType) p).getActualTypeArguments()[0];
@@ -158,6 +154,24 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
         } else {
             return arg;
         }
+    }
+
+
+    /***
+     * return the constructor to call in order to build the object
+     * @param constructors Object constructors
+     * @return the annotated constructor if present else return the first constructor
+     */
+    private Constructor getBuildArgConstructor(Constructor<?> constructors[]) {
+        if (constructors != null) {
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.isAnnotationPresent(GraphQLConstructor.class)) {
+                    return constructor;
+                }
+            }
+            return constructors[0];
+        }
+        return null;
     }
 
     private Object getGraphQLFieldValue(Object source, String fieldName) throws IllegalAccessException, NoSuchFieldException, InvocationTargetException {
