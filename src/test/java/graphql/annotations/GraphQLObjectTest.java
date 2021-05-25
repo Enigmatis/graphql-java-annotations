@@ -28,6 +28,7 @@ import graphql.annotations.processor.searchAlgorithms.ParentalSearch;
 import graphql.annotations.processor.typeBuilders.InputObjectBuilder;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.annotations.processor.util.CodeRegistryUtil;
+import graphql.com.google.common.collect.ImmutableList;
 import graphql.schema.*;
 import graphql.schema.GraphQLType;
 import graphql.schema.idl.SchemaParser;
@@ -275,7 +276,7 @@ public class GraphQLObjectTest {
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 8);
 
-        fields.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        fields = ImmutableList.sortedCopyOf((o1, o2) -> o1.getName().compareTo(o2.getName()), fields);
 
         assertEquals(fields.get(2).getName(), "field0");
         assertEquals(fields.get(2).getDescription(), "field");
@@ -407,7 +408,7 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = this.graphQLAnnotations.object(TestAccessors.class);
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 2);
-        fields.sort(Comparator.comparing(GraphQLFieldDefinition::getName));
+        fields = ImmutableList.sortedCopyOf(Comparator.comparing(GraphQLFieldDefinition::getName), fields);
 
         assertEquals(fields.get(0).getName(), "getValue");
         assertEquals(fields.get(1).getName(), "setAnotherValue");

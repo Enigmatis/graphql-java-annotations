@@ -54,7 +54,6 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
 
             ExecutionStepInfo fieldTypeInfo = ExecutionStepInfo.newExecutionStepInfo().type(fieldDef.getType()).parentInfo(parameters.getExecutionStepInfo()).build();
             ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-                    .arguments(parameters.getArguments())
                     .fields(parameters.getFields())
                     .nonNullFieldValidator(parameters.getNonNullFieldValidator())
                     .executionStepInfo(fieldTypeInfo)
@@ -88,7 +87,6 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
      */
     private ExecutionStrategyParameters withSource(ExecutionStrategyParameters parameters, Object source) {
         return ExecutionStrategyParameters.newParameters()
-                .arguments(parameters.getArguments())
                 .fields(parameters.getFields())
                 .nonNullFieldValidator(parameters.getNonNullFieldValidator())
                 .executionStepInfo(parameters.getExecutionStepInfo())

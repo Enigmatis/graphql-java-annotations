@@ -220,6 +220,7 @@ public class AnnotationsSchemaCreatorTest {
 
     @GraphQLName("additional")
     public static class AdditionalTypeTest {
+        @GraphQLField
         public int getI() {
             return 4;
         }

@@ -20,6 +20,7 @@ import graphql.annotations.annotationTypes.*;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.retrievers.GraphQLObjectHandler;
+import graphql.com.google.common.collect.ImmutableList;
 import graphql.schema.*;
 import org.testng.annotations.Test;
 
@@ -103,7 +104,7 @@ public class GraphQLExtensionsTest {
         List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
         assertEquals(fields.size(), 5);
 
-        fields.sort(Comparator.comparing(GraphQLFieldDefinition::getName));
+        fields = ImmutableList.sortedCopyOf(Comparator.comparing(GraphQLFieldDefinition::getName), fields);
 
         assertEquals(fields.get(0).getName(), "field");
         assertEquals(fields.get(1).getName(), "field2");
