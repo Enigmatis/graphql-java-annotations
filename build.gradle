@@ -7,16 +7,19 @@ buildscript {
     }
     dependencies {
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:5.1.2'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
     }
 }
 plugins {
     id 'com.jfrog.bintray' version '1.8.5'
     id 'net.researchgate.release' version '2.8.1'
     id 'com.github.hierynomus.license' version '0.15.0'
+    id "com.jfrog.artifactory" version "4.9.3"
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: "com.jfrog.artifactory"
 
 apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'com.jfrog.bintray'
@@ -140,32 +143,26 @@ publishing {
     }
 }
 
-afterReleaseBuild.dependsOn bintrayUpload
+afterReleaseBuild.dependsOn artifactoryPublish
 
-bintray {
-    user = System.getenv('BINTRAY_USER') ?: project.findProperty('BINTRAY_USER') ?: ''
-    key = System.getenv('BINTRAY_KEY') ?: project.findProperty('BINTRAY_KEY') ?: ''
-    publications = ['maven']
-    publish = true
-    pkg {
-        desc = 'This library offers an annotations-based syntax for GraphQL schema definition.'
-        repo = 'graphql-java-annotations'
-        name = 'graphql-java-annotations'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/graphql-java/graphql-java-annotations'
-        version {
-            name = project.version
-            released = new Date()
-            gpg {
-                sign = false
-            }
-            mavenCentralSync {
-                sync = true //[Default: true] Determines whether to sync the version to Maven Central..
-                user = System.getenv('OSS_USER') ?: project.findProperty('OSS_USER') ?: ''
-                password = System.getenv('OSS_PASS') ?: project.findProperty('OSS_PASS') ?: ''
-                close = '1'
-                //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
-            }
+artifactory {
+    clientConfig.setIncludeEnvVars(true)
+    clientConfig.info.addEnvironmentProperty('test.adding.dynVar',new java.util.Date().toString())
+
+    contextUrl = 'https://yarinvk.jfrog.io/artifactory/default-maven-virtual'
+    publish {
+        repository {
+            repoKey = 'libs-snapshot-local' // The Artifactory repository key to publish to
+            username = 'yarinvak@gmail.com' //System.getenv('JFROG_USER') // The publisher user name
+            password = 'eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJlckk1d25pVWF0X1RoLW9jRC1hZmowd05KVDRBV3RMbDFMMHh1em5NVFgwIn0.eyJzdWIiOiJqZmZlQDAwMFwvdXNlcnNcL3lhcmludmFrQGdtYWlsLmNvbSIsInNjcCI6ImFwcGxpZWQtcGVybWlzc2lvbnNcL2FkbWluIGFwaToqIiwiYXVkIjpbImpmcnRAKiIsImpmbWRAKiIsImpmZXZ0QCoiLCJqZmFjQCoiXSwiaXNzIjoiamZmZUAwMDAiLCJpYXQiOjE2MjE5NzM3NzMsImp0aSI6IjVkOTUxNWZlLTM0ODctNDA2Ny1hNjdmLTYwYmJkNjJhYjcwYiJ9.oHE_tFOGuxWkKZ_6E0-1A8AieMIPe9SW1TdWiwheUdEwpVysSgtaTpFNBICKTp_KrDIcCycu4IamcqiakMrYjgDGAN5imzRc-E2Rtn4LmKf5EuKTLdZHKZhKtMEVclrUUg6NjS0M_fRrfdP35yrZrE_A2SsUoLRCUlaGqgLyEpUewxI22U0IAi4kwOUY1f4lRf_2sb4aGE1wFNN2I3cLhEn5AFjeQsQzxa12Oc7CxTSk6un5F5lhpQchDBgy4YaJcnaYlblR0vnVSX_iKlfn7YW21-48ijOq-aOjib5rgY3gK2fFoWsdgFSKM69mYhLwLVbqSRueuk87ICVpCUjyhw' // The publisher password
+        }
+        defaults {
+            publications('mavenJava')
+            publishArtifacts = true
+            // Properties to be attached to the published artifacts.
+            properties = ['qa.level': 'basic', 'dev.team' : 'core']
+            publishPom = true // Publish generated POM files to Artifactory (true by default)
+            publishIvy = true // Publish generated Ivy descriptor files to Artifactory (true by default)
         }
     }
 }
