@@ -2,7 +2,6 @@ import aQute.bnd.gradle.Bundle
 
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -11,22 +10,18 @@ buildscript {
     }
 }
 plugins {
-    id 'com.jfrog.bintray' version '1.8.5'
     id 'net.researchgate.release' version '2.8.1'
     id 'com.github.hierynomus.license' version '0.15.0'
-    id "com.jfrog.artifactory" version "4.9.3"
+    id 'maven-publish'
+    id 'signing'
+    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: "com.jfrog.artifactory"
-
 apply plugin: 'biz.aQute.bnd.builder'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
-//def releaseVersion = System.properties.RELEASE_VERSION
-//version = releaseVersion ? releaseVersion : new SimpleDateFormat('yyyy-MM-dd\'T\'HH-mm-ss').format(new Date())
 
 // custom tasks for creating source/javadoc jars
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -143,28 +138,22 @@ publishing {
     }
 }
 
-afterReleaseBuild.dependsOn artifactoryPublish
+afterReleaseBuild.dependsOn nexusPublishing
 
-artifactory {
-    clientConfig.setIncludeEnvVars(true)
-    clientConfig.info.addEnvironmentProperty('test.adding.dynVar',new java.util.Date().toString())
-
-    contextUrl = 'https://yarinvk.jfrog.io/artifactory/default-maven-virtual'
-    publish {
-        repository {
-            repoKey = 'libs-snapshot-local' // The Artifactory repository key to publish to
-            username = 'yarinvak@gmail.com' //System.getenv('JFROG_USER') // The publisher user name
-            password = 'eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJlckk1d25pVWF0X1RoLW9jRC1hZmowd05KVDRBV3RMbDFMMHh1em5NVFgwIn0.eyJzdWIiOiJqZmZlQDAwMFwvdXNlcnNcL3lhcmludmFrQGdtYWlsLmNvbSIsInNjcCI6ImFwcGxpZWQtcGVybWlzc2lvbnNcL2FkbWluIGFwaToqIiwiYXVkIjpbImpmcnRAKiIsImpmbWRAKiIsImpmZXZ0QCoiLCJqZmFjQCoiXSwiaXNzIjoiamZmZUAwMDAiLCJpYXQiOjE2MjE5NzM3NzMsImp0aSI6IjVkOTUxNWZlLTM0ODctNDA2Ny1hNjdmLTYwYmJkNjJhYjcwYiJ9.oHE_tFOGuxWkKZ_6E0-1A8AieMIPe9SW1TdWiwheUdEwpVysSgtaTpFNBICKTp_KrDIcCycu4IamcqiakMrYjgDGAN5imzRc-E2Rtn4LmKf5EuKTLdZHKZhKtMEVclrUUg6NjS0M_fRrfdP35yrZrE_A2SsUoLRCUlaGqgLyEpUewxI22U0IAi4kwOUY1f4lRf_2sb4aGE1wFNN2I3cLhEn5AFjeQsQzxa12Oc7CxTSk6un5F5lhpQchDBgy4YaJcnaYlblR0vnVSX_iKlfn7YW21-48ijOq-aOjib5rgY3gK2fFoWsdgFSKM69mYhLwLVbqSRueuk87ICVpCUjyhw' // The publisher password
-        }
-        defaults {
-            publications('mavenJava')
-            publishArtifacts = true
-            // Properties to be attached to the published artifacts.
-            properties = ['qa.level': 'basic', 'dev.team' : 'core']
-            publishPom = true // Publish generated POM files to Artifactory (true by default)
-            publishIvy = true // Publish generated Ivy descriptor files to Artifactory (true by default)
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = System.env.MAVEN_CENTRAL_USER
+            password = System.env.MAVEN_CENTRAL_PASSWORD
         }
     }
+}
+
+// to publish to local maven repo skip signing: ./gradlew publishToMavenLocal  -x signGraphqlJavaPublication
+signing {
+    def signingKey = System.env.MAVEN_CENTRAL_PGP_KEY
+    useInMemoryPgpKeys(signingKey, "")
+    sign publishing.publications
 }
 
 task bundle(type: Bundle) {
