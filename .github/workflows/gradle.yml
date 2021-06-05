@@ -26,6 +26,6 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
     - name: Print env
-      run: echo "User name is ${{MAVEN_CENTRAL_USERNAME}}"
+      run: echo "User name is ${{secrets.MAVEN_CENTRAL_USERNAME}}"
     - name: Publish with Gradle
       run: ./gradlew publish
