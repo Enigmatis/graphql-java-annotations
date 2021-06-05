@@ -143,15 +143,15 @@ afterReleaseBuild.dependsOn nexusPublishing
 nexusPublishing {
     repositories {
         sonatype {
-            username = System.env.MAVEN_CENTRAL_USER
-            password = System.env.MAVEN_CENTRAL_PASSWORD
+            username = System.getenv("MAVEN_CENTRAL_USER")
+            password = System.getenv("MAVEN_CENTRAL_PASSWORD")
         }
     }
 }
 
 // to publish to local maven repo skip signing: ./gradlew publishToMavenLocal  -x signGraphqlJavaPublication
 signing {
-    def signingKey = System.env.MAVEN_CENTRAL_PGP_KEY
+    def signingKey = System.getenv("MAVEN_CENTRAL_PGP_KEY")
     useInMemoryPgpKeys(signingKey, "")
     sign publishing.publications
 }
