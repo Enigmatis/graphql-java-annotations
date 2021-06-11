@@ -3,7 +3,6 @@ import aQute.bnd.gradle.Bundle
 buildscript {
     repositories {
         mavenCentral()
-        sonatype()
     }
     dependencies {
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:5.1.2'
@@ -43,7 +42,6 @@ release {
 
 repositories {
     mavenCentral()
-    sonatype()
 }
 
 gradle.projectsEvaluated {
