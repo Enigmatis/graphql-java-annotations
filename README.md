@@ -37,7 +37,7 @@ If you would like to use a tool that creates a graphql spring boot server using 
 
 ```groovy
 dependencies {
-  compile "io.github.graphql-java:graphql-java-annotations:8.4"
+  compile "io.github.graphql-java:graphql-java-annotations:8.5"
 }
 ```
 
@@ -47,7 +47,7 @@ dependencies {
 <dependency>
     <groupId>io.github.graphql-java</groupId>
     <artifactId>graphql-java-annotations</artifactId>
-    <version>8.4</version>
+    <version>8.5</version>
 </dependency>
 ```
 

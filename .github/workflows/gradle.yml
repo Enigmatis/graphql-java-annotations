@@ -6,12 +6,15 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - '**.md'
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - '**.md'
 
 jobs:
   publish:
-
     runs-on: ubuntu-latest
     environment: prod
     steps:
