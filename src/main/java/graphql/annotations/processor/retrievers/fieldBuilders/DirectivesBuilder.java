@@ -97,7 +97,7 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
 
         for (int i = annotation.annotationType().getDeclaredMethods().length; i < arguments.size(); i++) {
             int finalI = i;
-            directiveBuilder.argument(arguments.get(i).transform(builder -> builder.value(arguments.get(finalI).getDefaultValue())));
+            directiveBuilder.argument(arguments.get(i).transform(builder -> builder.value(arguments.get(finalI).getArgumentDefaultValue().getValue())));
         }
         return directiveBuilder.build();
     }
@@ -118,7 +118,7 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
 
         for (int i = argumentValues.length; i < arguments.size(); i++) {
             int finalI = i;
-            directiveBuilder.argument(arguments.get(i).transform(builder -> builder.value(arguments.get(finalI).getDefaultValue())));
+            directiveBuilder.argument(arguments.get(i).transform(builder -> builder.value(arguments.get(finalI).getArgumentDefaultValue().getValue())));
         }
         return directiveBuilder.build();
     }

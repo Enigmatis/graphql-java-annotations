@@ -116,7 +116,7 @@ public class DirectivesBuilderTest {
         assertEquals(graphQLDirectives[1].getName(), "upperCase");
         assertFalse(graphQLDirectives[1].getArguments().isEmpty());
         assertEquals(graphQLDirectives[1].getArguments().get(0).getName(), "myArg");
-        assertEquals(graphQLDirectives[1].getArguments().get(0).getValue(), "DefaultString");
+        assertEquals(graphQLDirectives[1].getArguments().get(0).getArgumentValue().getValue(), "DefaultString");
 
         assertEquals(graphQLDirectives[2].getName(), "lowerCase");
         assertTrue(graphQLDirectives[2].getArguments().isEmpty());
@@ -141,7 +141,7 @@ public class DirectivesBuilderTest {
         assertEquals(graphQLDirectives[0].getName(), "upperCase");
         assertFalse(graphQLDirectives[0].getArguments().isEmpty());
         assertEquals(graphQLDirectives[0].getArguments().get(0).getName(), "myArg");
-        assertEquals(graphQLDirectives[0].getArguments().get(0).getValue(), "This is a string");
+        assertEquals(graphQLDirectives[0].getArguments().get(0).getArgumentValue().getValue(), "This is a string");
         assertEquals(graphQLDirectives[1].getName(), "lowerCase");
         assertTrue(graphQLDirectives[1].getArguments().isEmpty());
     }
@@ -221,10 +221,10 @@ public class DirectivesBuilderTest {
 
         assertEquals(graphQLDirectives[0].getArguments().size(), 2);
         assertEquals(graphQLDirectives[0].getArguments().get(0).getName(), "arg");
-        assertEquals(graphQLDirectives[0].getArguments().get(0).getValue(), "This is a string");
+        assertEquals(graphQLDirectives[0].getArguments().get(0).getArgumentValue().getValue(), "This is a string");
 
         assertEquals(graphQLDirectives[0].getArguments().get(1).getName(), "arg2");
-        assertEquals(graphQLDirectives[0].getArguments().get(1).getValue(), "5");
+        assertEquals(graphQLDirectives[0].getArguments().get(1).getArgumentValue().getValue(), "5");
     }
 
     // Argument
@@ -264,7 +264,7 @@ public class DirectivesBuilderTest {
         assertEquals(graphQLDirectives[1].getName(), "upperCase");
         assertFalse(graphQLDirectives[1].getArguments().isEmpty());
         assertEquals(graphQLDirectives[1].getArguments().get(0).getName(), "myArg");
-        assertEquals(graphQLDirectives[1].getArguments().get(0).getValue(), "DefaultString");
+        assertEquals(graphQLDirectives[1].getArguments().get(0).getArgumentValue().getValue(), "DefaultString");
     }
 
     @Test
@@ -286,7 +286,7 @@ public class DirectivesBuilderTest {
         assertEquals(graphQLDirectives[0].getName(), "upperCase");
         assertFalse(graphQLDirectives[0].getArguments().isEmpty());
         assertEquals(graphQLDirectives[0].getArguments().get(0).getName(), "myArg");
-        assertEquals(graphQLDirectives[0].getArguments().get(0).getValue(), "This is a string");
+        assertEquals(graphQLDirectives[0].getArguments().get(0).getArgumentValue().getValue(), "This is a string");
     }
 
     // Class
@@ -327,7 +327,7 @@ public class DirectivesBuilderTest {
         assertEquals(graphQLDirectives[1].getName(), "upperCase");
         assertFalse(graphQLDirectives[1].getArguments().isEmpty());
         assertEquals(graphQLDirectives[1].getArguments().get(0).getName(), "myArg");
-        assertEquals(graphQLDirectives[1].getArguments().get(0).getValue(), "DefaultString");
+        assertEquals(graphQLDirectives[1].getArguments().get(0).getArgumentValue().getValue(), "DefaultString");
 
         assertEquals(graphQLDirectives[2].getName(), "lowerCase");
         assertTrue(graphQLDirectives[2].getArguments().isEmpty());
@@ -352,7 +352,7 @@ public class DirectivesBuilderTest {
         assertEquals(graphQLDirectives[0].getName(), "upperCase");
         assertFalse(graphQLDirectives[0].getArguments().isEmpty());
         assertEquals(graphQLDirectives[0].getArguments().get(0).getName(), "myArg");
-        assertEquals(graphQLDirectives[0].getArguments().get(0).getValue(), "This is a string");
+        assertEquals(graphQLDirectives[0].getArguments().get(0).getArgumentValue().getValue(), "This is a string");
         assertEquals(graphQLDirectives[1].getName(), "lowerCase");
         assertTrue(graphQLDirectives[1].getArguments().isEmpty());
     }

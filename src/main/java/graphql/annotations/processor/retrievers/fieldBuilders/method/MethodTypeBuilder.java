@@ -14,10 +14,8 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders.method;
 
-import graphql.annotations.annotationTypes.GraphQLBatched;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.retrievers.fieldBuilders.Builder;
-import graphql.annotations.processor.typeFunctions.BatchedTypeFunction;
 import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLType;
@@ -42,14 +40,7 @@ public class MethodTypeBuilder implements Builder<GraphQLType> {
     public GraphQLType build() {
         AnnotatedType annotatedReturnType = method.getAnnotatedReturnType();
 
-        TypeFunction typeFunction;
-        if (method.getAnnotation(GraphQLBatched.class) != null) {
-            typeFunction = new BatchedTypeFunction(this.typeFunction);
-        } else {
-            typeFunction = this.typeFunction;
-        }
-
-        return typeFunction.buildType(isInput,method.getReturnType(), annotatedReturnType, container);
+        return this.typeFunction.buildType(isInput,method.getReturnType(), annotatedReturnType, container);
     }
 
 }
