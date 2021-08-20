@@ -14,16 +14,15 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.Scalars;
 import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLType;
-
 import java.lang.reflect.AnnotatedType;
 
 public class ByteFunction implements TypeFunction {
     @Override
     public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
-        return Scalars.GraphQLByte.getName();
+        return ExtendedScalars.GraphQLByte.getName();
     }
 
     @Override
@@ -37,6 +36,6 @@ public class ByteFunction implements TypeFunction {
     }
 
     private GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
-        return Scalars.GraphQLByte;
+        return ExtendedScalars.GraphQLByte;
     }
 }

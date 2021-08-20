@@ -14,11 +14,11 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import org.testng.annotations.Test;
-
-import static graphql.Scalars.GraphQLShort;
 import static graphql.annotations.processor.typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
+import static graphql.scalars.ExtendedScalars.GraphQLShort;
 import static org.testng.Assert.assertEquals;
+
+import org.testng.annotations.Test;
 
 public class ShortFunctionTests {
     @Test

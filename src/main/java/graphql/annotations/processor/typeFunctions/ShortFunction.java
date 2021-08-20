@@ -14,16 +14,15 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.Scalars;
 import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLType;
-
 import java.lang.reflect.AnnotatedType;
 
 public class ShortFunction implements TypeFunction {
     @Override
     public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
-        return Scalars.GraphQLShort.getName();
+        return ExtendedScalars.GraphQLShort.getName();
     }
 
     @Override
@@ -37,7 +36,7 @@ public class ShortFunction implements TypeFunction {
     }
 
     private GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
-        return Scalars.GraphQLShort;
+        return ExtendedScalars.GraphQLShort;
     }
 }
 

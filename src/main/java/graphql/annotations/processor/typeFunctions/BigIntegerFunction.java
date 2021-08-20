@@ -14,17 +14,16 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import graphql.Scalars;
 import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLType;
-
 import java.lang.reflect.AnnotatedType;
 import java.math.BigInteger;
 
 public class BigIntegerFunction implements TypeFunction {
     @Override
     public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
-        return Scalars.GraphQLBigInteger.getName();
+        return ExtendedScalars.GraphQLBigInteger.getName();
     }
 
     @Override
@@ -38,6 +37,6 @@ public class BigIntegerFunction implements TypeFunction {
     }
 
     private GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
-        return Scalars.GraphQLBigInteger;
+        return ExtendedScalars.GraphQLBigInteger;
     }
 }
