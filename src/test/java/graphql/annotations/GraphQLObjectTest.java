@@ -352,15 +352,15 @@ public class GraphQLObjectTest {
         }
     }
 
-    public static class TestObjectBridgMethod extends TestObjectBridgMethodParent<String> {
+    public static class TestObjectBridgMethod extends TestObjectBridgMethodParent<Long> {
 
         public TestObjectBridgMethod() {
-            super("1");
+            super(1L);
         }
 
         @Override
         @GraphQLField
-        public String id() {
+        public Long id() {
             return super.id();
         }
     }
@@ -370,7 +370,7 @@ public class GraphQLObjectTest {
         GraphQLSchema schema = newAnnotationsSchema().query(TestObjectBridgMethod.class).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{id}", new TestObjectBridgMethod());
-        assertEquals(((Map<String, Object>) result.getData()).get("id"), "1");
+        assertEquals(((Map<String, Object>) result.getData()).get("id"), 1L);
     }
 
     public interface Iface {

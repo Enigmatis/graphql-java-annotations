@@ -14,9 +14,11 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders.method;
 
+import graphql.annotations.annotationTypes.GraphQLBatched;
 import graphql.annotations.annotationTypes.GraphQLDataFetcher;
 import graphql.annotations.annotationTypes.GraphQLRelayMutation;
 import graphql.annotations.connection.GraphQLConnection;
+import graphql.annotations.dataFetchers.BatchedMethodDataFetcher;
 import graphql.annotations.dataFetchers.MethodDataFetcher;
 import graphql.annotations.dataFetchers.RelayMutationMethodDataFetcher;
 import graphql.annotations.processor.ProcessingElementsContainer;
@@ -60,7 +62,9 @@ public class MethodDataFetcherBuilder implements Builder<DataFetcher> {
     public DataFetcher build() {
         GraphQLDataFetcher dataFetcher = method.getAnnotation(GraphQLDataFetcher.class);
         DataFetcher actualDataFetcher;
-        if (dataFetcher == null) {
+        if (dataFetcher == null && method.getAnnotation(GraphQLBatched.class) != null) {
+            actualDataFetcher = new BatchedMethodDataFetcher(method, typeFunction, container);
+        } else if (dataFetcher == null) {
             actualDataFetcher = new MethodDataFetcher(method, typeFunction, container);
         } else {
             actualDataFetcher = dataFetcherConstructor.constructDataFetcher(method.getName(), dataFetcher);

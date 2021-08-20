@@ -85,6 +85,6 @@ public class DirectiveCreatorTest {
         assertNotNull(isActive);
         assertEquals(isActive.getName(), "isActive");
         assertEquals(isActive.getType(), GraphQLBoolean);
-        assertEquals(isActive.getArgumentDefaultValue().getValue(), true);
+        assertEquals(isActive.getDefaultValue(), true);
     }
 }

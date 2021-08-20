@@ -86,7 +86,7 @@ public class DirectiveArgumentCreatorTest {
         GraphQLArgument isActive = directiveArgumentCreator.getArgument(this.getClass().getDeclaredField("isActive"), DirectiveArgumentCreatorTest.class);
         // Assert
         assertEquals(isActive.getName(), "isActive");
-        assertEquals(isActive.getArgumentDefaultValue().getValue(), true);
+        assertEquals(isActive.getDefaultValue(), true);
         assertEquals(isActive.getDescription(), "isActive");
         assertEquals(isActive.getType(), GraphQLBoolean);
     }
@@ -100,7 +100,7 @@ public class DirectiveArgumentCreatorTest {
 
         // Assert
         assertEquals(argument.getName(), "suffix");
-        assertEquals(argument.getArgumentDefaultValue().getValue(), "bla");
+        assertEquals(argument.getDefaultValue(), "bla");
         assertEquals(argument.getDescription(), null);
         assertEquals(argument.getType(), GraphQLString);
     }
@@ -112,7 +112,7 @@ public class DirectiveArgumentCreatorTest {
 
         // Assert
         assertEquals(argument.getName(), "suffix1");
-        assertEquals(argument.getArgumentDefaultValue().getValue(), null);
+        assertEquals(argument.getDefaultValue(), null);
         assertEquals(argument.getDescription(), "bla");
         assertEquals(argument.getType(), GraphQLString);
     }
@@ -139,7 +139,7 @@ public class DirectiveArgumentCreatorTest {
 
         // Assert
         assertEquals(argument.getName(), "arg0");
-        assertEquals(argument.getArgumentDefaultValue().getValue(), null);
+        assertEquals(argument.getDefaultValue(), null);
         assertEquals(argument.getDescription(), null);
         assertEquals(argument.getType(), GraphQLString);
     }
@@ -151,7 +151,7 @@ public class DirectiveArgumentCreatorTest {
 
         // Assert
         assertEquals(argument.getName(), "suffix");
-        assertEquals(argument.getArgumentDefaultValue().getValue(), null);
+        assertEquals(argument.getDefaultValue(), null);
         assertEquals(argument.getDescription(), "the suffix");
         assertEquals(argument.getType(), GraphQLString);
     }

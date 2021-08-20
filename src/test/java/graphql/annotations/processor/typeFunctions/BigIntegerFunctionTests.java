@@ -14,12 +14,13 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
-import static graphql.annotations.processor.typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
-import static graphql.scalars.ExtendedScalars.GraphQLBigInteger;
-import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Test;
 
 import java.math.BigInteger;
-import org.testng.annotations.Test;
+
+import static graphql.Scalars.GraphQLBigInteger;
+import static graphql.annotations.processor.typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
+import static org.testng.Assert.assertEquals;
 
 public class BigIntegerFunctionTests {
     @Test

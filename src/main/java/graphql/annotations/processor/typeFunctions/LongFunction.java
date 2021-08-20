@@ -14,9 +14,10 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
+import graphql.Scalars;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLType;
+
 import java.lang.reflect.AnnotatedType;
 
 
@@ -24,7 +25,7 @@ class LongFunction implements TypeFunction {
 
     @Override
     public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
-        return ExtendedScalars.GraphQLLong.getName();
+        return Scalars.GraphQLLong.getName();
     }
 
     @Override
@@ -38,7 +39,7 @@ class LongFunction implements TypeFunction {
     }
 
     private GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
-        return ExtendedScalars.GraphQLLong;
+        return Scalars.GraphQLLong;
     }
 
 }

@@ -14,16 +14,17 @@
  */
 package graphql.annotations.processor.typeFunctions;
 
+import graphql.Scalars;
 import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLType;
+
 import java.lang.reflect.AnnotatedType;
 import java.math.BigDecimal;
 
 public class BigDecimalFunction implements TypeFunction {
     @Override
     public String getTypeName(Class<?> aClass, AnnotatedType annotatedType) {
-        return ExtendedScalars.GraphQLBigDecimal.getName();
+        return Scalars.GraphQLBigDecimal.getName();
     }
 
     @Override
@@ -37,6 +38,6 @@ public class BigDecimalFunction implements TypeFunction {
     }
 
     private GraphQLType buildType(boolean inputType, Class<?> aClass, AnnotatedType annotatedType) {
-        return ExtendedScalars.GraphQLBigDecimal;
+        return Scalars.GraphQLBigDecimal;
     }
 }
