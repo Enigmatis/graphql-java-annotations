@@ -18,8 +18,8 @@ import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 
-import static graphql.Scalars.GraphQLBigDecimal;
 import static graphql.annotations.processor.typeFunctions.DefaultTypeFunctionTestHelper.testedDefaultTypeFunction;
+import static graphql.scalars.ExtendedScalars.GraphQLBigDecimal;
 import static org.testng.Assert.assertEquals;
 
 public class BigDecimalFunctionTests {

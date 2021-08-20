@@ -52,7 +52,7 @@ public class GraphQLDirectivesViaClassDefinitionTest {
         @Override
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
-            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
+            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getArgumentValue().getValue();
             CodeRegistryUtil.wrapDataFetcher(field, environment, (((dataFetchingEnvironment, value) -> {
                 if (value instanceof String && isActive) {
                     return ((String) value).toUpperCase();
@@ -68,14 +68,14 @@ public class GraphQLDirectivesViaClassDefinitionTest {
         @Override
         public GraphQLInputObjectField onInputObjectField(AnnotationsWiringEnvironment environment) {
             GraphQLInputObjectField field = (GraphQLInputObjectField) environment.getElement();
-            String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
+            String suffix = (String) environment.getDirective().getArgument("suffix").getArgumentValue().getValue();
             return field.transform(builder -> builder.name(field.getName() + suffix));
         }
 
         @Override
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
-            String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
+            String suffix = (String) environment.getDirective().getArgument("suffix").getArgumentValue().getValue();
             CodeRegistryUtil.wrapDataFetcher(field, environment, (dataFetchingEnvironment, value) -> {
                 if (value instanceof String) {
                     return value + suffix;
@@ -89,14 +89,14 @@ public class GraphQLDirectivesViaClassDefinitionTest {
         @Override
         public GraphQLArgument onArgument(AnnotationsWiringEnvironment environment) {
             GraphQLArgument element = (GraphQLArgument) environment.getElement();
-            String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
+            String suffix = (String) environment.getDirective().getArgument("suffix").getArgumentValue().getValue();
             return element.transform(builder -> builder.name(element.getName() + suffix));
         }
 
         @Override
         public GraphQLInputObjectType onInputObjectType(AnnotationsWiringEnvironment environment) {
             GraphQLInputObjectType element = (GraphQLInputObjectType) environment.getElement();
-            String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
+            String suffix = (String) environment.getDirective().getArgument("suffix").getArgumentValue().getValue();
             return element;
         }
     }

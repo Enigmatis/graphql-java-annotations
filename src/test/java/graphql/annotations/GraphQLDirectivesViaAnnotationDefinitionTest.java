@@ -57,7 +57,7 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         @Override
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
-            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
+            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getArgumentValue().getValue();
             CodeRegistryUtil.wrapDataFetcher(field, environment, (((dataFetchingEnvironment, value) -> {
                 if (value instanceof String && isActive) {
                     return ((String) value).toUpperCase();
@@ -73,17 +73,17 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         @Override
         public GraphQLInputObjectField onInputObjectField(AnnotationsWiringEnvironment environment) {
             GraphQLInputObjectField field = (GraphQLInputObjectField) environment.getElement();
-            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
+            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getArgumentValue().getValue();
             if (!isActive) return field;
-            String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
+            String suffix = (String) environment.getDirective().getArgument("suffix").getArgumentValue().getValue();
             return field.transform(builder -> builder.name(field.getName() + suffix));
         }
 
         @Override
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
-            String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
-            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
+            String suffix = (String) environment.getDirective().getArgument("suffix").getArgumentValue().getValue();
+            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getArgumentValue().getValue();
             if (!isActive) return field;
             CodeRegistryUtil.wrapDataFetcher(field, environment, (dataFetchingEnvironment, value) -> {
                 if (value instanceof String) {
@@ -98,8 +98,8 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         @Override
         public GraphQLArgument onArgument(AnnotationsWiringEnvironment environment) {
             GraphQLArgument element = (GraphQLArgument) environment.getElement();
-            String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
-            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
+            String suffix = (String) environment.getDirective().getArgument("suffix").getArgumentValue().getValue();
+            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getArgumentValue().getValue();
             if (!isActive) return element;
             return element.transform(builder -> builder.name(element.getName() + suffix));
         }
@@ -107,9 +107,9 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         @Override
         public GraphQLInputObjectType onInputObjectType(AnnotationsWiringEnvironment environment) {
             GraphQLInputObjectType element = (GraphQLInputObjectType) environment.getElement();
-            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getValue();
+            boolean isActive = (boolean) environment.getDirective().getArgument("isActive").getArgumentValue().getValue();
             if (!isActive) return element;
-            String suffix = (String) environment.getDirective().getArgument("suffix").getValue();
+            String suffix = (String) environment.getDirective().getArgument("suffix").getArgumentValue().getValue();
             return element;
         }
     }
@@ -118,7 +118,7 @@ public class GraphQLDirectivesViaAnnotationDefinitionTest {
         @Override
         public GraphQLFieldDefinition onField(AnnotationsWiringEnvironment environment) {
             GraphQLFieldDefinition field = (GraphQLFieldDefinition) environment.getElement();
-            String[] list= (String[]) environment.getDirective().getArgument("list").getValue();
+            String[] list= (String[]) environment.getDirective().getArgument("list").getArgumentValue().getValue();
             CodeRegistryUtil.wrapDataFetcher(field, environment, (dataFetchingEnvironment, value) -> value + list[0]);
             return field;
         }

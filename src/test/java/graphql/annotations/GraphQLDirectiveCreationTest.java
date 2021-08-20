@@ -81,17 +81,17 @@ public class GraphQLDirectiveCreationTest {
         assertNotNull(isActive);
         assertEquals(isActive.getName(), "isActive");
         assertEquals(isActive.getType(), GraphQLBoolean);
-        assertEquals(isActive.getDefaultValue(), true);
+        assertEquals(isActive.getArgumentDefaultValue().getValue(), true);
 
         GraphQLArgument suffixToAdd = directive.getArgument("suffixToAdd");
         assertNotNull(suffixToAdd);
         assertEquals(suffixToAdd.getType(), GraphQLString);
         assertEquals(suffixToAdd.getDescription(), "adds suffix to the string");
-        assertEquals(suffixToAdd.getDefaultValue(), "");
+        assertEquals(suffixToAdd.getArgumentDefaultValue().getValue(), "");
 
         GraphQLArgument noDefaultValue = directive.getArgument("noDefaultValue");
         assertNotNull(noDefaultValue);
-        assertNull(noDefaultValue.getDefaultValue());
+        assertNull(noDefaultValue.getArgumentDefaultValue().getValue());
     }
 
     /**
@@ -137,13 +137,13 @@ public class GraphQLDirectiveCreationTest {
         assertNotNull(isActive);
         assertEquals(isActive.getName(), "isActive");
         assertEquals(isActive.getType(), GraphQLBoolean);
-        assertNull(isActive.getDefaultValue());
+        assertNull(isActive.getArgumentDefaultValue().getValue());
 
         GraphQLArgument suffixToAdd = suffix.getArgument("suffix");
         assertNotNull(suffixToAdd);
         assertEquals(suffixToAdd.getType(), GraphQLString);
         assertEquals("the suffix", suffixToAdd.getDescription());
-        assertNull(suffixToAdd.getDefaultValue());
+        assertNull(suffixToAdd.getArgumentDefaultValue().getValue());
     }
 
 
@@ -182,7 +182,7 @@ public class GraphQLDirectiveCreationTest {
         assertNotNull(isActive);
         assertEquals(isActive.getName(), "isActive");
         assertEquals(isActive.getType(), GraphQLBoolean);
-        assertEquals(true,isActive.getDefaultValue());
+        assertEquals(true,isActive.getArgumentDefaultValue().getValue());
     }
 
     @Test(expectedExceptions = GraphQLAnnotationsException.class)
