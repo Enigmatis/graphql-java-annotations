@@ -3,7 +3,7 @@
 
 name: Build
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -19,8 +19,6 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Test with Gradle
-        run: ./gradlew test
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v2
         if: always() # always run even if the previous step fails
