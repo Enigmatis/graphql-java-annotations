@@ -4,10 +4,8 @@
 name: Publish
 
 on:
-  push:
+  workflow_dispatch:
     branches: [ master ]
-    paths:
-      - 'src/**'
 
 jobs:
   publish:
