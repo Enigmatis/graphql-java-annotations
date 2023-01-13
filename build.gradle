@@ -5,13 +5,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:5.1.2'
+        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:6.4.0'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
     }
 }
 plugins {
-    id 'net.researchgate.release' version '2.8.1'
-    id 'com.github.hierynomus.license' version '0.15.0'
+    id 'com.github.hierynomus.license' version '0.16.1'
     id 'maven-publish'
     id 'signing'
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
@@ -34,12 +33,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-release {
-    tagTemplate = 'v${version}'
-    failOnPublishNeeded = false
-    failOnCommitNeeded = false
-}
-
 repositories {
     mavenCentral()
 }
@@ -53,9 +46,9 @@ gradle.projectsEvaluated {
 }
 
 dependencies {
-    compile 'javax.validation:validation-api:1.1.0.Final'
-    compile 'com.graphql-java:graphql-java:17.2'
-    compile 'com.graphql-java:graphql-java-extended-scalars:17.0'
+    implementation 'javax.validation:validation-api:1.1.0.Final'
+    implementation 'com.graphql-java:graphql-java:17.2'
+    implementation 'com.graphql-java:graphql-java-extended-scalars:17.0'
 
 
     // OSGi
@@ -64,9 +57,9 @@ dependencies {
     compileOnly 'org.osgi:org.osgi.service.component:1.3.0'
     compileOnly 'biz.aQute.bnd:biz.aQute.bndlib:3.2.0'
 
-    testCompile 'org.testng:testng:6.9.10'
-    testCompile 'org.hamcrest:hamcrest-all:1.3'
-    testCompile 'org.mockito:mockito-core:2.+'
+    testImplementation 'org.testng:testng:6.9.10'
+    testImplementation 'org.hamcrest:hamcrest-all:1.3'
+    testImplementation 'org.mockito:mockito-core:2.+'
 }
 
 test.useTestNG()
@@ -140,29 +133,21 @@ publishing {
     }
 }
 
-afterReleaseBuild.dependsOn nexusPublishing
-
-nexusPublishing {
+publishing {
     repositories {
-        sonatype {
-            username = System.getenv("MAVEN_CENTRAL_USER")
-            password = System.getenv("MAVEN_CENTRAL_PASSWORD")
+        maven {
+            def releasesRepoUrl = "https://nexus.kw.kontextwork.com/repository/kw-maven-release"
+            def snapshotsRepoUrl = "https://nexus.kw.kontextwork.com/repository/kw-maven-snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials(PasswordCredentials) {
+                username "$ourNexusAuthorUser"
+                password "$ourNexusAuthorPassword"
+            }
         }
     }
-}
-
-// to publish to local maven repo skip signing: ./gradlew publishToMavenLocal  -x signGraphqlJavaPublication
-signing {
-    def signingKey = System.getenv("MAVEN_CENTRAL_PGP_KEY")
-    useInMemoryPgpKeys(signingKey, "")
-    sign publishing.publications
 }
 
 task bundle(type: Bundle) {
     from sourceSets.main.output
     bndfile = file('bundle.bnd')
-}
-
-wrapper {
-    gradleVersion = '6.5.1'
 }
