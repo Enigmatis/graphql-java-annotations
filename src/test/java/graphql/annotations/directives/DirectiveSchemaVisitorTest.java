@@ -77,8 +77,8 @@ public class DirectiveSchemaVisitorTest {
         TraversalControl traversalControl = directiveSchemaVisitor.visitGraphQLArgument(argument, context);
 
         // Assert
-        verifyZeroInteractions(wiringMock);
-        verifyZeroInteractions(transformerUtilWrapper);
+        verifyNoMoreInteractions(wiringMock);
+        verifyNoMoreInteractions(transformerUtilWrapper);
         assertEquals(traversalControl, TraversalControl.CONTINUE);
     }
 
@@ -98,7 +98,7 @@ public class DirectiveSchemaVisitorTest {
         directiveSchemaVisitor.visitGraphQLArgument(argument, context);
 
         // Assert
-        verifyZeroInteractions(wiringMock);
+        verifyNoMoreInteractions(wiringMock);
         verify(transformerUtilWrapper).changeNode(eq(context), eq(argument));
     }
 
@@ -133,8 +133,8 @@ public class DirectiveSchemaVisitorTest {
         TraversalControl traversalControl = directiveSchemaVisitor.visitGraphQLFieldDefinition(type, context);
 
         // Assert
-        verifyZeroInteractions(wiringMock);
-        verifyZeroInteractions(transformerUtilWrapper);
+        verifyNoMoreInteractions(wiringMock);
+        verifyNoMoreInteractions(transformerUtilWrapper);
         assertEquals(traversalControl, TraversalControl.CONTINUE);
     }
 
@@ -154,7 +154,7 @@ public class DirectiveSchemaVisitorTest {
         directiveSchemaVisitor.visitGraphQLFieldDefinition(type, context);
 
         // Assert
-        verifyZeroInteractions(wiringMock);
+        verifyNoMoreInteractions(wiringMock);
         verify(transformerUtilWrapper).changeNode(eq(context), eq(type));
     }
 
