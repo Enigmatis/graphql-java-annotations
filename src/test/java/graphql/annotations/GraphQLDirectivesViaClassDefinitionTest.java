@@ -225,7 +225,7 @@ public class GraphQLDirectivesViaClassDefinitionTest {
         this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), new DirectiveAndWiring(upperCase, UpperWiring.class));
         GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
-        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
+        GraphQLSchema schema = newSchema().query(object).additionalDirective(upperCase).codeRegistry(codeRegistry).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { nameWithFalse }");
         assertTrue(result.getErrors().isEmpty());
