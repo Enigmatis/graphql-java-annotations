@@ -30,9 +30,7 @@ class IDFunction implements TypeFunction {
 
     @Override
     public boolean canBuildType(Class<?> aClass, AnnotatedType annotatedType) {
-        return annotatedType != null
-                && (aClass == Integer.class || aClass == int.class || aClass == String.class)
-                && annotatedType.isAnnotationPresent(GraphQLID.class);
+        return annotatedType != null && annotatedType.isAnnotationPresent(GraphQLID.class);
     }
 
     @Override
