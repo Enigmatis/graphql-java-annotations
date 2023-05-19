@@ -14,7 +14,14 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders;
 
-import graphql.Scalars;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -24,17 +31,6 @@ import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLType;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static graphql.Assert.assertShouldNeverHappen;
-import static graphql.scalar.CoercingUtil.isNumberIsh;
 import static graphql.schema.GraphQLDirective.newDirective;
 
 
@@ -139,7 +135,7 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
                     Object value;
                     if ( graphQLArgument.getType() instanceof GraphQLScalarType )
                     {
-                        value = parseArgumentValue( graphQLArgument, argumentValue );
+                        value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
                     }
                     else
                     {
@@ -165,7 +161,7 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
             if (graphQLArgument.getType() instanceof GraphQLScalarType) {
 
                 try {
-                    Object value = parseArgumentValue( graphQLArgument, argumentValue );
+                    Object value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
                     builder.value( value );
                 } catch (Exception e) {
                     throw new GraphQLAnnotationsException(COULD_NOT_PARSE_ARGUMENT_VALUE_TO_ARGUMENT_TYPE, e);
@@ -174,57 +170,5 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
                 throw new GraphQLAnnotationsException(DIRECTIVE_ARGUMENT_TYPE_MUST_BE_A_SCALAR, null);
             }
         }));
-    }
-
-    private Object parseArgumentValue( GraphQLArgument graphQLArgument, Object argumentValue )
-    {
-        GraphQLScalarType argumentType = (GraphQLScalarType) graphQLArgument.getType();
-        if ( argumentType.equals( Scalars.GraphQLBoolean ) )
-        {
-            return castToBoolean( argumentValue );
-        }
-        else
-        {
-            return argumentType.getCoercing().parseValue( argumentValue );
-        }
-    }
-
-    private Boolean castToBoolean( Object input )
-    {
-        if ( input instanceof Boolean )
-        {
-            return (Boolean) input;
-        }
-        else if ( input instanceof String )
-        {
-            String lStr = ( (String) input ).toLowerCase();
-            if ( lStr.equals( "true" ) )
-            {
-                return true;
-            }
-            if ( lStr.equals( "false" ) )
-            {
-                return false;
-            }
-            return null;
-        }
-        else if ( isNumberIsh( input ) )
-        {
-            BigDecimal value;
-            try
-            {
-                value = new BigDecimal( input.toString() );
-            }
-            catch ( NumberFormatException e )
-            {
-                // this should never happen because String is handled above
-                return assertShouldNeverHappen();
-            }
-            return value.compareTo( BigDecimal.ZERO ) != 0;
-        }
-        else
-        {
-            return null;
-        }
     }
 }
