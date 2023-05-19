@@ -14,6 +14,7 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders;
 
+import graphql.Scalars;
 import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -26,11 +27,14 @@ import graphql.schema.GraphQLType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static graphql.Assert.assertShouldNeverHappen;
+import static graphql.scalar.CoercingUtil.isNumberIsh;
 import static graphql.schema.GraphQLDirective.newDirective;
 
 
@@ -134,7 +138,22 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
                     Object argumentValue = methods[finalI].invoke(annotation);
                     Object value;
                     if (graphQLArgument.getType() instanceof GraphQLScalarType) {
-                        value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
+//                        value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
+
+                        try {
+                            GraphQLScalarType argumentType = (GraphQLScalarType) graphQLArgument.getType();
+                            if ( argumentType.equals( Scalars.GraphQLBoolean ) )
+                            {
+                                value = castToBoolean( argumentValue );
+                            }
+                            else
+                            {
+                                value = argumentType.getCoercing().parseValue( argumentValue );
+                            }
+                            builder.value( value );
+                        } catch (Exception e) {
+                            throw new GraphQLAnnotationsException(COULD_NOT_PARSE_ARGUMENT_VALUE_TO_ARGUMENT_TYPE, e);
+                        }
                     }
                     else{
                         value = argumentValue;
@@ -159,8 +178,17 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
             if (graphQLArgument.getType() instanceof GraphQLScalarType) {
 
                 try {
-                    Object value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
-                    builder.value(value);
+                    Object value;
+                    GraphQLScalarType argumentType = (GraphQLScalarType) graphQLArgument.getType();
+                    if ( argumentType.equals( Scalars.GraphQLBoolean ) )
+                    {
+                        value = castToBoolean( argumentValue );
+                    }
+                    else
+                    {
+                        value = argumentType.getCoercing().parseValue( argumentValue );
+                    }
+                    builder.value( value );
                 } catch (Exception e) {
                     throw new GraphQLAnnotationsException(COULD_NOT_PARSE_ARGUMENT_VALUE_TO_ARGUMENT_TYPE, e);
                 }
@@ -168,5 +196,44 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
                 throw new GraphQLAnnotationsException(DIRECTIVE_ARGUMENT_TYPE_MUST_BE_A_SCALAR, null);
             }
         }));
+    }
+
+    private Boolean castToBoolean( Object input )
+    {
+        if ( input instanceof Boolean )
+        {
+            return (Boolean) input;
+        }
+        else if ( input instanceof String )
+        {
+            String lStr = ( (String) input ).toLowerCase();
+            if ( lStr.equals( "true" ) )
+            {
+                return true;
+            }
+            if ( lStr.equals( "false" ) )
+            {
+                return false;
+            }
+            return null;
+        }
+        else if ( isNumberIsh( input ) )
+        {
+            BigDecimal value;
+            try
+            {
+                value = new BigDecimal( input.toString() );
+            }
+            catch ( NumberFormatException e )
+            {
+                // this should never happen because String is handled above
+                return assertShouldNeverHappen();
+            }
+            return value.compareTo( BigDecimal.ZERO ) != 0;
+        }
+        else
+        {
+            return null;
+        }
     }
 }

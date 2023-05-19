@@ -207,7 +207,7 @@ public class GraphQLDirectivesViaClassDefinitionTest {
     }
 
 
-    @Test(enabled = false) // TODO there is issue with coercing in DirectivesBuilder
+    @Test
     public void queryName_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
         this.graphQLAnnotations.directive(UpperCase.class);
 
@@ -218,21 +218,21 @@ public class GraphQLDirectivesViaClassDefinitionTest {
         assertEquals(((Map<String, String>) result.getData()).get("name").toString(), "YARIN");
     }
 
-    @Test(enabled = false) // TODO there is issue with coercing in DirectivesBuilder
+    @Test
     public void queryNameWithFalse_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
         GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("isActive").type(GraphQLBoolean))
                 .validLocations(Introspection.DirectiveLocation.FIELD_DEFINITION).build();
         this.graphQLAnnotations.getContainer().getDirectiveRegistry().put(upperCase.getName(), new DirectiveAndWiring(upperCase, UpperWiring.class));
         GraphQLObjectType object = this.graphQLAnnotations.object(Query.class);
         GraphQLCodeRegistry codeRegistry = graphQLAnnotations.getContainer().getCodeRegistryBuilder().build();
-        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).build();
+        GraphQLSchema schema = newSchema().query(object).codeRegistry(codeRegistry).additionalDirective( upperCase ).build();
 
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("query { nameWithFalse }");
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("nameWithFalse").toString(), "yarin");
     }
 
-    @Test(enabled = false) // TODO there is issue with coercing in DirectivesBuilder
+    @Test
     public void queryNameWithNoArgs_directivesProvidedToRegistry_wiringIsActivated() throws Exception {
         GraphQLSchema schema = newAnnotationsSchema().query(Query2.class).directive(UpperCaseNoDefault.class).build();
 
@@ -248,7 +248,7 @@ public class GraphQLDirectivesViaClassDefinitionTest {
         GraphQL.newGraphQL(schema).build().execute("query { nameWithNoArgs }");
     }
 
-    @Test(enabled = false) // TODO there is issue with coercing in DirectivesBuilder
+    @Test
     public void queryName_chainedDirectives_wiringIsActivatedInCorrectOrder() throws Exception {
         GraphQLSchema schema = newAnnotationsSchema().query(Query3.class).directives(SuffixDirective.class, UpperCase.class).build();
 

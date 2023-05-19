@@ -22,12 +22,14 @@ import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.PropertyDataFetcher;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.*;
@@ -54,7 +56,7 @@ public class GraphQLDataFetcherTest {
         final HashMap<String, Object> data = result.getData();
         assertNotNull(data);
         assertTrue(((HashMap<String, Boolean>) data.get("sample")).get("isGreat"));
-        assertFalse(((HashMap<String, Boolean>) data.get("sample")).get("isBad")); // TODO investigate why returned false instead of true
+        assertTrue(((HashMap<String, Boolean>) data.get("sample")).get("isBad"));
     }
 
     @Test
@@ -84,7 +86,7 @@ public class GraphQLDataFetcherTest {
         // Then
         final HashMap<String, Object> data = result.getData();
         assertNotNull(data);
-        assertFalse(((HashMap<String, Boolean>) data.get("sample")).get("isBad")); // TODO investigate why returned true instead of false
+        assertTrue(((HashMap<String, Boolean>) data.get("sample")).get("isBad"));
     }
 
     @GraphQLName("Query")
@@ -161,8 +163,10 @@ public class GraphQLDataFetcherTest {
         }
 
         @Override
-        public Object get(DataFetchingEnvironment environment) {
-            final Object result = super.get(environment);
+        public Object get( final GraphQLFieldDefinition fieldDefinition, final Object source, final Supplier supplier )
+            throws Exception
+        {
+            final Object result = super.get( fieldDefinition, source, supplier );
             if (flip) {
                 return !(Boolean) result;
             } else {
