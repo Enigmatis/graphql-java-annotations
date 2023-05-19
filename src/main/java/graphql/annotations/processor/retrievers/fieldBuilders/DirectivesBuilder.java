@@ -137,28 +137,15 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
                     methods[finalI].setAccessible(true);
                     Object argumentValue = methods[finalI].invoke(annotation);
                     Object value;
-                    if (graphQLArgument.getType() instanceof GraphQLScalarType) {
-//                        value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
-
-                        try {
-                            GraphQLScalarType argumentType = (GraphQLScalarType) graphQLArgument.getType();
-                            if ( argumentType.equals( Scalars.GraphQLBoolean ) )
-                            {
-                                value = castToBoolean( argumentValue );
-                            }
-                            else
-                            {
-                                value = argumentType.getCoercing().parseValue( argumentValue );
-                            }
-                            builder.value( value );
-                        } catch (Exception e) {
-                            throw new GraphQLAnnotationsException(COULD_NOT_PARSE_ARGUMENT_VALUE_TO_ARGUMENT_TYPE, e);
-                        }
+                    if ( graphQLArgument.getType() instanceof GraphQLScalarType )
+                    {
+                        value = parseArgumentValue( graphQLArgument, argumentValue );
                     }
-                    else{
+                    else
+                    {
                         value = argumentValue;
                     }
-                    builder.value(value);
+                    builder.value( value );
                 } catch (Exception e) {
                     throw new GraphQLAnnotationsException(COULD_NOT_PARSE_ARGUMENT_VALUE_TO_ARGUMENT_TYPE, e);
                 }
@@ -178,16 +165,7 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
             if (graphQLArgument.getType() instanceof GraphQLScalarType) {
 
                 try {
-                    Object value;
-                    GraphQLScalarType argumentType = (GraphQLScalarType) graphQLArgument.getType();
-                    if ( argumentType.equals( Scalars.GraphQLBoolean ) )
-                    {
-                        value = castToBoolean( argumentValue );
-                    }
-                    else
-                    {
-                        value = argumentType.getCoercing().parseValue( argumentValue );
-                    }
+                    Object value = parseArgumentValue( graphQLArgument, argumentValue );
                     builder.value( value );
                 } catch (Exception e) {
                     throw new GraphQLAnnotationsException(COULD_NOT_PARSE_ARGUMENT_VALUE_TO_ARGUMENT_TYPE, e);
@@ -196,6 +174,19 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
                 throw new GraphQLAnnotationsException(DIRECTIVE_ARGUMENT_TYPE_MUST_BE_A_SCALAR, null);
             }
         }));
+    }
+
+    private Object parseArgumentValue( GraphQLArgument graphQLArgument, Object argumentValue )
+    {
+        GraphQLScalarType argumentType = (GraphQLScalarType) graphQLArgument.getType();
+        if ( argumentType.equals( Scalars.GraphQLBoolean ) )
+        {
+            return castToBoolean( argumentValue );
+        }
+        else
+        {
+            return argumentType.getCoercing().parseValue( argumentValue );
+        }
     }
 
     private Boolean castToBoolean( Object input )
