@@ -65,7 +65,7 @@ public class GraphQLFragmentTest {
         GraphQL graphQL2 = GraphQL.newGraphQL(schema).build();
 
         // When
-        ExecutionResult graphQLResult = graphQL2.execute("{getItems { ... on MyObject {getA, getMy {getB}} ... on MyObject2 {getA, getB}  }}", new RootObject());
+        ExecutionResult graphQLResult = graphQL2.execute(GraphQLHelper.createExecutionInput("{getItems { ... on MyObject {getA, getMy {getB}} ... on MyObject2 {getA, getB}  }}", new RootObject()));
         Set resultMap = ((Map) graphQLResult.getData()).entrySet();
 
         // Then

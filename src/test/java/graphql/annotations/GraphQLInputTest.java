@@ -186,7 +186,7 @@ public class GraphQLInputTest {
                 .additionalType(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }", new Query());
+        ExecutionResult result = graphQL.execute(GraphQLHelper.createExecutionInput("{ object { value(input:{key:\"test\"}) } }", new Query()));
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "testa");
     }
@@ -196,7 +196,7 @@ public class GraphQLInputTest {
         GraphQLSchema schema = newAnnotationsSchema().query(QueryMultipleDefinitions.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ something(code: {firstField:\"a\",secondField:\"b\"}) somethingElse(code: {firstField:\"c\",secondField:\"d\"}) }", new QueryMultipleDefinitions());
+        ExecutionResult result = graphQL.execute(GraphQLHelper.createExecutionInput("{ something(code: {firstField:\"a\",secondField:\"b\"}) somethingElse(code: {firstField:\"c\",secondField:\"d\"}) }", new QueryMultipleDefinitions()));
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, String>) result.getData()).get("something"), "ab");
         assertEquals(((Map<String, String>) result.getData()).get("somethingElse"), "cd");
@@ -207,11 +207,11 @@ public class GraphQLInputTest {
         GraphQLSchema schema = newAnnotationsSchema().query(QueryRecursion.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ object { value(input:{key:\"test\"}) } }", new QueryRecursion());
+        ExecutionResult result = graphQL.execute(GraphQLHelper.createExecutionInput("{ object { value(input:{key:\"test\"}) } }", new QueryRecursion()));
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "testa");
 
-        result = graphQL.execute("{ object { value(input:{rec:{key:\"test\"}}) } }", new QueryRecursion());
+        result = graphQL.execute(GraphQLHelper.createExecutionInput("{ object { value(input:{rec:{key:\"test\"}}) } }", new QueryRecursion()));
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "rectesta");
     }
@@ -221,7 +221,7 @@ public class GraphQLInputTest {
         GraphQLSchema schema = newAnnotationsSchema().query(QueryList.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ object { value(input:[[[{key:\"test\", complex:[{subKey:\"subtest\"},{subKey:\"subtest2\"}]}]]]) } }", new QueryList());
+        ExecutionResult result = graphQL.execute(GraphQLHelper.createExecutionInput("{ object { value(input:[[[{key:\"test\", complex:[{subKey:\"subtest\"},{subKey:\"subtest2\"}]}]]]) } }", new QueryList()));
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("object").get("value"), "test-subtest");
     }
 
@@ -230,7 +230,7 @@ public class GraphQLInputTest {
         GraphQLSchema schema = newAnnotationsSchema().query(QueryIface.class).additionalType(TestObject.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ iface { value(input:{key:\"test\"}) } }", new QueryIface());
+        ExecutionResult result = graphQL.execute(GraphQLHelper.createExecutionInput("{ iface { value(input:{key:\"test\"}) } }", new QueryIface()));
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("iface").get("value"), "testa");
     }

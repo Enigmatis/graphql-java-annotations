@@ -170,7 +170,7 @@ public class GraphQLInterfaceTest {
         GraphQLSchema schema = newAnnotationsSchema().query(UnionQuery.class).build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-        ExecutionResult result = graphQL.execute("{ union {  ... on TestObject1 { value }  } }", new UnionQuery(new TestObject1()));
+        ExecutionResult result = graphQL.execute(GraphQLHelper.createExecutionInput("{ union {  ... on TestObject1 { value }  } }", new UnionQuery(new TestObject1())));
         assertTrue(result.getErrors().isEmpty());
         assertEquals(((Map<String, Map<String, String>>) result.getData()).get("union").get("value"), "a");
     }

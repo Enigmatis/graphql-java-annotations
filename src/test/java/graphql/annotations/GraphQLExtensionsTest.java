@@ -117,7 +117,8 @@ public class GraphQLExtensionsTest {
     public void values() {
         GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).typeExtension(TestObjectExtension.class).build();
 
-        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute("{field field2 field3 field4 field5}", new GraphQLExtensionsTest.TestObject());
+        ExecutionResult result = GraphQL.newGraphQL( schema ).build().execute(
+            GraphQLHelper.createExecutionInput( "{field field2 field3 field4 field5}", new GraphQLExtensionsTest.TestObject() ) );
         Map<String, Object> data = result.getData();
         assertEquals(data.get("field"), "test");
         assertEquals(data.get("field2"), "test test2");
