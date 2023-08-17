@@ -14,6 +14,14 @@
  */
 package graphql.annotations.processor.retrievers.fieldBuilders;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectives;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -22,14 +30,6 @@ import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLType;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static graphql.schema.GraphQLDirective.newDirective;
 
@@ -133,13 +133,15 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
                     methods[finalI].setAccessible(true);
                     Object argumentValue = methods[finalI].invoke(annotation);
                     Object value;
-                    if (graphQLArgument.getType() instanceof GraphQLScalarType) {
+                    if ( graphQLArgument.getType() instanceof GraphQLScalarType )
+                    {
                         value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
                     }
-                    else{
+                    else
+                    {
                         value = argumentValue;
                     }
-                    builder.value(value);
+                    builder.value( value );
                 } catch (Exception e) {
                     throw new GraphQLAnnotationsException(COULD_NOT_PARSE_ARGUMENT_VALUE_TO_ARGUMENT_TYPE, e);
                 }
@@ -160,7 +162,7 @@ public class DirectivesBuilder implements Builder<GraphQLDirective[]> {
 
                 try {
                     Object value = ((GraphQLScalarType) graphQLArgument.getType()).getCoercing().parseValue(argumentValue);
-                    builder.value(value);
+                    builder.value( value );
                 } catch (Exception e) {
                     throw new GraphQLAnnotationsException(COULD_NOT_PARSE_ARGUMENT_VALUE_TO_ARGUMENT_TYPE, e);
                 }

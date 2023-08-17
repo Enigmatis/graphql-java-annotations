@@ -22,12 +22,14 @@ import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.PropertyDataFetcher;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 import static graphql.annotations.AnnotationsSchemaCreator.newAnnotationsSchema;
 import static org.testng.Assert.*;
@@ -161,8 +163,10 @@ public class GraphQLDataFetcherTest {
         }
 
         @Override
-        public Object get(DataFetchingEnvironment environment) {
-            final Object result = super.get(environment);
+        public Object get( final GraphQLFieldDefinition fieldDefinition, final Object source, final Supplier supplier )
+            throws Exception
+        {
+            final Object result = super.get( fieldDefinition, source, supplier );
             if (flip) {
                 return !(Boolean) result;
             } else {

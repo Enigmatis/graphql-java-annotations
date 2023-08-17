@@ -133,7 +133,9 @@ public class RelayTest {
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
-        ExecutionResult result = graphQL.execute("mutation { doSomething(input: {clientMutationId: \"1\"}) { getI clientMutationId } }", new TestObject());
+        ExecutionResult result = graphQL.execute(
+            GraphQLHelper.createExecutionInput( "mutation { doSomething(input: {clientMutationId: \"1\"}) { getI clientMutationId } }",
+                                                new TestObject() ) );
 
         assertEquals(result.getErrors().size(), 0);
 
@@ -155,7 +157,9 @@ public class RelayTest {
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
-        ExecutionResult result = graphQL.execute("mutation { doSomethingI(input: {clientMutationId: \"1\"}) { getI clientMutationId } }", new TestObject());
+        ExecutionResult result = graphQL.execute(
+            GraphQLHelper.createExecutionInput( "mutation { doSomethingI(input: {clientMutationId: \"1\"}) { getI clientMutationId } }",
+                                                new TestObject() ) );
 
         assertEquals(result.getErrors().size(), 0);
 
@@ -194,7 +198,8 @@ public class RelayTest {
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).queryExecutionStrategy(new EnhancedExecutionStrategy()).build();
 
-        ExecutionResult result = graphQL.execute("mutation { doSomethingElse(input: {a: 0, b: 1, clientMutationId: \"1\"}) { getI clientMutationId } }", new TestObject());
+        ExecutionResult result = graphQL.execute( GraphQLHelper.createExecutionInput(
+            "mutation { doSomethingElse(input: {a: 0, b: 1, clientMutationId: \"1\"}) { getI clientMutationId } }", new TestObject() ) );
 
         assertEquals(result.getErrors().size(), 0);
 
@@ -237,7 +242,10 @@ public class RelayTest {
         inputVariables.put("b", 1);
         inputVariables.put("clientMutationId", "1");
         variables.put("input", inputVariables);
-        ExecutionResult result = graphQL.execute("mutation VariableMutation($input:DoSomethingElseInput!) { doSomethingElse(input: $input) { getI clientMutationId } }", new TestObject(), variables);
+
+        ExecutionResult result = graphQL.execute( GraphQLHelper.createExecutionInput(
+            "mutation VariableMutation($input:DoSomethingElseInput!) { doSomethingElse(input: $input) { getI clientMutationId } }",
+            new TestObject(), variables ) );
 
         assertEquals(result.getErrors().size(), 0);
 
