@@ -1,6 +1,6 @@
 ![logo](graphql-annotations.png?raw=true)
 # GraphQL-Java Annotations
-[![Build Status](https://travis-ci.org/graphql-java/graphql-java-annotations.svg?branch=master)](https://travis-ci.org/graphql-java/graphql-java-annotations)
+![build](https://github.com/Enigmatis/graphql-java-annotations/actions/workflows/build.yml/badge.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.graphql-java/graphql-java-annotations.svg?maxAge=3000)]()
 
 [GraphQL-Java](https://github.com/graphql-java/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
