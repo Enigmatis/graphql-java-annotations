@@ -1,20 +1,21 @@
 import aQute.bnd.gradle.Bundle
+import io.github.gradlenexus.publishplugin.NexusRepository
 
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:5.1.2'
+        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:6.4.0'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
     }
 }
 plugins {
-    id 'net.researchgate.release' version '2.8.1'
-    id 'com.github.hierynomus.license' version '0.15.0'
+    id 'net.researchgate.release' version '3.0.2'
+    id 'com.github.hierynomus.license' version '0.16.1'
     id 'maven-publish'
     id 'signing'
-    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
+    id "io.github.gradle-nexus.publish-plugin" version "1.3.0"
 }
 
 apply plugin: 'java'
@@ -24,13 +25,15 @@ apply plugin: 'maven-publish'
 
 
 // custom tasks for creating source/javadoc jars
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+tasks.register('sourcesJar', Jar) {
+    dependsOn classes
+    archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 
@@ -45,18 +48,20 @@ repositories {
 }
 
 gradle.projectsEvaluated {
-    tasks.withType(JavaCompile) {
-        doLast {
-            options.compilerArgs += "-parameters"
+    tasks.withType(JavaCompile).tap {
+        configureEach {
+            doLast {
+                options.compilerArgs += "-parameters"
+            }
         }
     }
 }
 
 dependencies {
-    compile 'javax.validation:validation-api:1.1.0.Final'
-    compile 'com.graphql-java:graphql-java:20.4'
-    compile 'com.graphql-java:graphql-java-extended-scalars:20.2'
-    compile 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'javax.validation:validation-api:1.1.0.Final'
+    implementation 'com.graphql-java:graphql-java:21.1'
+    implementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
 
     // OSGi
     compileOnly 'org.osgi:org.osgi.core:6.0.0'
@@ -64,9 +69,9 @@ dependencies {
     compileOnly 'org.osgi:org.osgi.service.component:1.3.0'
     compileOnly 'biz.aQute.bnd:biz.aQute.bndlib:3.2.0'
 
-    testCompile 'org.testng:testng:6.9.10'
-    testCompile 'org.hamcrest:hamcrest-all:1.3'
-    testCompile 'org.mockito:mockito-core:2.+'
+    testImplementation 'org.testng:testng:7.5.1'
+    testImplementation 'org.hamcrest:hamcrest-all:1.3'
+    testImplementation 'org.mockito:mockito-core:2.+'
 }
 
 test.useTestNG()
@@ -158,11 +163,13 @@ signing {
     sign publishing.publications
 }
 
-task bundle(type: Bundle) {
+tasks.register('bundle', Bundle) {
     from sourceSets.main.output
-    bndfile = file('bundle.bnd')
+    bundle {
+        bndfile = project.file('bundle.bnd')
+    }
 }
 
 wrapper {
-    gradleVersion = '6.5.1'
+    gradleVersion = '8.3'
 }
