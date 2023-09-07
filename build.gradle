@@ -165,9 +165,6 @@ signing {
 
 tasks.register('bundle', Bundle) {
     from sourceSets.main.output
-    bundle {
-        bndfile = project.file('bundle.bnd')
-    }
 }
 
 wrapper {

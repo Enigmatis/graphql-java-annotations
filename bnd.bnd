@@ -1,0 +1,2 @@
+-exportcontents: graphql.annotations.*
+-nouses: true
