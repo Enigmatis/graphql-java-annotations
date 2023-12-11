@@ -14,6 +14,7 @@ package graphql.annotations.processor.retrievers.fieldBuilders;
 
 import graphql.annotations.annotationTypes.GraphQLDefaultValue;
 import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.annotationTypes.GraphQLIgnore;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
@@ -50,6 +51,7 @@ public class ArgumentBuilder implements Builder<List<GraphQLArgument>> {
         TypeFunction finalTypeFunction = typeFunction;
         List<GraphQLArgument> args = Arrays.stream(method.getParameters()).
                 filter(p -> !DataFetchingEnvironment.class.isAssignableFrom(p.getType())).
+                filter(p -> !p.isAnnotationPresent(GraphQLIgnore.class)).
                 map(parameter -> {
                     Class<?> t = parameter.getType();
                     graphql.schema.GraphQLInputType graphQLType = (GraphQLInputType) finalTypeFunction.buildType(true, t, parameter.getAnnotatedType(), container);
