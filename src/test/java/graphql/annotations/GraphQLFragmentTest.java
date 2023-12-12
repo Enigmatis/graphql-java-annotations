@@ -17,6 +17,7 @@ package graphql.annotations;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.TypeResolutionEnvironment;
+import graphql.annotations.GraphQLFragmentTest.MyInterface;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.GraphQLAnnotations;
@@ -95,7 +96,10 @@ public class GraphQLFragmentTest {
         }
     }
 
-    public static class MyObject2 implements MyInterface {
+    public static class MyObject2 extends SuperClass {
+    }
+
+    public static class SuperClass implements MyInterface {
         public String getA() {
             return "a2";
         }

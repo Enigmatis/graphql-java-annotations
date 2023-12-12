@@ -23,6 +23,7 @@ import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
 import graphql.annotations.processor.retrievers.GraphQLInterfaceRetriever;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
+import graphql.annotations.processor.util.ClassUtils;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
@@ -95,7 +96,7 @@ public class OutputObjectBuilder {
             }
         }
 
-        for (Class<?> iface : object.getInterfaces()) {
+        for (Class<?> iface : ClassUtils.getAllInterfaces(object)) {
             if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
                 String ifaceName = graphQLObjectInfoRetriever.getTypeName(iface);
                 if (container.getProcessing().contains(ifaceName)) {
