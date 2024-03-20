@@ -44,6 +44,7 @@ public class GraphQLExtensionsHandler {
 
     public List<GraphQLFieldDefinition> getExtensionFields(Class<?> object, List<String> definedFields, ProcessingElementsContainer container) throws CannotCastMemberException {
         List<GraphQLFieldDefinition> fields = new ArrayList<>();
+        String typeName = graphQLObjectInfoRetriever.getTypeName(object);
         if (container.getExtensionsTypeRegistry().containsKey(object)) {
             for (Class<?> aClass : container.getExtensionsTypeRegistry().get(object)) {
                 for (Method method : graphQLObjectInfoRetriever.getOrderedMethods(aClass)) {
@@ -51,7 +52,7 @@ public class GraphQLExtensionsHandler {
                         continue;
                     }
                     if (methodSearchAlgorithm.isFound(method)) {
-                        addExtensionField(fieldRetriever.getField(object.getSimpleName(), method, container), fields, definedFields);
+                        addExtensionField(fieldRetriever.getField(typeName, method, container), fields, definedFields);
                     }
                 }
                 for (Field field : getAllFields(aClass).values()) {
@@ -59,7 +60,7 @@ public class GraphQLExtensionsHandler {
                         continue;
                     }
                     if (fieldSearchAlgorithm.isFound(field)) {
-                        addExtensionField(fieldRetriever.getField(object.getSimpleName(), field, container), fields, definedFields);
+                        addExtensionField(fieldRetriever.getField(typeName, field, container), fields, definedFields);
                     }
                 }
             }
