@@ -94,6 +94,31 @@ public class GraphQLExtensionsTest {
         }
     }
 
+    @GraphQLDescription("Object with different GraphQL name")
+    @GraphQLName("DifferentObject")
+    public static class DifferentNameTestObject {
+        @GraphQLField
+        public String field() {
+            return "different";
+        }
+
+    }
+
+    @GraphQLTypeExtension(GraphQLExtensionsTest.DifferentNameTestObject.class)
+    public static class DifferentNameTestObjectExtension {
+        private final DifferentNameTestObject obj;
+
+        public DifferentNameTestObjectExtension(DifferentNameTestObject obj) {
+            this.obj = obj;
+        }
+
+        @GraphQLField
+        public String field2() {
+            return obj.field() + " field2";
+        }
+
+    }
+
     @Test
     public void fields() {
         GraphQLAnnotations instance = new GraphQLAnnotations();
@@ -114,6 +139,24 @@ public class GraphQLExtensionsTest {
     }
 
     @Test
+    public void fieldsDifferentGraphQLName() {
+        GraphQLAnnotations instance = new GraphQLAnnotations();
+        instance.registerTypeExtension(DifferentNameTestObjectExtension.class);
+        GraphQLObjectHandler graphQLObjectHandler = instance.getObjectHandler();
+        GraphQLObjectType object = graphQLObjectHandler.getGraphQLType(GraphQLExtensionsTest.DifferentNameTestObject.class, instance.getContainer());
+
+        List<GraphQLFieldDefinition> fields = object.getFieldDefinitions();
+        assertEquals(fields.size(), 2);
+
+        fields = ImmutableList.sortedCopyOf(Comparator.comparing(GraphQLFieldDefinition::getName), fields);
+
+        assertEquals(fields.get(0).getName(), "field");
+        assertEquals(fields.get(1).getName(), "field2");
+        assertEquals(fields.get(0).getType(), GraphQLString);
+        assertEquals(fields.get(1).getType(), GraphQLString);
+    }
+
+    @Test
     public void values() {
         GraphQLSchema schema = newAnnotationsSchema().query(TestObject.class).typeExtension(TestObjectExtension.class).build();
 
@@ -128,6 +171,19 @@ public class GraphQLExtensionsTest {
     }
 
     @Test
+    public void valuesDifferentGraphQLName() {
+        GraphQLSchema schema = newAnnotationsSchema().query(DifferentNameTestObject.class).typeExtension(DifferentNameTestObjectExtension.class).build();
+
+        assertTrue(schema.getCodeRegistry().hasDataFetcher(FieldCoordinates.coordinates("DifferentObject", "field2")));
+
+        ExecutionResult result = GraphQL.newGraphQL( schema ).build().execute(
+            GraphQLHelper.createExecutionInput( "{field field2}", new GraphQLExtensionsTest.DifferentNameTestObject() ) );
+        Map<String, Object> data = result.getData();
+        assertEquals(data.get("field"), "different");
+        assertEquals(data.get("field2"), "different field2");
+    }
+
+    @Test
     public void testDuplicateField() {
         GraphQLAnnotations instance = new GraphQLAnnotations();
         GraphQLObjectHandler graphQLObjectHandler = instance.getObjectHandler();
@@ -135,4 +191,5 @@ public class GraphQLExtensionsTest {
         GraphQLAnnotationsException e = expectThrows(GraphQLAnnotationsException.class, () -> graphQLObjectHandler.getGraphQLType(TestObject.class, instance.getContainer()));
         assertTrue(e.getMessage().startsWith("Duplicate field"));
     }
+
 }
