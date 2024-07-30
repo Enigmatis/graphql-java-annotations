@@ -150,8 +150,8 @@ afterReleaseBuild.dependsOn nexusPublishing
 nexusPublishing {
     repositories {
         sonatype {
-            username = System.getenv("MAVEN_CENTRAL_USER")
-            password = System.getenv("MAVEN_CENTRAL_PASSWORD")
+            username = System.getenv("MAVEN_CENTRAL_USERTOKEN_USERNAME")
+            password = System.getenv("MAVEN_CENTRAL_USERTOKEN_PASSWORD")
         }
     }
 }
