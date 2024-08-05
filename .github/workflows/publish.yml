@@ -25,6 +25,6 @@ jobs:
     - name: Publish with Gradle
       run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
       env:
-        MAVEN_CENTRAL_USER: ${{ secrets.MAVEN_CENTRAL_USERTOKEN_USERNAME }}
-        MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_USERTOKEN_PASSWORD }}
+        MAVEN_CENTRAL_USERTOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERTOKEN_USERNAME }}
+        MAVEN_CENTRAL_USERTOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_USERTOKEN_PASSWORD }}
         MAVEN_CENTRAL_PGP_KEY: ${{ secrets.MAVEN_CENTRAL_PGP_KEY }}
