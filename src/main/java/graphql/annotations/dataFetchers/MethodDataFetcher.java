@@ -3,7 +3,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,7 @@ import graphql.annotations.processor.typeFunctions.TypeFunction;
 import graphql.schema.*;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
 import static graphql.annotations.processor.util.PrefixesUtil.addPrefixToPropertyName;
@@ -120,6 +117,11 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
 
     private Object buildArg(Type p, GraphQLType graphQLType, Object arg) {
         if (arg == null) {
+            // for Optional parameters null should be returned as Optional.empty() to show a request for a null value
+            // and not including the parameter in the query at all should be returned as null to show "undefined" value / not set
+            if ((p instanceof ParameterizedType && ((ParameterizedType) p).getRawType() == Optional.class)) {
+                return Optional.empty();
+            }
             return null;
         }
         if (graphQLType instanceof graphql.schema.GraphQLNonNull) {
@@ -136,7 +138,13 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
                 Map map = (Map) arg;
                 for (Parameter parameter : parameters) {
                     String name = toGraphqlName(parameter.getAnnotation(GraphQLName.class) != null ? parameter.getAnnotation(GraphQLName.class).value() : parameter.getName());
-                    objects.add(buildArg(parameter.getParameterizedType(), ((GraphQLInputObjectType) graphQLType).getField(name).getType(), map.get(name)));
+                    // There is a difference between not having a parameter in the query and having it with a null value
+                    // If the value is not given, it will always be null, but if the value is given as null and the parameter is optional, it will be Optional.empty()
+                    if (!map.containsKey(name)) {
+                        objects.add(null);
+                    } else {
+                        objects.add(buildArg(parameter.getParameterizedType(), ((GraphQLInputObjectType) graphQLType).getField(name).getType(), map.get(name)));
+                    }
                 }
                 return constructNewInstance(constructor, objects.toArray(new Object[objects.size()]));
             }
@@ -148,8 +156,19 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
             for (Object item : ((List) arg)) {
                 list.add(buildArg(subType, wrappedType, item));
             }
-
+            // add Optional wrapper if needed
+            if (((ParameterizedType) p).getRawType() == Optional.class) {
+                return Optional.of(list);
+            }
             return list;
+        } else if (p instanceof ParameterizedType) {
+            Type subType = ((ParameterizedType) p).getActualTypeArguments()[0];
+            Object val = buildArg(subType, graphQLType, arg);
+            // add Optional wrapper if needed
+            if (val != null && ((ParameterizedType) p).getRawType() == Optional.class) {
+                return Optional.of(val);
+            }
+            return val;
         } else {
             return arg;
         }
