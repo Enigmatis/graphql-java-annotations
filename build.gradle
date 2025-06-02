@@ -59,8 +59,8 @@ gradle.projectsEvaluated {
 
 dependencies {
     implementation 'javax.validation:validation-api:1.1.0.Final'
-    implementation 'com.graphql-java:graphql-java:22.3'
-    implementation 'com.graphql-java:graphql-java-extended-scalars:22.0'
+    implementation 'com.graphql-java:graphql-java:24.1'
+    implementation 'com.graphql-java:graphql-java-extended-scalars:24.0'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
 
     // OSGi

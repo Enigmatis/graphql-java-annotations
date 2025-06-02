@@ -29,15 +29,6 @@ public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
     private static final String CLIENT_MUTATION_ID = "clientMutationId";
 
     @Override
-    protected Object resolveField(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
-        GraphQLObjectType parentType = (GraphQLObjectType) parameters.getExecutionStepInfo().getUnwrappedNonNullType();
-        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, parameters.getField().getSingleField());
-        if (fieldDef == null) return null;
-
-        return super.resolveField(executionContext, parameters);
-    }
-
-    @Override
     protected FieldValueInfo completeValue(ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws NonNullableFieldWasNullException {
         graphql.schema.GraphQLType fieldType = parameters.getExecutionStepInfo().getType();
 
