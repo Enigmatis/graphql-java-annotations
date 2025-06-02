@@ -23,53 +23,43 @@ import graphql.schema.GraphQLObjectType;
 
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class EnhancedExecutionStrategy extends AsyncSerialExecutionStrategy {
 
     private static final String CLIENT_MUTATION_ID = "clientMutationId";
 
     @Override
-    protected CompletableFuture<ExecutionResult> resolveField(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
+    protected Object resolveField(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
         GraphQLObjectType parentType = (GraphQLObjectType) parameters.getExecutionStepInfo().getUnwrappedNonNullType();
         GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, parameters.getField().getSingleField());
         if (fieldDef == null) return null;
 
-        if (fieldDef.getName().contentEquals(CLIENT_MUTATION_ID)) {
+        return super.resolveField(executionContext, parameters);
+    }
+
+    @Override
+    protected FieldValueInfo completeValue(ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws NonNullableFieldWasNullException {
+        graphql.schema.GraphQLType fieldType = parameters.getExecutionStepInfo().getType();
+
+        if (parameters.getExecutionStepInfo().getFieldDefinition().getName().contentEquals(CLIENT_MUTATION_ID)) {
             Field field = (Field) executionContext.getOperationDefinition().getSelectionSet().getSelections().get(0);
             Argument argument = field.getArguments().get(0);
 
             Object clientMutationId;
             if (argument.getValue() instanceof VariableReference) {
                 VariableReference ref = (VariableReference) argument.getValue();
-                HashMap mutationInputVariables = (HashMap) executionContext.getVariables().get(ref.getName());
+                HashMap mutationInputVariables = (HashMap) executionContext.getCoercedVariables().get(ref.getName());
                 clientMutationId = mutationInputVariables.get(CLIENT_MUTATION_ID);
             } else {
                 ObjectValue value = (ObjectValue) field.getArguments().get(0).getValue();
                 StringValue clientMutationIdVal = (StringValue) value.getObjectFields().stream()
-                        .filter(f -> f.getName().contentEquals(CLIENT_MUTATION_ID))
-                        .findFirst().get().getValue();
+                    .filter(f -> f.getName().contentEquals(CLIENT_MUTATION_ID))
+                    .findFirst().get().getValue();
                 clientMutationId = clientMutationIdVal.getValue();
             }
-
-            ExecutionStepInfo fieldTypeInfo = ExecutionStepInfo.newExecutionStepInfo().type(fieldDef.getType()).parentInfo(parameters.getExecutionStepInfo()).build();
-            ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-                    .fields(parameters.getFields())
-                    .nonNullFieldValidator(parameters.getNonNullFieldValidator())
-                    .executionStepInfo(fieldTypeInfo)
-                    .source(clientMutationId)
-                    .build();
-
-
-            return completeValue(executionContext, newParameters).getFieldValue();
-        } else {
-            return super.resolveField(executionContext, parameters);
+            return super.completeValue(executionContext, withSource(parameters, clientMutationId));
         }
-    }
 
-    @Override
-    protected FieldValueInfo completeValue(ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws NonNullableFieldWasNullException {
-        graphql.schema.GraphQLType fieldType = parameters.getExecutionStepInfo().getType();
         Object result = parameters.getSource();
         if (result instanceof Enum && fieldType instanceof GraphQLEnumType) {
             Object value = ((GraphQLEnumType) fieldType).parseValue(((Enum) result).name());

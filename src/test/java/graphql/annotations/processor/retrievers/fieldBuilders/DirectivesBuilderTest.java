@@ -95,9 +95,16 @@ public class DirectivesBuilderTest {
     public void testDecoratedField_directivesAreInRegistry_directivesAreBuilt() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("myArg").type(GraphQLString).defaultValue("DefaultString")).build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
-        GraphQLDirective annotationDirective = newDirective().name("anno").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase")
+            .argument(builder -> builder.name("myArg").type(GraphQLString).defaultValueProgrammatic("DefaultString"))
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase")
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
+        GraphQLDirective annotationDirective = newDirective().name("anno")
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
 
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         processingElementsContainer.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, WiringClass.class));
@@ -126,8 +133,13 @@ public class DirectivesBuilderTest {
     public void testDecoratedFieldWithArguments_directivesAreInRegistry_directivesAreBuilt() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("myArg").type(GraphQLString)).build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase")
+            .argument(builder -> builder.name("myArg").type(GraphQLString))
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase")
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         processingElementsContainer.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, WiringClass.class));
 
@@ -150,8 +162,12 @@ public class DirectivesBuilderTest {
     public void testDecoratedFieldWithArguments_argumentsValuesLongerThanArgumentsNumber_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase")
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase")
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         processingElementsContainer.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, WiringClass.class));
 
@@ -171,7 +187,10 @@ public class DirectivesBuilderTest {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
         GraphQLInputObjectType inputField = GraphQLInputObjectType.newInputObject().name("inputField").build();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("arg").type(inputField)).build();
+        GraphQLDirective upperCase = newDirective().name("upperCase")
+            .argument(builder -> builder.name("arg").type(inputField))
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
 
         DirectivesBuilder directivesBuilder = new DirectivesBuilder(this.getClass().getField("decoratedFieldWithArguments"), processingElementsContainer);
@@ -189,7 +208,10 @@ public class DirectivesBuilderTest {
     public void testDecoratedFieldWithArguments_argumentValueIsNotTheSameTypeAsArgument_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("arg").type(GraphQLInt)).build();
+        GraphQLDirective upperCase = newDirective().name("upperCase")
+            .argument(builder -> builder.name("arg").type(GraphQLInt))
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
 
         DirectivesBuilder directivesBuilder = new DirectivesBuilder(this.getClass().getField("decoratedFieldWithArguments"), processingElementsContainer);
@@ -207,9 +229,14 @@ public class DirectivesBuilderTest {
     public void testDecoratedFieldWithArguments_moreArgumentsThanArgumentsValues_directivesAreBuilt() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("arg").type(GraphQLString))
-                .argument(builder -> builder.name("arg2").type(GraphQLInt).defaultValue("5")).build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase")
+            .argument(builder -> builder.name("arg").type(GraphQLString))
+            .argument(builder -> builder.name("arg2").type(GraphQLInt).defaultValueProgrammatic("5"))
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase")
+            .validLocation(Introspection.DirectiveLocation.FIELD)
+            .build();
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         processingElementsContainer.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, WiringClass.class));
 
@@ -242,9 +269,16 @@ public class DirectivesBuilderTest {
     public void testDecoratedArgument_directivesAreInRegistry_directivesAreBuilt() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("myArg").type(GraphQLString).defaultValue("DefaultString")).build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
-        GraphQLDirective anno = newDirective().name("anno").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase")
+            .argument(builder -> builder.name("myArg").type(GraphQLString).defaultValueProgrammatic("DefaultString"))
+            .validLocation(Introspection.DirectiveLocation.ARGUMENT_DEFINITION)
+            .build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase")
+            .validLocation(Introspection.DirectiveLocation.ARGUMENT_DEFINITION)
+            .build();
+        GraphQLDirective anno = newDirective().name("anno")
+            .validLocation(Introspection.DirectiveLocation.ARGUMENT_DEFINITION)
+            .build();
 
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         processingElementsContainer.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, WiringClass.class));
@@ -271,8 +305,11 @@ public class DirectivesBuilderTest {
     public void testDecoratedParameterWithArguments_directivesAreInRegistry_directivesAreBuilt() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("myArg").type(GraphQLString)).build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase")
+            .argument(builder -> builder.name("myArg").type(GraphQLString))
+            .validLocation(Introspection.DirectiveLocation.ARGUMENT_DEFINITION).build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase").validLocation(
+            Introspection.DirectiveLocation.ARGUMENT_DEFINITION).build();
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         processingElementsContainer.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, WiringClass.class));
 
@@ -304,9 +341,11 @@ public class DirectivesBuilderTest {
     public void testDecoratedClass_directivesAreInRegistry_directivesAreBuilt() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("myArg").type(GraphQLString).defaultValue("DefaultString")).build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
-        GraphQLDirective anno = newDirective().name("anno").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("myArg")
+            .type(GraphQLString).defaultValueProgrammatic("DefaultString"))
+            .validLocation(Introspection.DirectiveLocation.OBJECT).build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase").validLocation(Introspection.DirectiveLocation.OBJECT).build();
+        GraphQLDirective anno = newDirective().name("anno").validLocation(Introspection.DirectiveLocation.FIELD).build();
 
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         processingElementsContainer.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, WiringClass.class));
@@ -337,8 +376,10 @@ public class DirectivesBuilderTest {
     public void testDecoratedClassWithArguments_directivesAreInRegistry_directivesAreBuilt() throws Exception {
         // Arrange
         ProcessingElementsContainer processingElementsContainer = new ProcessingElementsContainer();
-        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("myArg").type(GraphQLString)).build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase").argument(builder -> builder.name("myArg").type(GraphQLString)).validLocation(
+            Introspection.DirectiveLocation.OBJECT).build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase").validLocation(
+            Introspection.DirectiveLocation.OBJECT).build();
         processingElementsContainer.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         processingElementsContainer.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, WiringClass.class));
 
