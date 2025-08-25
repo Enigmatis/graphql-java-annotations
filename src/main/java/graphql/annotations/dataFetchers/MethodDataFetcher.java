@@ -165,8 +165,8 @@ public class MethodDataFetcher<T> implements DataFetcher<T> {
             Type subType = ((ParameterizedType) p).getActualTypeArguments()[0];
             Object val = buildArg(subType, graphQLType, arg);
             // add Optional wrapper if needed
-            if (val != null && ((ParameterizedType) p).getRawType() == Optional.class) {
-                return Optional.of(val);
+            if (((ParameterizedType) p).getRawType() == Optional.class) {
+                return Optional.ofNullable(val);
             }
             return val;
         } else {
