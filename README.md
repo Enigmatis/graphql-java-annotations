@@ -3,8 +3,7 @@
 ![build](https://github.com/Enigmatis/graphql-java-annotations/actions/workflows/build.yml/badge.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.graphql-java/graphql-java-annotations.svg?maxAge=3000)]()
 
-[GraphQL-Java](https://github.com/graphql-java/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based
-syntax for GraphQL schema definition.
+[GraphQL-Java](https://github.com/graphql-java/graphql-java) is a great library, but its syntax is a little bit verbose. This library offers an annotations-based syntax for GraphQL schema definition.
 
 If you would like to use a tool that creates a graphql spring boot server using graphql-java-annotations, you can view the [graphql-spring-annotations](https://github.com/yarinvak/graphql-spring-annotations) library.
 
@@ -29,6 +28,7 @@ If you would like to use a tool that creates a graphql spring boot server using 
     - [Mutations](#mutations)
     - [Connection](#connection)
     - [Customizing Relay Schema](#customizing-relay-schema)     
+- [Community and Governance](#community-and-governance)
 
 ## Getting Started
 
@@ -620,3 +620,13 @@ It has 2 methods:
 
 For you convenience, there are two classes that you can use: `AbstractSimplePaginatedData` and `SimplePaginatedDataImpl`
 For examples, look at the tests
+
+
+## Community and Governance
+
+We are community-driven and operate in a low-maintenance mode. If you’d like to get involved or understand how decisions are made:
+
+- Contributing guide: see CONTRIBUTING.md
+- Governance: see GOVERNANCE.md
+- Code of Conduct: see CODE_OF_CONDUCT.md
+- Security: to report vulnerabilities, see SECURITY.md
