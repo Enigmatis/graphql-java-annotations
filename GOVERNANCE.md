@@ -5,6 +5,3 @@
 - Decisions are made by lazy consensus among maintainers; in case of disagreement, majority vote among maintainers.
 - Security issues: follow SECURITY.md.
 - Release cadence: as needed when changes accumulate.
-
-## Maintainers
-- Listed in build metadata and CODEOWNERS; please @mention for reviews.
