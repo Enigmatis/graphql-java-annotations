@@ -1,2 +1,3 @@
 -exportcontents: graphql.annotations.*
+Import-Package: !java.*, *
 -nouses: true
