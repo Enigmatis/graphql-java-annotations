@@ -19,6 +19,7 @@ import graphql.annotations.annotationTypes.directives.activation.GraphQLDirectiv
 import graphql.annotations.processor.DirectiveAndWiring;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.introspection.Introspection;
 import graphql.schema.GraphQLDirective;
 import org.testng.annotations.Test;
 
@@ -67,8 +68,8 @@ public class DirectiveWiringMapRetrieverTest {
     public void getDirectiveWiringMap_wiringClassIsPrivate_throwAGraphQLAnnotationsException() throws Exception {
         // Arrange
         DirectiveWiringMapRetriever directiveWiringMapRetriever = new DirectiveWiringMapRetriever();
-        GraphQLDirective upperCase = newDirective().name("upperCase").build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase").validLocation(Introspection.DirectiveLocation.FIELD).build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase").validLocation(Introspection.DirectiveLocation.FIELD).build();
         ProcessingElementsContainer container = new ProcessingElementsContainer();
         container.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, ThirdWiringClass.class));
         container.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, SecondWiringClass.class));
@@ -87,8 +88,8 @@ public class DirectiveWiringMapRetrieverTest {
     public void getDirectiveWiringMap_directivesAreInRegistry_returnCorrectMap() throws Exception {
         // Arrange
         DirectiveWiringMapRetriever directiveWiringMapRetriever = new DirectiveWiringMapRetriever();
-        GraphQLDirective upperCase = newDirective().name("upperCase").build();
-        GraphQLDirective lowerCase = newDirective().name("lowerCase").build();
+        GraphQLDirective upperCase = newDirective().name("upperCase").validLocation(Introspection.DirectiveLocation.FIELD).build();
+        GraphQLDirective lowerCase = newDirective().name("lowerCase").validLocation(Introspection.DirectiveLocation.FIELD).build();
         ProcessingElementsContainer container = new ProcessingElementsContainer();
         container.getDirectiveRegistry().put("upperCase", new DirectiveAndWiring(upperCase, WiringClass.class));
         container.getDirectiveRegistry().put("lowerCase", new DirectiveAndWiring(lowerCase, SecondWiringClass.class));

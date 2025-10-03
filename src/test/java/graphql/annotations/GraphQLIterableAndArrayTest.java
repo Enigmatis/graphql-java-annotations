@@ -138,10 +138,10 @@ public class GraphQLIterableAndArrayTest {
     }
 
     private Object getQueryResultAtIndex(ExecutionResult result, String queryName, int index) {
-        return ((ArrayList) (((LinkedHashMap) result.getData()).get(queryName))).get(index);
+        return ((List) (((LinkedHashMap) result.getData()).get(queryName))).get(index);
     }
 
     private Object getQueryResultAtCell(ExecutionResult result, String queryName, int rowIndex, int columnIndex) {
-        return (((ArrayList) (getQueryResultAtIndex(result, queryName, rowIndex))).get(columnIndex));
+        return (((List) (getQueryResultAtIndex(result, queryName, rowIndex))).get(columnIndex));
     }
 }
