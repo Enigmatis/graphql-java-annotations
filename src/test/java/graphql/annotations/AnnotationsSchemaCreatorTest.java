@@ -96,6 +96,63 @@ public class AnnotationsSchemaCreatorTest {
         assertThat(mutationType.getFieldDefinitions().size(), is(1));
     }
 
+    public interface BaseQuery {
+        @GraphQLField
+        int baseQuery();
+    }
+
+    public interface IntermediateQuery extends BaseQuery {
+        @GraphQLField
+        int intermediateQuery();
+    }
+
+    public interface InheritedQuery extends IntermediateQuery {
+        @GraphQLField
+        int inheritedQuery();
+    }
+
+    public interface BaseMutation {
+        @GraphQLField
+        int baseMutation();
+    }
+
+    public static class ParentMutation implements BaseMutation {
+        @Override
+        public int baseMutation() {
+            return 6;
+        }
+
+        @GraphQLField
+        public int parentMutation() {
+            return 7;
+        }
+    }
+
+    public static class InheritedMutation extends ParentMutation {
+        @GraphQLField
+        public int inheritedMutation() {
+            return 8;
+        }
+    }
+
+    @Test
+    public void build_QueryAndMutationWithInheritedTypes_SchemaContainsInheritedFields() {
+        // arrange + act
+        GraphQLSchema schema = builder.query(InheritedQuery.class).mutation(InheritedMutation.class).build();
+        GraphQLObjectType queryType = schema.getQueryType();
+        GraphQLObjectType mutationType = schema.getMutationType();
+
+        // assert
+        assertThat(queryType.getFieldDefinition("baseQuery"), notNullValue());
+        assertThat(queryType.getFieldDefinition("intermediateQuery"), notNullValue());
+        assertThat(queryType.getFieldDefinition("inheritedQuery"), notNullValue());
+        assertThat(queryType.getFieldDefinitions().size(), is(3));
+        assertThat(mutationType.getFieldDefinition("baseMutation"), notNullValue());
+        assertThat(mutationType.getFieldDefinition("parentMutation"), notNullValue());
+        assertThat(mutationType.getFieldDefinition("inheritedMutation"), notNullValue());
+        assertThat(mutationType.getFieldDefinitions().size(), is(3));
+    }
+
     public static class SubscriptionTest {
         @GraphQLField
         public int subscribe() {
