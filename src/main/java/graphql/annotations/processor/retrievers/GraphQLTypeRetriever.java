@@ -77,7 +77,7 @@ public class GraphQLTypeRetriever {
         } else {
             if (isInput) {
                 type = new InputObjectBuilder(graphQLObjectInfoRetriever, fieldSearchAlgorithm, methodSearchAlgorithm,
-                        graphQLFieldRetriever).getInputObjectBuilder(object, container).build();
+                        graphQLFieldRetriever, extensionsHandler).getInputObjectBuilder(object, container).build();
             } else {
                 type = new OutputObjectBuilder(graphQLObjectInfoRetriever, fieldSearchAlgorithm, methodSearchAlgorithm,
                         graphQLFieldRetriever, graphQLInterfaceRetriever, extensionsHandler).getOutputObjectBuilder(object, container).build();

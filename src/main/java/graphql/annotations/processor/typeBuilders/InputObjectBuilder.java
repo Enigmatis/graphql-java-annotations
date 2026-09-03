@@ -17,6 +17,7 @@ package graphql.annotations.processor.typeBuilders;
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.processor.ProcessingElementsContainer;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
@@ -36,12 +37,14 @@ public class InputObjectBuilder {
     private SearchAlgorithm fieldSearchAlgorithm;
     private SearchAlgorithm methodSearchAlgorithm;
     private GraphQLFieldRetriever graphQLFieldRetriever;
+    private GraphQLExtensionsHandler extensionsHandler;
 
-    public InputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm fieldSearchAlgorithm, SearchAlgorithm methodSearchAlgorithm, GraphQLFieldRetriever graphQLFieldRetriever) {
+    public InputObjectBuilder(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever, SearchAlgorithm fieldSearchAlgorithm, SearchAlgorithm methodSearchAlgorithm, GraphQLFieldRetriever graphQLFieldRetriever, GraphQLExtensionsHandler extensionsHandler) {
         this.graphQLObjectInfoRetriever = graphQLObjectInfoRetriever;
         this.methodSearchAlgorithm = methodSearchAlgorithm;
         this.fieldSearchAlgorithm = fieldSearchAlgorithm;
         this.graphQLFieldRetriever = graphQLFieldRetriever;
+        this.extensionsHandler = extensionsHandler;
     }
 
     /**
@@ -85,6 +88,9 @@ public class InputObjectBuilder {
                 builder.field(gqlField);
             }
         }
+
+        builder.fields(extensionsHandler.getExtensionInputFields(object, definedFields, container));
+
         return builder;
     }
 

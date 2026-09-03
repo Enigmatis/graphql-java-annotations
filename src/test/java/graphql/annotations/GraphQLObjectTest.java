@@ -21,6 +21,7 @@ import graphql.annotations.annotationTypes.*;
 import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.processor.GraphQLAnnotations;
 import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
 import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
 import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
 import graphql.annotations.processor.searchAlgorithms.BreadthFirstSearch;
@@ -57,6 +58,15 @@ public class GraphQLObjectTest {
     @BeforeMethod
     public void init() {
         this.graphQLAnnotations = new GraphQLAnnotations();
+    }
+
+    private static GraphQLExtensionsHandler newExtensionsHandler(GraphQLObjectInfoRetriever graphQLObjectInfoRetriever) {
+        GraphQLExtensionsHandler extensionsHandler = new GraphQLExtensionsHandler();
+        extensionsHandler.setGraphQLObjectInfoRetriever(graphQLObjectInfoRetriever);
+        extensionsHandler.setFieldSearchAlgorithm(new ParentalSearch(graphQLObjectInfoRetriever));
+        extensionsHandler.setMethodSearchAlgorithm(new BreadthFirstSearch(graphQLObjectInfoRetriever));
+        extensionsHandler.setFieldRetriever(new GraphQLFieldRetriever());
+        return extensionsHandler;
     }
 
     public static class DefaultAValue implements Supplier<Object> {
@@ -723,7 +733,7 @@ public class GraphQLObjectTest {
     public void inputObject() {
         GraphQLObjectInfoRetriever graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
         GraphQLInputObjectType type = new InputObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever),
-                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
+                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever(), newExtensionsHandler(graphQLObjectInfoRetriever)).
                 getInputObjectBuilder(InputObject.class, this.graphQLAnnotations.getContainer()).build();
 
         assertEquals(type.getName(), DEFAULT_INPUT_PREFIX + InputObject.class.getSimpleName(), "Type name prefix did not match expected value");
@@ -737,7 +747,7 @@ public class GraphQLObjectTest {
         container.setInputPrefix("");
         container.setInputSuffix("Input");
         GraphQLInputObjectType type = new InputObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever),
-                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
+                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever(), newExtensionsHandler(graphQLObjectInfoRetriever)).
                 getInputObjectBuilder(InputObject.class, this.graphQLAnnotations.getContainer()).build();
 
         assertEquals(type.getName(), "" + InputObject.class.getSimpleName() + "Input", "Type name prefix did not match expected value");
@@ -808,7 +818,7 @@ public class GraphQLObjectTest {
         GraphQLObjectType object = this.graphQLAnnotations.object(OptionalTest.class);
         GraphQLObjectInfoRetriever graphQLObjectInfoRetriever = new GraphQLObjectInfoRetriever();
         GraphQLInputObjectType inputObject = new InputObjectBuilder(graphQLObjectInfoRetriever, new ParentalSearch(graphQLObjectInfoRetriever),
-                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever()).
+                new BreadthFirstSearch(graphQLObjectInfoRetriever), new GraphQLFieldRetriever(), newExtensionsHandler(graphQLObjectInfoRetriever)).
                 getInputObjectBuilder(OptionalTest.class, this.graphQLAnnotations.getContainer()).build();
 
         GraphQLObjectType mutation = GraphQLObjectType.newObject().name("mut").field(newFieldDefinition().name("test").type(object).

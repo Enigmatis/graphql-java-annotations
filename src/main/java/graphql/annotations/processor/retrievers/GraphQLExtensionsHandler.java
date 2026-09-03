@@ -20,6 +20,7 @@ import graphql.annotations.processor.exceptions.CannotCastMemberException;
 import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
 import graphql.annotations.processor.searchAlgorithms.SearchAlgorithm;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectField;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -69,6 +70,41 @@ public class GraphQLExtensionsHandler {
     }
 
     private void addExtensionField(GraphQLFieldDefinition gqlField, List<GraphQLFieldDefinition> fields, List<String> definedFields) {
+        if (!definedFields.contains(gqlField.getName())) {
+            definedFields.add(gqlField.getName());
+            fields.add(gqlField);
+        } else {
+            throw new GraphQLAnnotationsException("Duplicate field found in extension : " + gqlField.getName(), null);
+        }
+    }
+
+    public List<GraphQLInputObjectField> getExtensionInputFields(Class<?> object, List<String> definedFields, ProcessingElementsContainer container) throws CannotCastMemberException {
+        List<GraphQLInputObjectField> fields = new ArrayList<>();
+        String typeName = container.getInputPrefix() + graphQLObjectInfoRetriever.getTypeName(object) + container.getInputSuffix();
+        if (container.getExtensionsTypeRegistry().containsKey(object)) {
+            for (Class<?> aClass : container.getExtensionsTypeRegistry().get(object)) {
+                for (Method method : graphQLObjectInfoRetriever.getOrderedMethods(aClass)) {
+                    if (method.isBridge() || method.isSynthetic()) {
+                        continue;
+                    }
+                    if (methodSearchAlgorithm.isFound(method)) {
+                        addExtensionInputField(fieldRetriever.getInputField(method, container, typeName), fields, definedFields);
+                    }
+                }
+                for (Field field : getAllFields(aClass).values()) {
+                    if (Modifier.isStatic(field.getModifiers())) {
+                        continue;
+                    }
+                    if (fieldSearchAlgorithm.isFound(field)) {
+                        addExtensionInputField(fieldRetriever.getInputField(field, container, typeName), fields, definedFields);
+                    }
+                }
+            }
+        }
+        return fields;
+    }
+
+    private void addExtensionInputField(GraphQLInputObjectField gqlField, List<GraphQLInputObjectField> fields, List<String> definedFields) {
         if (!definedFields.contains(gqlField.getName())) {
             definedFields.add(gqlField.getName());
             fields.add(gqlField);

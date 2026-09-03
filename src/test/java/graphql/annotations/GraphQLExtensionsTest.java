@@ -192,4 +192,36 @@ public class GraphQLExtensionsTest {
         assertTrue(e.getMessage().startsWith("Duplicate field"));
     }
 
+    public static class TestInput {
+        @GraphQLField
+        public String field;
+    }
+
+    @GraphQLTypeExtension(GraphQLExtensionsTest.TestInput.class)
+    public static class TestInputExtension {
+        @GraphQLField
+        public String field2;
+    }
+
+    public static class QueryWithInput {
+        @GraphQLField
+        public String echo(TestInput input) {
+            return input.field;
+        }
+    }
+
+    @Test
+    public void inputFields() {
+        GraphQLSchema schema = newAnnotationsSchema().query(QueryWithInput.class).typeExtension(TestInputExtension.class).build();
+        GraphQLInputObjectType object = (GraphQLInputObjectType) schema.getType("InputTestInput");
+
+        List<GraphQLInputObjectField> fields = object.getFields();
+        assertEquals(fields.size(), 2);
+
+        fields = ImmutableList.sortedCopyOf(Comparator.comparing(GraphQLInputObjectField::getName), fields);
+        assertEquals(fields.get(0).getName(), "field");
+        assertEquals(fields.get(1).getName(), "field2");
+        assertEquals(fields.get(1).getType(), GraphQLString);
+    }
+
 }
