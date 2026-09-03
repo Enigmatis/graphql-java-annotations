@@ -23,7 +23,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static graphql.annotations.processor.util.NamingKit.toGraphqlName;
@@ -36,10 +38,27 @@ public class GraphQLObjectInfoRetriever {
         return toGraphqlName(name == null ? objectClass.getSimpleName() : name.value());
     }
 
-    public List<Method> getOrderedMethods(Class c) {
-        return Arrays.stream(c.getMethods())
+    public List<Method> getOrderedMethods(Class<?> c) {
+        var methods = new LinkedHashMap<String, Method>();
+        collectMethods(c, methods);
+        return methods.values().stream()
                 .sorted(Comparator.comparing(Method::getName))
                 .collect(Collectors.toList());
+    }
+
+    private void collectMethods(Class<?> c, Map<String, Method> methods) {
+        if (c == null) {
+            return;
+        }
+
+        Arrays.stream(c.getDeclaredMethods())
+                .forEach(method -> methods.putIfAbsent(method.getName(), method));
+
+        for (Class<?> iface : c.getInterfaces()) {
+            collectMethods(iface, methods);
+        }
+
+        collectMethods(c.getSuperclass(), methods);
     }
 
     public Boolean isGraphQLField(AnnotatedElement element) {
@@ -49,6 +68,5 @@ public class GraphQLObjectInfoRetriever {
         }
         return annotation.value();
     }
-
 
 }
